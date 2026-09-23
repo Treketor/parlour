@@ -56,6 +56,16 @@ export async function sendSignInLink(
       value,
     };
   }
+  // Supabase's built-in sender only delivers to the project's team members until a
+  // custom email service is set up (DECISIONS.md 025). Says nothing about accounts.
+  if (error.code === "email_address_not_authorized") {
+    return {
+      status: "failed",
+      message:
+        "Sign-in emails cannot be sent to this address yet. Use the address you were invited with.",
+      value,
+    };
+  }
   console.error("Sign-in link failed", error);
   return {
     status: "failed",
