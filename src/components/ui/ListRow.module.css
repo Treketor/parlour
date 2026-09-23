@@ -213,8 +213,9 @@
   }
 }
 
+/* Sits over the title text, not the thumbnail, so the label lines up with what it names. */
 .titleHead {
-  grid-column: thumb-start / title-end;
+  grid-area: title;
 }
 
 .sortButton {

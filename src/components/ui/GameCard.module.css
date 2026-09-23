@@ -88,7 +88,8 @@
 }
 
 .year {
-  font-variant-numeric: tabular-nums lining-nums;
+  /* Not a column, so proportional: tabular figures only where numbers stack. */
+  font-variant-numeric: proportional-nums lining-nums;
 }
 
 .platform {
@@ -111,5 +112,6 @@
 .rating {
   color: var(--color-text);
   font-weight: var(--ui-strong-weight);
-  font-variant-numeric: tabular-nums lining-nums;
+  /* Not a column, so proportional: tabular figures only where numbers stack. */
+  font-variant-numeric: proportional-nums lining-nums;
 }

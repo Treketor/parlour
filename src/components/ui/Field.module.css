@@ -1,5 +1,6 @@
 .field {
   display: grid;
+  align-content: start;
   gap: var(--space-1-5);
   min-width: 0;
 }
@@ -98,14 +99,8 @@
 }
 
 .clear:active {
-  transform: scale(0.9);
+  transform: scale(calc(1 - 0.1 * var(--motion-distance)));
   transition-duration: 0s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .clear:active {
-    transform: none;
-  }
 }
 
 .selectControl .input {
