@@ -1,0 +1,34 @@
+.skeleton {
+  display: block;
+  background: var(--color-surface-raised);
+  border-radius: 1px;
+  animation: pulse 1.6s var(--ease-in-out) infinite alternate;
+}
+
+.block {
+  width: 100%;
+  height: 100%;
+}
+
+/* Sized from the font so a text skeleton occupies exactly one line of that text. */
+.text {
+  width: 100%;
+  height: 0.9em;
+  margin-block: calc((1lh - 0.9em) / 2);
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+/* Still breathes (opacity only) so it reads as loading, just more slowly. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation-duration: 2.4s;
+  }
+}

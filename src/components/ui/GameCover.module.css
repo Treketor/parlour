@@ -1,0 +1,55 @@
+.cover {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background: var(--color-surface-raised);
+  border-radius: 1px;
+}
+
+/* A hairline inside the frame keeps dark box art from dissolving into the page. */
+.cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgb(234 229 219 / 0.08);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.card {
+  width: 100%;
+}
+
+.thumb {
+  width: 2rem;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.image[data-loaded] {
+  opacity: 1;
+}
+
+.fallbackTitle {
+  position: absolute;
+  inset: auto var(--space-3) var(--space-3);
+  color: var(--color-text-muted);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  line-height: var(--leading-heading);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
