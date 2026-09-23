@@ -190,3 +190,19 @@ Now the menu stays up until the new page has arrived, then disappears at once, a
 ## 027. Emailed links sign you in straight away
 
 Revises 023 after review. The confirm page submits itself as soon as it loads, showing "Signing you in", so a link is one click, not two. With the default email template the one-time token is already spent at Supabase's own endpoint before the page loads, so the extra button protected nothing. Submitting from the page (rather than acting on the GET) still keeps link scanners that do not run scripts from spending a `token_hash` token once the template changes. The button remains as a fallback when JavaScript is off.
+
+## 028. IGDB integration: shared token, rate limit, Postgres cache
+
+- **Current field names only.** IGDB replaced several enums with lookup endpoints (`game_type`, `platform_type`, `date_format`, `release_region`, `external_game_source`). Queries use the new fields. The lookup tables are small and stable, so their ids are constants in `src/server/igdb/constants.ts` rather than extra requests.
+- **One token for the app.** Twitch allows 25 live app tokens and disables the oldest beyond that, so the token lives in `provider_tokens` (service role only). It is read once per server instance, renewed a day before expiry, and replaced once if IGDB rejects it. If another instance has already renewed it, that token is reused rather than requesting a new one.
+- **Rate limiting.** A per-instance limiter keeps to 4 requests per second and 8 in flight; waiting for a slot is event-driven, not polling. Several instances could still exceed the rate together, so the client also backs off on 429 (honouring `Retry-After`) and on 5xx and network errors, up to 4 attempts. It does not retry 4xx errors, which would fail the same way again.
+- **Validated at the edge.** Every response is parsed with Zod before use; an unexpected shape is an error, not a crash three layers later.
+- **Cache policy.** Searches are cached by normalised query for a day, empty results included. Games are refetched after 7 days (`stale_after`). If IGDB fails, an expired cached answer is served rather than an error; a game that was never stored is still an error.
+- **Atomic writes.** A batch of games is written by `store_igdb_games(jsonb)` in one transaction. It replaces each game's related rows, so screenshots or platforms removed on IGDB do not linger. It runs with invoker rights, and only the service role may call it.
+- **Search scope.** Search returns playable things: main games, standalone expansions, remakes, remasters, expanded games and ports. DLC, bundles, mods and updates are excluded, as are editions (`version_parent`), which would otherwise fill results with near-duplicates.
+- **Data hygiene found in real responses.** Some titles start with a zero-width space, so text is cleaned before storage. A release date can name a platform the game's own list does not include; the date is kept and the platform link dropped. Year-only and quarter dates are never stored as a fake full date.
+- **Where it runs.** The IGDB client, secrets and service-role client are marked `server-only`, so importing them into browser code fails the build.
+
+## 029. Tests for external services
+
+Offline tests use real IGDB responses saved as fixtures (Outer Wilds search, an unreleased game) plus fakes for the network and database. A separate `npm run test:live` suite runs the whole path against the real services with `.env.local`. It is not part of `npm test`, so the normal run never needs secrets or a network.
