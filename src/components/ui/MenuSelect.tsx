@@ -23,6 +23,12 @@ type MenuSelectProps<T extends string> = {
   /** Which edge of the trigger the menu lines up with. */
   align?: "start" | "end";
   disabled?: boolean;
+  /**
+   * Action mode: the trigger always reads `placeholder` (e.g. "Add") and the
+   * items are commands rather than a current value, so nothing is checked.
+   */
+  action?: boolean;
+  size?: "sm" | "md";
   className?: string | undefined;
 };
 
@@ -39,6 +45,8 @@ export function MenuSelect<T extends string>({
   placeholder = "Choose",
   align = "start",
   disabled,
+  action = false,
+  size = "md",
   className,
 }: MenuSelectProps<T>) {
   const [open, setOpen] = useState(false);
@@ -46,7 +54,7 @@ export function MenuSelect<T extends string>({
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const selected = options.find((option) => option.value === value);
+  const selected = action ? undefined : options.find((option) => option.value === value);
 
   function close({ restoreFocus }: { restoreFocus: boolean }) {
     setOpen(false);
@@ -54,8 +62,9 @@ export function MenuSelect<T extends string>({
   }
 
   function choose(next: T) {
+    close({ restoreFocus: !action });
+    // In action mode the caller usually replaces this control, so it decides where focus goes.
     onChange(next);
-    close({ restoreFocus: true });
   }
 
   useEffect(() => {
@@ -120,18 +129,18 @@ export function MenuSelect<T extends string>({
       <button
         ref={triggerRef}
         type="button"
-        className={styles.trigger}
+        className={cx(styles.trigger, size === "sm" && styles.small)}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        aria-label={`${label}: ${selected?.label ?? placeholder}`}
+        aria-label={action ? label : `${label}: ${selected?.label ?? placeholder}`}
         disabled={disabled}
         data-open={open || undefined}
         onClick={() => setOpen((current) => !current)}
         onKeyDown={onTriggerKeyDown}
       >
         {selected?.leading}
-        <span className={cx(styles.triggerLabel, !selected && styles.placeholder)}>
+        <span className={cx(styles.triggerLabel, !selected && !action && styles.placeholder)}>
           {selected?.label ?? placeholder}
         </span>
         <ChevronDownIcon className={styles.chevron} width={14} height={14} />
@@ -160,8 +169,8 @@ export function MenuSelect<T extends string>({
                     itemRefs.current[index] = node;
                   }}
                   type="button"
-                  role="menuitemradio"
-                  aria-checked={checked}
+                  role={action ? "menuitem" : "menuitemradio"}
+                  aria-checked={action ? undefined : checked}
                   tabIndex={-1}
                   className={styles.item}
                   onClick={() => choose(option.value)}
@@ -173,7 +182,9 @@ export function MenuSelect<T extends string>({
                       <span className={styles.itemDescription}>{option.description}</span>
                     )}
                   </span>
-                  {checked && <CheckIcon className={styles.check} width={14} height={14} />}
+                  {checked && !action && (
+                    <CheckIcon className={styles.check} width={14} height={14} />
+                  )}
                 </button>
               );
             })}
