@@ -106,6 +106,6 @@ So the app decides for itself. `useShouldReduceMotion()` combines the in-app pre
 
 Segmented controls and the rating scale change value on `pointerdown`, not `click`. Buttons show their pressed state through `:active`, which applies on pointer-down; a no-op `touchstart` listener makes iOS Safari do the same. Keyboard activation still goes through `click`.
 
-## 015. Next.js agent files are disabled
+## 015. Next.js instruction-file generation is off
 
-Next 16 writes `AGENTS.md` and `CLAUDE.md` into the project on `next dev` unless `agentRules: false` is set. They are disabled, and the generated files were removed.
+Next 16 writes coding-agent instruction files into the project root on `next dev` unless `agentRules: false` is set. They are noise in a hand-maintained repo, so generation is off.
