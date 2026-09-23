@@ -10,15 +10,176 @@
   min-width: 0;
 }
 
-.results {
+.resultsArea {
   margin-top: var(--space-10);
 }
 
-.idle {
+.idle,
+.hint {
   display: grid;
   gap: var(--space-2);
   max-width: 52ch;
   color: var(--color-text-faint);
   font-size: var(--text-sm);
   line-height: var(--leading-reading);
+}
+
+.resultsHeading {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-faint);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.results {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--hairline);
+}
+
+/* One game: cover beside the text; platforms run under the text, not the cover. */
+.result {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  column-gap: var(--space-4);
+  padding-block: var(--space-5);
+  border-bottom: var(--hairline);
+}
+
+@media (min-width: 40rem) {
+  .result {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    column-gap: var(--space-5);
+  }
+}
+
+.resultCover {
+  display: block;
+  align-self: start;
+  aspect-ratio: 3 / 4;
+}
+
+.resultBody {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.resultHead {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.resultTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  line-height: var(--leading-heading);
+  overflow-wrap: anywhere;
+}
+
+.resultMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}
+
+.metaItem strong {
+  color: var(--color-text-muted);
+  font-weight: var(--ui-strong-weight);
+}
+
+.count {
+  color: var(--color-text-faint);
+}
+
+/* Long platform lists flow into two columns on wide screens, keeping each game compact. */
+.platforms {
+  display: grid;
+  column-gap: var(--space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--hairline);
+}
+
+@media (min-width: 64rem) {
+  .platforms {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.platformRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name action"
+    "message message";
+  align-items: center;
+  column-gap: var(--space-3);
+  min-height: 2.5rem;
+  padding-block: var(--space-1);
+  border-bottom: var(--hairline);
+}
+
+.platformName {
+  grid-area: name;
+  min-width: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.platformAction {
+  grid-area: action;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* The in-library state fades in where the Add control was; nothing shifts. */
+.inLibrary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-height-md);
+  outline-offset: 2px;
+  animation: settle var(--duration-base) var(--ease-out);
+}
+
+/* Unconfirmed optimistic state: readable, but visibly not yet final. */
+.inLibrary[data-pending] {
+  opacity: 0.7;
+}
+
+.ownership {
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}
+
+.rowMessage {
+  grid-area: message;
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+}
+
+.rowMessage:empty {
+  display: none;
+}
+
+.noPlatforms {
+  color: var(--color-text-faint);
+  font-size: var(--text-sm);
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateX(calc(4px * var(--motion-distance)));
+  }
 }

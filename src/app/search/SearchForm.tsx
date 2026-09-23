@@ -24,6 +24,8 @@ export function SearchForm({ initialQuery }: { initialQuery: string }) {
         type="search"
         placeholder="Search by title"
         autoComplete="off"
+        // An empty search page exists to be typed into.
+        autoFocus={initialQuery === ""}
         leading={<SearchIcon />}
         value={query}
         onChange={(event) => setQuery(event.target.value)}
