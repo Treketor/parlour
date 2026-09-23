@@ -61,16 +61,16 @@ The rejected direction is deleted after review.
 
 Three curves, five durations, used everywhere:
 
-| Token | Value | Use |
-|---|---|---|
-| `ease-out` | cubic-bezier(0.22, 1, 0.36, 1) | Anything responding to input or entering. Fast start reads as immediate. |
-| `ease-in-out` | cubic-bezier(0.65, 0, 0.35, 1) | Things travelling between two resting places (reorders). |
-| `ease-in` | cubic-bezier(0.55, 0, 1, 0.45) | Exits: accelerate out of the way. |
-| `press` | 70ms | Release of a pressed state. Press itself applies with no transition. |
-| `fast` | 120ms | Hover, colour changes, exits. |
-| `base` | 180ms | Popovers, small reveals. |
-| `slow` | 240ms | Indicators sliding between options. |
-| `spatial` | 320ms | Rows moving to new positions. |
+| Token         | Value                          | Use                                                                      |
+| ------------- | ------------------------------ | ------------------------------------------------------------------------ |
+| `ease-out`    | cubic-bezier(0.22, 1, 0.36, 1) | Anything responding to input or entering. Fast start reads as immediate. |
+| `ease-in-out` | cubic-bezier(0.65, 0, 0.35, 1) | Things travelling between two resting places (reorders).                 |
+| `ease-in`     | cubic-bezier(0.55, 0, 1, 0.45) | Exits: accelerate out of the way.                                        |
+| `press`       | 70ms                           | Release of a pressed state. Press itself applies with no transition.     |
+| `fast`        | 120ms                          | Hover, colour changes, exits.                                            |
+| `base`        | 180ms                          | Popovers, small reveals.                                                 |
+| `slow`        | 240ms                          | Indicators sliding between options.                                      |
+| `spatial`     | 320ms                          | Rows moving to new positions.                                            |
 
 Only `transform` and `opacity` animate. Hover changes colour only; nothing lifts or grows on hover.
 
@@ -87,3 +87,25 @@ Warm near-black ground (`#1a1917`) with surfaces stepped up in lightness instead
 Progress states do not get a colour each, which would turn into a rainbow. They get small drawn glyphs and a text label; only "playing" uses the accent. The error colour is a muted coral and appears nowhere else.
 
 Measured contrast against the canvas: body 14.0:1, muted 8.7:1, faint 6.0:1, brass 7.6:1, steel 8.5:1, error 7.0:1. Faint text stays above 4.5:1 on every surface step, down to the pressed fill. Control edges use a separate `control-line` token at 3.3:1, because WCAG 1.4.11 needs input boundaries at 3:1 and the decorative hairlines are deliberately much quieter.
+
+## 012. Typefaces, and a check that figures really are tabular
+
+Editorial: Source Serif 4 for display and reading text (its optical-size axis tightens it at display sizes), Public Sans for the interface. Swiss: Schibsted Grotesk throughout.
+
+Libre Franklin was the first choice for the Editorial interface face. It was dropped after measuring it in the browser: the Google Fonts build ignores `tabular-nums`, so a "1" and an "8" are different widths and price columns would jiggle. Public Sans is derived from Libre Franklin, looks almost the same, and its tabular figures work. All three faces were measured, not assumed.
+
+Tabular figures are used only where numbers stack in a column: tables, list rows, the rating column. Anywhere a number stands alone (a card's year, a single score), figures are proportional. Schibsted's tabular figures in particular are wide enough to read as code when used outside a column.
+
+## 013. Reduced motion does not trust the library default
+
+Measured in stage 1 with Motion 13.4: `MotionConfig reducedMotion` stops transform animations on ordinary elements but does not stop `layout` animations, despite the documentation. Rows still slid 300px under "always".
+
+So the app decides for itself. `useShouldReduceMotion()` combines the in-app preference with the OS setting. Under reduced motion, lists turn layout animation off and fade the re-sorted list in instead, and sliding indicators move instantly. The in-app preference is also written to `data-motion` on `<html>` so the CSS tokens follow the same choice. It becomes a user setting in a later stage.
+
+## 014. Controls commit on pointer-down
+
+Segmented controls and the rating scale change value on `pointerdown`, not `click`. Buttons show their pressed state through `:active`, which applies on pointer-down; a no-op `touchstart` listener makes iOS Safari do the same. Keyboard activation still goes through `click`.
+
+## 015. Next.js agent files are disabled
+
+Next 16 writes `AGENTS.md` and `CLAUDE.md` into the project on `next dev` unless `agentRules: false` is set. They are disabled, and the generated files were removed.
