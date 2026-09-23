@@ -1,0 +1,118 @@
+.button {
+  --fill: transparent;
+  --fill-hover: var(--color-surface-raised);
+  --fill-pressed: var(--color-surface-pressed);
+
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  place-items: center;
+  height: var(--control-height-md);
+  padding-inline: var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: var(--fill);
+  font-size: var(--text-sm);
+  font-weight: var(--ui-strong-weight);
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform var(--duration-press) var(--ease-out);
+}
+
+/*
+ * Hover and press fills live on a layer whose opacity animates, so the only
+ * properties that ever transition are transform and opacity.
+ */
+.button::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--fill-hover);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .button:hover:not(:disabled, [aria-disabled="true"])::before {
+    opacity: 1;
+  }
+}
+
+/* Pressed applies on pointer-down with no transition in; only the release eases. */
+.button:active:not(:disabled, [aria-disabled="true"]) {
+  transform: scale(var(--press-scale));
+  transition-duration: 0s;
+}
+
+.button:active:not(:disabled, [aria-disabled="true"])::before {
+  background: var(--fill-pressed);
+  opacity: 1;
+  transition-duration: 0s;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.button[aria-busy="true"] {
+  cursor: progress;
+}
+
+.content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  grid-area: 1 / 1;
+}
+
+.content[data-hidden] {
+  visibility: hidden;
+}
+
+.spinner {
+  grid-area: 1 / 1;
+  display: inline-flex;
+}
+
+/* Variants */
+
+.primary {
+  --fill: var(--color-accent);
+  --fill-hover: var(--color-accent-strong);
+  --fill-pressed: var(--color-accent-pressed);
+  color: var(--color-on-accent);
+}
+
+.secondary {
+  border-color: var(--color-control-line);
+  color: var(--color-text);
+}
+
+.quiet {
+  color: var(--color-text);
+}
+
+.danger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  --fill-hover: rgb(223 143 126 / 0.1);
+  --fill-pressed: rgb(223 143 126 / 0.18);
+}
+
+/* Sizes */
+
+.sm {
+  height: var(--control-height-sm);
+  padding-inline: var(--space-3);
+  font-size: var(--text-xs);
+}
+
+.iconOnly {
+  aspect-ratio: 1;
+  padding-inline: 0;
+}

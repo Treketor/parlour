@@ -1,0 +1,27 @@
+.spinner {
+  flex: none;
+  /* Each turn eases in and out: reads as deliberate rather than mechanical. */
+  animation: spin 900ms var(--ease-in-out) infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* Rotation is the motion people ask to avoid; a slow fade still says "working". */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: breathe 1.2s var(--ease-in-out) infinite alternate;
+  }
+}
+
+@keyframes breathe {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.35;
+  }
+}
