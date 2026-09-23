@@ -140,3 +140,11 @@ The search page and form are real: the query lives in the URL, and `next/form` s
 ## 020. Legal pages describe today, not the plan
 
 Terms, privacy and data sources are written in plain language and state what is true now (nothing is stored), then list what will be stored once accounts exist. Each page shows an "updated" date kept in one file (`src/app/(legal)/updated.ts`). Whenever a stage starts storing or sharing something new, that stage updates these pages. They are not legal advice.
+
+## 021. Mobile menu replaces the tab row
+
+Revises 018 after review. Below 40rem the header is one row: wordmark, "Add a game", and a menu button. The button is a word plus two strokes, not a three-bar icon. On open the strokes rotate into a cross and the word changes from "Menu" to "Close", so the control always says what pressing it will do.
+
+The panel drops from the header on the solid canvas (no scrim, no blur) and lists the three destinations at 32px, with the reference pages beneath. While it is open the page and footer are `inert` and the page does not scroll. Escape returns focus to the button; following a link closes it; widening the window past the breakpoint closes it. Under reduced motion the strokes snap and the panel only fades.
+
+Also fixed at review: search inputs showed the browser's own clear button beside ours. The native one is hidden globally.

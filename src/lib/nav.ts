@@ -15,3 +15,11 @@ export function isActivePath(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
+
+/** Reference pages: in the footer on wide screens and at the foot of the mobile menu. */
+export const SECONDARY_NAV: readonly NavItem[] = [
+  { href: "/data-sources", label: "Data sources" },
+  { href: "/terms", label: "Terms" },
+  { href: "/privacy", label: "Privacy" },
+  { href: "/system", label: "Design system" },
+];

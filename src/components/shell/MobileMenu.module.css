@@ -1,0 +1,113 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-height-md);
+  padding-inline: var(--space-2);
+  margin-right: calc(-1 * var(--space-2));
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--ui-strong-weight);
+  touch-action: manipulation;
+}
+
+/* Fixed width so "Menu" and "Close" swap without nudging the header. */
+.toggleLabel {
+  min-width: 2.75rem;
+  text-align: right;
+}
+
+.toggle:active {
+  color: var(--color-text-muted);
+}
+
+.glyph {
+  overflow: visible;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: square;
+}
+
+.strokeTop,
+.strokeBottom {
+  transform-box: view-box;
+  transform-origin: 8px 8px;
+  /* Snaps rather than rotates under reduced motion: the duration scales to zero. */
+  transition: transform calc(var(--duration-base) * var(--motion-distance)) var(--ease-out);
+}
+
+.toggle[data-open] .strokeTop {
+  transform: translateY(2.5px) rotate(45deg);
+}
+
+.toggle[data-open] .strokeBottom {
+  transform: translateY(-2.5px) rotate(-45deg);
+}
+
+/* Covers the page below the header on a solid ground; no blur, no scrim. */
+.panel {
+  position: fixed;
+  top: var(--header-height);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 29;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-10);
+  overflow-y: auto;
+  padding: var(--space-4) var(--gutter) var(--space-8);
+  background: var(--color-canvas);
+}
+
+.primary,
+.secondary {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.primary {
+  border-top: var(--hairline);
+}
+
+.primaryLink {
+  display: flex;
+  align-items: center;
+  min-height: 3.75rem;
+  border-bottom: var(--hairline);
+  color: var(--color-text);
+  font-size: var(--text-2xl);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+.primaryLink:active {
+  color: var(--color-text-muted);
+}
+
+.primaryLink[aria-current="page"] {
+  color: var(--color-accent);
+}
+
+.primaryLink:focus-visible {
+  outline-offset: -2px;
+}
+
+.secondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  font-size: var(--text-sm);
+}
+
+.secondary a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+}

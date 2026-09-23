@@ -7,6 +7,7 @@ import { useLayoutTransition } from "@/components/Providers";
 import { ButtonLink } from "@/components/ui/Button";
 import { PlusIcon } from "@/components/ui/icons";
 import { PRIMARY_NAV, isActivePath } from "@/lib/nav";
+import { MobileMenu } from "./MobileMenu";
 import styles from "./SiteHeader.module.css";
 
 export function SiteHeader() {
@@ -57,6 +58,10 @@ export function SiteHeader() {
         >
           Add a game
         </ButtonLink>
+
+        <div className={styles.menu}>
+          <MobileMenu />
+        </div>
       </div>
     </header>
   );

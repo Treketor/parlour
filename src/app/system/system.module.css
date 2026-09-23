@@ -65,7 +65,7 @@
   /* Shares the sections' top rule so the index and first title start on one line. */
   .index {
     position: sticky;
-    top: var(--header-offset);
+    top: var(--header-height);
     align-self: start;
     padding-top: var(--space-6);
     border-top: var(--hairline);
@@ -89,7 +89,7 @@
   min-width: 0;
   padding-top: var(--space-6);
   border-top: var(--hairline);
-  scroll-margin-top: calc(var(--header-offset) + var(--space-6));
+  scroll-margin-top: calc(var(--header-height) + var(--space-6));
 }
 
 .sectionHead {

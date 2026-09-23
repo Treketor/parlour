@@ -1,16 +1,10 @@
 import Link from "next/link";
+import { SECONDARY_NAV } from "@/lib/nav";
 import styles from "./SiteFooter.module.css";
-
-const links = [
-  { href: "/data-sources", label: "Data sources" },
-  { href: "/terms", label: "Terms" },
-  { href: "/privacy", label: "Privacy" },
-  { href: "/system", label: "Design system" },
-];
 
 export function SiteFooter() {
   return (
-    <footer className={styles.footer}>
+    <footer id="site-footer" className={styles.footer}>
       <div className={styles.inner}>
         <p className={styles.attribution}>
           Game data from{" "}
@@ -25,7 +19,7 @@ export function SiteFooter() {
         </p>
         <nav aria-label="Footer">
           <ul className={styles.links}>
-            {links.map((link) => (
+            {SECONDARY_NAV.map((link) => (
               <li key={link.href}>
                 <Link href={link.href}>{link.label}</Link>
               </li>
