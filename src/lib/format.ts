@@ -9,3 +9,8 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 export function formatDate(date: Date): string {
   return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
 }
+
+/** "1 game", "12 games". Thousands get separators: "1,204 games". */
+export function formatCount(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count.toLocaleString("en-GB")} ${count === 1 ? singular : plural}`;
+}
