@@ -28,7 +28,7 @@
 
   /* Type. Families come from next/font variables set on <html>. */
   --font-display: var(--font-source-serif), Georgia, serif;
-  --font-ui: var(--font-libre-franklin), system-ui, sans-serif;
+  --font-ui: var(--font-public-sans), system-ui, sans-serif;
   --font-reading: var(--font-source-serif), Georgia, serif;
 
   --display-weight: 560;
