@@ -1,0 +1,20 @@
+.main {
+  display: grid;
+  gap: var(--space-8);
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--space-16) var(--gutter);
+}
+
+.wordmark {
+  font-size: var(--text-lg);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+}
+
+.reference {
+  margin-top: var(--space-2);
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
