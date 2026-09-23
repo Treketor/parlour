@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Providers } from "@/components/Providers";
 import { SiteFooter } from "@/components/shell/SiteFooter";
 import { SiteHeader } from "@/components/shell/SiteHeader";
+import { getUserId } from "@/lib/supabase/server";
 import { schibstedGrotesk } from "./fonts";
 import styles from "./layout.module.css";
 import "@/styles/tokens.css";
@@ -17,7 +18,9 @@ export const viewport: Viewport = {
   themeColor: "#1a1917",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const signedIn = (await getUserId()) !== null;
+
   return (
     <html lang="en" className={schibstedGrotesk.variable}>
       <body className={styles.body}>
@@ -25,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <a href="#content" className={styles.skip}>
             Skip to content
           </a>
-          <SiteHeader />
+          <SiteHeader signedIn={signedIn} />
           <main id="content" className={styles.main} tabIndex={-1}>
             {children}
           </main>

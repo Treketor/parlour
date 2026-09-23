@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
+import { signOut } from "@/app/auth/actions";
+import { SubmitButton } from "@/components/ui/SubmitButton";
 import { PRIMARY_NAV, SECONDARY_NAV, isActivePath } from "@/lib/nav";
 import { transition } from "@/lib/motion";
 import styles from "./MobileMenu.module.css";
@@ -17,7 +19,7 @@ const WIDE_QUERY = "(min-width: 40rem)";
  * from the header it belongs to and covers the page; the page behind is inert
  * and does not scroll while it is open.
  */
-export function MobileMenu() {
+export function MobileMenu({ signedIn }: { signedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const panelId = useId();
@@ -111,17 +113,24 @@ export function MobileMenu() {
                 })}
               </ul>
             </nav>
-            <nav aria-label="More">
-              <ul className={styles.secondary}>
-                {SECONDARY_NAV.map((item) => (
-                  <li key={item.href}>
-                    <Link href={item.href} onClick={() => setOpen(false)}>
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <div className={styles.foot}>
+              {signedIn && (
+                <form action={signOut}>
+                  <SubmitButton variant="secondary">Sign out</SubmitButton>
+                </form>
+              )}
+              <nav aria-label="More">
+                <ul className={styles.secondary}>
+                  {SECONDARY_NAV.map((item) => (
+                    <li key={item.href}>
+                      <Link href={item.href} onClick={() => setOpen(false)}>
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
