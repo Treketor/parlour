@@ -174,3 +174,15 @@ Also fixed at review: search inputs showed the browser's own clear button beside
 ## 024. Data layer narrows database strings
 
 Rows arrive with `progress` and `ownership` as plain strings. `toLibraryEntry` converts them to the app's types and throws `UnexpectedDataError` on anything unknown. The database constraints make that impossible today, so if it ever fires, the schema and the app have drifted, and a loud failure is better than a wrong screen.
+
+## 025. Email sending waits for launch
+
+Supabase's built-in email sender only delivers to members of the project's team, is heavily rate-limited, and locks the email templates. For a single-user stage that is enough: the default Magic Link template sends a PKCE link, which the confirm page already handles, and it works in the browser that asked for it.
+
+Before Parlour is public (stage 11), a custom email service (SMTP) is required anyway, since nobody outside the team would receive a link. The template then changes to the `token_hash` form so links work across devices. Until then, an address the built-in sender refuses gets a plain message on the sign-in form.
+
+## 026. Navigation from the mobile menu
+
+Found at stage 3 review: after tapping a page in the mobile menu, the menu faded out straight away, which uncovered the old page while the new one was still loading. The new page then faded in on top of it, so you briefly saw two pages and two fades.
+
+Now the menu stays up until the new page has arrived, then disappears at once, and the page's own entrance is the only motion. The tapped item shows a small spinner if the wait is noticeable (after 80ms). On desktop, a tapped nav link shows a faint marker straight away, ahead of the real marker sliding over. Both use Next's `useLinkStatus`. Closing the menu by hand still animates.

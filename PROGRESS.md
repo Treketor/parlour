@@ -23,17 +23,17 @@
   - Logic with tests: rating keyboard and pointer model, catalogue sorting, date formatting, motion token parity (41 tests).
 - Stage 2: app shell (44 tests; header with sliding current-page marker, footer with attribution, skip link, page entrance), Library and Queue empty states, Search page and form, 404, error and root error pages, Terms, Privacy and Data sources. Home is now the Library; `/system` sits inside the shell and is linked from the footer. After review: a mobile menu replaced the tab row, and the doubled clear button in search is fixed.
 
-- Stage 3: Supabase project, schema (profiles, per-platform library entries, tags, queue, change history, minimal catalogue), row-level security with 22 pgTAP access tests, generated types, data layer, emailed-link sign-in with a scanner-proof confirm page, sign-out, signed-out states for Library and Queue, loading skeletons, privacy page updated for accounts. 69 unit tests.
+- Stage 3: Supabase project, schema (profiles, per-platform library entries, tags, queue, change history, minimal catalogue), row-level security with 22 pgTAP access tests, generated types, data layer, emailed-link sign-in with a scanner-proof confirm page, sign-out, signed-out states for Library and Queue, loading skeletons, privacy page updated for accounts. 69 unit tests. After review: mobile menu navigation no longer shows two pages at once, and nav links show pending feedback.
 
 ## Next
 
-- Finish sign-in setup in the Supabase dashboard (README, "Sign-in settings"), then sign in once to check the signed-in states.
+- Finish sign-in setup in the Supabase dashboard (README, "Sign-in settings"; the email template step waits for custom SMTP), then sign in once to check the signed-in states.
 - Stage 4: IGDB integration.
 
 ## Known issues
 
 - The signed-in states (library count, queue, sign-out) have not yet been seen in a browser: that needs the account from the dashboard steps.
-- Until the Magic Link email template is changed, sign-in links only work in the same browser that asked for them.
+- Until custom SMTP is set up (before launch), sign-in emails only reach Supabase team members, and links only work in the browser that asked for them.
 
 - Search says it is not connected when a query is submitted; replaced by real results in stage 5.
 - The browser logs a warning about an unused preloaded stylesheet a few seconds after load. It comes from Next prefetching the Design system page linked in the footer, and it is harmless.

@@ -32,5 +32,6 @@ Sign-in is by emailed link, and accounts are invite-only. These are set in the S
 
 1. **Sign In / Providers**: turn off "Allow new users to sign up".
 2. **URL Configuration**: add `http://localhost:3000/**` (and the production URL, once deployed) to the redirect URLs.
-3. **Emails, Magic Link template**: link to `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`. This makes links work when opened on a different device, and survive email security scanners.
-4. **Users**: create each account with "Add user". There is no public sign-up.
+3. **Users**: create each account with "Add user". There is no public sign-up.
+
+Until a custom email service (SMTP) is configured, Supabase only sends sign-in emails to members of the project's team, a few per hour, and the email template cannot be edited. Links then work only in the browser that asked for them. Before Parlour is public, set up custom SMTP and change the Magic Link template to link to `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`, which makes links work on any device.
