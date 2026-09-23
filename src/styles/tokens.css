@@ -12,12 +12,13 @@
   --color-surface-pressed: #312e2a;
   --color-line: #34312c;
   --color-line-strong: #4b4740;
+  /* Input and checkbox edges: held at 3:1 against canvas and surface (WCAG 1.4.11). */
+  --color-control-line: #706a61;
   --color-text: #eae5db;
-  --color-text-muted: #b0aa9e;
-  --color-text-faint: #8a8479;
+  --color-text-muted: #bcb6a9;
+  --color-text-faint: #9c968b;
   --color-on-accent: #1a1917;
   --color-danger: #df8f7e;
-  --color-danger-line: #7a4a40;
 
   --color-accent: #c8a565;
   --color-accent-strong: #d9b978;

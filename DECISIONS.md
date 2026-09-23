@@ -86,4 +86,4 @@ Warm near-black ground (`#1a1917`) with surfaces stepped up in lightness instead
 
 Progress states do not get a colour each, which would turn into a rainbow. They get small drawn glyphs and a text label; only "playing" uses the accent. The error colour is a muted coral and appears nowhere else.
 
-Text colours are checked against the canvas: body 14.6:1, muted 8.0:1, faint 5.0:1, accent 8.0:1.
+Measured contrast against the canvas: body 14.0:1, muted 8.7:1, faint 6.0:1, brass 7.6:1, steel 8.5:1, error 7.0:1. Faint text stays above 4.5:1 on every surface step, down to the pressed fill. Control edges use a separate `control-line` token at 3.3:1, because WCAG 1.4.11 needs input boundaries at 3:1 and the decorative hairlines are deliberately much quieter.
