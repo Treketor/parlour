@@ -53,6 +53,11 @@ export default function PrivacyPage() {
             which avoids tracking cookies until you press play. Links to stores go directly to those
             stores.
           </p>
+          <p>
+            When you search, Parlour sends the words you typed to IGDB from its own server. Nothing
+            that identifies you goes with them, and searches are kept for a day so the same one is
+            not sent twice.
+          </p>
           <p>Your data is never sold or shared for marketing.</p>
         </section>
 

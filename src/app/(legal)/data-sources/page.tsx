@@ -38,7 +38,7 @@ export default function DataSourcesPage() {
         <p>
           Parlour does not write its own game data. Everything about a game comes from the services
           below, through their official APIs, cached so they are not asked twice for the same thing.
-          None of them is connected yet; this page lists what each will provide, and is updated as
+          IGDB is connected; IsThereAnyDeal and YouTube are not yet, and this page is updated as
           they are. Parlour is not affiliated with or endorsed by any of them.
         </p>
 
