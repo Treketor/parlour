@@ -10,6 +10,7 @@ import { PlusIcon } from "@/components/ui/icons";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { PRIMARY_NAV, isActivePath } from "@/lib/nav";
 import { MobileMenu } from "./MobileMenu";
+import { NavPendingMarker } from "./NavPending";
 import styles from "./SiteHeader.module.css";
 
 export function SiteHeader({ signedIn }: { signedIn: boolean }) {
@@ -35,6 +36,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
                     aria-current={active ? "page" : undefined}
                   >
                     {item.label}
+                    {!active && <NavPendingMarker />}
                     {active && (
                       // Slides to the new item on navigation, so you see where you went.
                       <motion.span

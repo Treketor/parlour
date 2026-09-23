@@ -8,6 +8,7 @@ import { signOut } from "@/app/auth/actions";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { PRIMARY_NAV, SECONDARY_NAV, isActivePath } from "@/lib/nav";
 import { transition } from "@/lib/motion";
+import { NavPendingSpinner } from "./NavPending";
 import styles from "./MobileMenu.module.css";
 
 /** Matches the header breakpoint where the inline nav takes over. */
@@ -26,11 +27,29 @@ export function MobileMenu({ signedIn }: { signedIn: boolean }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Following a link changes the route; the menu has done its job.
+  // When the new page arrives the menu vanishes at once: the page's own
+  // entrance is the transition, and a second fade on top reads as lag.
+  // Closing by hand (button, Escape) still animates.
+  const [closeInstantly, setCloseInstantly] = useState(false);
   const [lastPathname, setLastPathname] = useState(pathname);
   if (pathname !== lastPathname) {
     setLastPathname(pathname);
+    setCloseInstantly(true);
     setOpen(false);
+  }
+
+  function toggle() {
+    setCloseInstantly(false);
+    setOpen((current) => !current);
+  }
+
+  // The panel stays up while a new page loads, so the old page never shows
+  // through; only a tap on the page you are already on closes it here.
+  function closeIfCurrent(href: string) {
+    if (href === pathname) {
+      setCloseInstantly(false);
+      setOpen(false);
+    }
   }
 
   useEffect(() => {
@@ -46,6 +65,7 @@ export function MobileMenu({ signedIn }: { signedIn: boolean }) {
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
+      setCloseInstantly(false);
       setOpen(false);
       buttonRef.current?.focus();
     }
@@ -75,7 +95,7 @@ export function MobileMenu({ signedIn }: { signedIn: boolean }) {
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         data-open={open || undefined}
-        onClick={() => setOpen((current) => !current)}
+        onClick={toggle}
       >
         <span className={styles.toggleLabel}>{open ? "Close" : "Menu"}</span>
         <svg className={styles.glyph} width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
@@ -92,7 +112,11 @@ export function MobileMenu({ signedIn }: { signedIn: boolean }) {
             className={styles.panel}
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0, transition: transition.enter }}
-            exit={{ opacity: 0, y: -4, transition: transition.exit }}
+            exit={
+              closeInstantly
+                ? { opacity: 0, transition: { duration: 0 } }
+                : { opacity: 0, y: -4, transition: transition.exit }
+            }
           >
             <nav aria-label="Main">
               <ul className={styles.primary}>
@@ -104,9 +128,10 @@ export function MobileMenu({ signedIn }: { signedIn: boolean }) {
                         href={item.href}
                         className={styles.primaryLink}
                         aria-current={active ? "page" : undefined}
-                        onClick={() => setOpen(false)}
+                        onClick={() => closeIfCurrent(item.href)}
                       >
                         {item.label}
+                        <NavPendingSpinner />
                       </Link>
                     </li>
                   );
@@ -123,7 +148,7 @@ export function MobileMenu({ signedIn }: { signedIn: boolean }) {
                 <ul className={styles.secondary}>
                   {SECONDARY_NAV.map((item) => (
                     <li key={item.href}>
-                      <Link href={item.href} onClick={() => setOpen(false)}>
+                      <Link href={item.href} onClick={() => closeIfCurrent(item.href)}>
                         {item.label}
                       </Link>
                     </li>

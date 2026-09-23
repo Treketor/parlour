@@ -1,0 +1,31 @@
+.spinner,
+.marker {
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.spinner[data-pending],
+.marker[data-pending] {
+  opacity: 1;
+  /* Only shows if the page takes longer than a blink. */
+  transition-delay: 80ms;
+}
+
+.spinner {
+  display: inline-flex;
+  margin-left: auto;
+  color: var(--color-text-muted);
+}
+
+.marker {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--color-accent);
+}
+
+.marker[data-pending] {
+  opacity: 0.4;
+}
