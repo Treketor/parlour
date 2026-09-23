@@ -1,4 +1,5 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import Link from "next/link";
+import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from "react";
 import { cx } from "@/lib/cx";
 import styles from "./Button.module.css";
 import { Spinner } from "./Spinner";
@@ -61,5 +62,30 @@ export function IconButton({ label, className, children, ...rest }: IconButtonPr
     <Button aria-label={label} title={label} className={cx(styles.iconOnly, className)} {...rest}>
       {children}
     </Button>
+  );
+}
+
+type ButtonLinkProps = ComponentProps<typeof Link> & {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  icon?: ReactNode;
+};
+
+/** Navigation that looks like a button. It stays a link so it can be opened in a new tab. */
+export function ButtonLink({
+  variant = "secondary",
+  size = "md",
+  icon,
+  className,
+  children,
+  ...rest
+}: ButtonLinkProps) {
+  return (
+    <Link className={cx(styles.button, styles[variant], styles[size], className)} {...rest}>
+      <span className={styles.content}>
+        {icon}
+        {children}
+      </span>
+    </Link>
   );
 }

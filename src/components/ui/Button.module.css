@@ -16,6 +16,7 @@
   font-weight: var(--ui-strong-weight);
   line-height: 1;
   white-space: nowrap;
+  text-decoration: none;
   user-select: none;
   touch-action: manipulation;
   transition: transform var(--duration-press) var(--ease-out);
