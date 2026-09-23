@@ -92,3 +92,9 @@ a {
   white-space: nowrap;
   border: 0;
 }
+
+/* Chrome and Safari draw their own clear button in search inputs; TextField has its own. */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  appearance: none;
+}
