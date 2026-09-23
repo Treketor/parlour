@@ -109,3 +109,12 @@ Segmented controls and the rating scale change value on `pointerdown`, not `clic
 ## 015. Next.js instruction-file generation is off
 
 Next 16 writes coding-agent instruction files into the project root on `next dev` unless `agentRules: false` is set. They are noise in a hand-maintained repo, so generation is off.
+
+## 016. Swiss chosen; Editorial removed
+
+Chosen at stage 1 review because it reads as more deliberate and less generated. Supersedes the Editorial parts of 009, 011 and 012.
+
+- One typeface, Schibsted Grotesk, at every size. Hierarchy comes from size, weight and tracking rather than a second family.
+- Accent is steel (`#9db7d5`, 8.5:1 on the canvas). Brass and the two Editorial faces are gone from the code, along with the direction switch.
+- Display size moved from 52px to 64px. With no serif to separate titles from interface text, scale contrast does that work.
+- The motion switch stays on `/system` and becomes a user setting later.
