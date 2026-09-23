@@ -6,7 +6,7 @@ Status: early development. See [PROGRESS.md](PROGRESS.md) for where things stand
 
 ## Running locally
 
-Requires Node 20 or later.
+Requires Node 22.12 or later.
 
 ```bash
 npm install
