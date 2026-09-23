@@ -21,32 +21,37 @@ export default function PrivacyPage() {
         <section>
           <h2>What Parlour stores about you</h2>
           <p>
-            Nothing, at the moment. There are no accounts yet, and nothing you do on the site is
-            saved on a server or in your browser.
+            Accounts are invite-only for now. If you have one, Parlour keeps only what it needs to
+            show your library back to you:
           </p>
-          <p>When accounts and libraries arrive, this page will list exactly what is kept:</p>
           <ul>
-            <li>your email address, to sign you in;</li>
+            <li>your email address, to send sign-in links;</li>
             <li>the games in your library, with their progress, ratings, tags and notes;</li>
-            <li>your queue and your price region.</li>
+            <li>your queue, your price region, and a history of progress and rating changes.</li>
           </ul>
+          <p>
+            Visitors without an account leave nothing behind: browsing and searching are not saved.
+          </p>
         </section>
 
         <section>
           <h2>Cookies and tracking</h2>
           <p>
-            Parlour sets no cookies and runs no analytics, advertising or tracking scripts. When
-            sign-in exists it will need one cookie to keep you signed in, and nothing else.
+            Parlour runs no analytics, advertising or tracking scripts. Signing in sets cookies that
+            hold your session, and signing out removes them. Visitors who do not sign in get no
+            cookies at all.
           </p>
         </section>
 
         <section>
           <h2>Other services</h2>
           <p>
-            Pages are served by the hosting provider, which keeps short-lived request logs (such as
-            IP addresses) to run and protect the service. Game images will load from IGDB, and
-            trailers will play through YouTube&rsquo;s privacy-enhanced mode, which avoids tracking
-            cookies until you press play. Links to stores go directly to those stores.
+            Accounts and libraries are stored with Supabase, in its Tokyo region, and sign-in emails
+            are sent through it. Pages are served by the hosting provider, which keeps short-lived
+            request logs (such as IP addresses) to run and protect the service. Game images will
+            load from IGDB, and trailers will play through YouTube&rsquo;s privacy-enhanced mode,
+            which avoids tracking cookies until you press play. Links to stores go directly to those
+            stores.
           </p>
           <p>Your data is never sold or shared for marketing.</p>
         </section>
@@ -58,7 +63,7 @@ export default function PrivacyPage() {
             <a href="https://github.com/Treketor/parlour/issues" rel="noopener">
               project repository
             </a>
-            . Once accounts exist, deleting your account will delete everything listed above.
+            . Deleting your account deletes everything listed above, including the history.
           </p>
         </section>
       </div>
