@@ -1,0 +1,92 @@
+.checkbox {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-sm);
+  cursor: pointer;
+  user-select: none;
+}
+
+.input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: inherit;
+}
+
+.box {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid var(--color-control-line);
+  border-radius: var(--radius-control);
+  transition: transform var(--duration-press) var(--ease-out);
+}
+
+/* Fill on its own layer so checking animates opacity, not background-color. */
+.box::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--color-accent);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.mark {
+  position: relative;
+  color: var(--color-on-accent);
+  opacity: 0;
+  transform: scale(calc(1 - 0.4 * var(--motion-distance)));
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
+}
+
+.input:checked + .box::before,
+.input:checked + .box .mark {
+  opacity: 1;
+}
+
+.input:checked + .box .mark {
+  transform: none;
+}
+
+@media (hover: hover) {
+  .checkbox:hover .input:not(:disabled, :checked) + .box {
+    border-color: var(--color-text-faint);
+  }
+}
+
+.input:active:not(:disabled) + .box {
+  transform: scale(calc(1 - 0.1 * var(--motion-distance)));
+  transition-duration: 0s;
+}
+
+.input:focus-visible + .box {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+}
+
+.input:disabled + .box,
+.input:disabled ~ .label {
+  opacity: 0.4;
+}
+
+.checkbox:has(:disabled) {
+  cursor: not-allowed;
+}
+
+.input[aria-invalid="true"] + .box {
+  border-color: var(--color-danger);
+}
+
+.label {
+  font-size: var(--text-sm);
+}
