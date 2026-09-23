@@ -5,8 +5,8 @@
 1. Design and motion system (done)
 2. App shell, routing, empty, error and legal pages (done)
 3. Database schema, row-level security, auth (done)
-4. IGDB integration: proxy, token and rate handling, catalogue cache (awaiting review)
-5. Search and add to library
+4. IGDB integration: proxy, token and rate handling, catalogue cache (done)
+5. Search and add to library (awaiting review)
 6. Library browsing: list and grid, filter and sort
 7. Library entry editing: progress, ownership, rating, tags, notes
 8. Game detail page: media, release info, scores, trailers, walkthrough links
@@ -27,14 +27,15 @@
 
 - Stage 4: IGDB client (shared stored token, rate limiter, retries, validated responses), catalogue tables for summaries, scores with counts, genres, per-platform release dates, media, trailers and store ids, atomic batch writes, search cache, and `searchCatalogue` / `ensure` for stage 5. 12 more pgTAP access tests, 4 live end-to-end tests, 125 unit tests. No UI yet: search is wired up in stage 5.
 
+- Stage 5: search results from IGDB with covers, one block per game and one row per platform, re-ranked for exact titles and popularity, scores only with enough ratings behind them; optimistic add with Owned / Want to own / Not interested; signed-out, empty, too-short and IGDB-failure states; results skeleton.
+
 ## Next
 
-- Stage 5: search and add to library.
+- Stage 6: library browsing (list and grid, filter and sort).
 
 ## Known issues
 
 - Until custom SMTP is set up (before launch), sign-in emails only reach Supabase team members, and links only work in the browser that asked for them.
-- Search says it is not connected when a query is submitted; replaced by real results in stage 5.
 - The browser logs a warning about an unused preloaded stylesheet a few seconds after load. It comes from Next prefetching the Design system page linked in the footer, and it is harmless.
-- Cover art is the designed no-art state everywhere; it is stored now and appears in the UI from stage 5.
+- Cover art appears in search results; library views pick it up in stage 6.
 - Progress glyphs are 12px. The paused mark is the least legible at that size; accepted at review as still distinguishable.

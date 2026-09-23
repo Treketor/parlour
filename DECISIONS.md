@@ -206,3 +206,13 @@ Revises 023 after review. The confirm page submits itself as soon as it loads, s
 ## 029. Tests for external services
 
 Offline tests use real IGDB responses saved as fixtures (Outer Wilds search, an unreleased game) plus fakes for the network and database. A separate `npm run test:live` suite runs the whole path against the real services with `.env.local`. It is not part of `npm test`, so the normal run never needs secrets or a network.
+
+## 030. Search results and adding to the library
+
+- **One block per game, one row per platform.** The cover, title, year, type and scores appear once, then each platform gets its own row with its own Add control or library status. You choose the exact version you play without the title repeating for every platform. Long platform lists flow into two columns on wide screens.
+- **Ranking on top of IGDB.** IGDB orders by name similarity only, which put a 1995 _Hades_ with no ratings above the 2020 one. Results are re-ranked: exact titles, then titles starting with the search, then the rest; within each, more-rated games first; IGDB's order breaks remaining ties. The cache keeps IGDB's order, so the ranking can change without refetching.
+- **Honest scores.** Critic scores need at least 3 reviews and player scores at least 10 ratings to appear, always with the count ("Critics 94 (17 reviews)"). Below that, nothing is shown.
+- **Adding is optimistic.** Choosing Owned, Want to own or Not interested switches the row to "in library" at once, slightly dimmed until the server confirms. If the server refuses, the row reverts and says why. Focus moves to the new status, and a live region announces the addition. Adding something already in the library (from another tab) counts as success.
+- **The server checks everything the browser sends.** The request is validated, the game is made sure of through the catalogue (fetched from IGDB only if missing or stale), the platform must be one the game is actually on, and the insert runs under the person's own session, so row-level security applies.
+- **Signed out, search still works.** The catalogue is public; the Add control becomes "Sign in to add", which returns to the same search afterwards.
+- **Loading keeps the form.** Results sit in a Suspense boundary keyed by the query, so a new search shows a skeleton of the results while the form stays put.
