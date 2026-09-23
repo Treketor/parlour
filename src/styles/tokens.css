@@ -122,17 +122,25 @@
   --color-accent-line: rgb(157 183 213 / 0.45);
 }
 
+/*
+ * Reduced, not removed: state changes still crossfade so the eye can see what
+ * changed, but nothing travels or scales. The attribute form lets the app
+ * offer its own setting on top of the OS preference.
+ */
 @media (prefers-reduced-motion: reduce) {
-  :root {
-    /*
-     * Reduced, not removed: state changes still crossfade so the eye can see
-     * what changed, but nothing travels or scales.
-     */
+  :root:not([data-motion="full"]) {
     --motion-distance: 0;
     --press-scale: 1;
     --duration-spatial: 160ms;
     --duration-slow: 160ms;
   }
+}
+
+:root[data-motion="reduced"] {
+  --motion-distance: 0;
+  --press-scale: 1;
+  --duration-spatial: 160ms;
+  --duration-slow: 160ms;
 }
 
 @media (pointer: coarse) {

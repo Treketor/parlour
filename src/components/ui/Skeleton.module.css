@@ -28,7 +28,11 @@
 
 /* Still breathes (opacity only) so it reads as loading, just more slowly. */
 @media (prefers-reduced-motion: reduce) {
-  .skeleton {
+  :root:not([data-motion="full"]) .skeleton {
     animation-duration: 2.4s;
   }
+}
+
+:root[data-motion="reduced"] .skeleton {
+  animation-duration: 2.4s;
 }

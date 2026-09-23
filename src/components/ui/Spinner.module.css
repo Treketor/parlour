@@ -12,9 +12,13 @@
 
 /* Rotation is the motion people ask to avoid; a slow fade still says "working". */
 @media (prefers-reduced-motion: reduce) {
-  .spinner {
+  :root:not([data-motion="full"]) .spinner {
     animation: breathe 1.2s var(--ease-in-out) infinite alternate;
   }
+}
+
+:root[data-motion="reduced"] .spinner {
+  animation: breathe 1.2s var(--ease-in-out) infinite alternate;
 }
 
 @keyframes breathe {

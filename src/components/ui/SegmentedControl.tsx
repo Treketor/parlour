@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { useId, useRef, type KeyboardEvent } from "react";
 import { cx } from "@/lib/cx";
-import { transition } from "@/lib/motion";
+import { useLayoutTransition } from "@/components/Providers";
 import styles from "./SegmentedControl.module.css";
 
 export type SegmentOption<T extends string> = { value: T; label: string };
@@ -30,6 +30,7 @@ export function SegmentedControl<T extends string>({
   className,
 }: SegmentedControlProps<T>) {
   const indicatorId = useId();
+  const slide = useLayoutTransition("slide");
   const refs = useRef(new Map<T, HTMLButtonElement>());
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -90,7 +91,7 @@ export function SegmentedControl<T extends string>({
               <motion.span
                 layoutId={indicatorId}
                 className={styles.indicator}
-                transition={transition.slide}
+                transition={slide}
                 aria-hidden="true"
               />
             )}
