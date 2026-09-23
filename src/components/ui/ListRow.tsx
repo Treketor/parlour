@@ -4,6 +4,7 @@ import { cx } from "@/lib/cx";
 import { formatDate } from "@/lib/format";
 import { progressLabel, type Progress } from "@/lib/progress";
 import type { Rating } from "@/lib/rating";
+import type { SortDirection, SortKey } from "@/lib/sort";
 import { GameCover } from "./GameCover";
 import { ProgressGlyph } from "./ProgressGlyph";
 import { Skeleton } from "./Skeleton";
@@ -112,8 +113,7 @@ export function ListRowSkeleton() {
   );
 }
 
-export type SortKey = "title" | "platform" | "progress" | "rating" | "added";
-export type SortState = { key: SortKey; direction: "asc" | "desc" };
+export type SortState = { key: SortKey; direction: SortDirection };
 
 type ListHeaderProps = {
   sort: SortState;
