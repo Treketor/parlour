@@ -1,0 +1,21 @@
+.panel {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 28rem;
+}
+
+.form {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-4);
+}
+
+.field {
+  justify-self: stretch;
+}
+
+.small {
+  margin-top: var(--space-2);
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}

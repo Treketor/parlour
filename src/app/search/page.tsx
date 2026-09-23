@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { Notice } from "@/components/ui/Notice";
+import { firstParam } from "@/lib/search-params";
 import { SearchForm } from "./SearchForm";
 import styles from "./search.module.css";
 
@@ -8,12 +9,8 @@ export const metadata: Metadata = {
   title: "Search",
 };
 
-function firstValue(value: string | string[] | undefined): string {
-  return (Array.isArray(value) ? value[0] : value)?.trim() ?? "";
-}
-
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
-  const query = firstValue((await searchParams).q);
+  const query = firstParam((await searchParams).q);
 
   return (
     <>
