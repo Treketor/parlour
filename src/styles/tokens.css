@@ -22,6 +22,7 @@
 
   --color-accent: #c8a565;
   --color-accent-strong: #d9b978;
+  --color-accent-pressed: #b39055;
   --color-accent-wash: rgb(200 165 101 / 0.1);
   --color-accent-line: rgb(200 165 101 / 0.45);
 
@@ -58,6 +59,7 @@
   /* Space. 4px base; names are multiples of 4. */
   --space-0-5: 0.125rem;
   --space-1: 0.25rem;
+  --space-1-5: 0.375rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
@@ -82,7 +84,8 @@
   --radius-none: 0;
   --radius-control: 2px;
   --hairline: 1px solid var(--color-line);
-  --focus-ring: 0 0 0 2px var(--color-canvas), 0 0 0 4px var(--color-accent);
+  --focus-outline: 2px solid var(--color-accent);
+  --focus-offset: 2px;
 
   /* Motion. See DECISIONS.md 010. */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -114,6 +117,7 @@
 
   --color-accent: #9db7d5;
   --color-accent-strong: #b3c8e0;
+  --color-accent-pressed: #87a1c0;
   --color-accent-wash: rgb(157 183 213 / 0.1);
   --color-accent-line: rgb(157 183 213 / 0.45);
 }
