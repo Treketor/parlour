@@ -124,3 +124,19 @@ Chosen at stage 1 review because it reads as more deliberate and less generated.
 Replaces the working name from 008. Parlour games are the ones people play together in the front room, and a parlour is a room for sitting and talking. That covers both halves of the app: a personal catalogue now, game clubs later. It points at games without sounding like gaming culture.
 
 Rejected: Shelfmark (an iOS reading tracker with the same shelf model already uses it), Holdings (no connection to games), Couch Club (clear but expected, and "couch" names are crowded), Player Two (taken). Names that say "video game book club" outright clash with existing sites of that name. British spelling kept on purpose.
+
+## 018. App shell
+
+- A sticky header on a solid ground (no blur): wordmark, Library, Queue, Search, and "Add a game" as the one primary action. The current-page marker sits on the header's bottom edge and slides to the new item on navigation. On narrow screens the nav drops to a second row of full-width tabs; no hamburger menu for three items.
+- A `template.tsx` wraps every page, so each navigation plays a short fade-and-rise (180ms, ease out; fade only under reduced motion). There are no exit animations: they would delay the next page.
+- App pages title at 40px. The 64px display size is kept for the design system page and future editorial moments.
+- The footer carries IGDB and IsThereAnyDeal attribution on every page, plus links to terms, privacy, data sources and the design system.
+- Error boundaries receive `error`, `reset` and `retry` in the installed Next 16.3.6, although the docs describe `unstable_retry`. We use `retry`, which refreshes server data before re-rendering. `global-error.tsx` brings its own tokens and font, so even a root failure looks like Parlour.
+
+## 019. Search before IGDB
+
+The search page and form are real: the query lives in the URL, and `next/form` submits it as a client-side navigation. Until IGDB is connected (stage 5), a submitted search says plainly that search is not connected and that nothing was searched or saved. This is preferable to fake results or a disabled box.
+
+## 020. Legal pages describe today, not the plan
+
+Terms, privacy and data sources are written in plain language and state what is true now (nothing is stored), then list what will be stored once accounts exist. Each page shows an "updated" date kept in one file (`src/app/(legal)/updated.ts`). Whenever a stage starts storing or sharing something new, that stage updates these pages. They are not legal advice.
