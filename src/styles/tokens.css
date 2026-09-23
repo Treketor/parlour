@@ -1,0 +1,138 @@
+/*
+ * Design tokens. Components read these and nothing else: no raw colours,
+ * sizes or timings in component styles. Motion values are mirrored in
+ * src/lib/motion.ts for Motion's JS API; a test keeps the two in step.
+ */
+
+:root {
+  /* Colour. Warm near-black ground; lightness steps do the work shadows would. */
+  --color-canvas: #1a1917;
+  --color-surface: #211f1c;
+  --color-surface-raised: #292724;
+  --color-surface-pressed: #312e2a;
+  --color-line: #34312c;
+  --color-line-strong: #4b4740;
+  --color-text: #eae5db;
+  --color-text-muted: #b0aa9e;
+  --color-text-faint: #8a8479;
+  --color-on-accent: #1a1917;
+  --color-danger: #df8f7e;
+  --color-danger-line: #7a4a40;
+
+  --color-accent: #c8a565;
+  --color-accent-strong: #d9b978;
+  --color-accent-wash: rgb(200 165 101 / 0.1);
+  --color-accent-line: rgb(200 165 101 / 0.45);
+
+  /* Type. Families come from next/font variables set on <html>. */
+  --font-display: var(--font-source-serif), Georgia, serif;
+  --font-ui: var(--font-libre-franklin), system-ui, sans-serif;
+  --font-reading: var(--font-source-serif), Georgia, serif;
+
+  --display-weight: 560;
+  --display-tracking: -0.012em;
+  --heading-weight: 600;
+  --ui-strong-weight: 600;
+
+  /* Scale: roughly a major third from a 15px UI base, rounded to whole pixels. */
+  --text-2xs: 0.75rem; /* 12 */
+  --text-xs: 0.8125rem; /* 13 */
+  --text-sm: 0.875rem; /* 14 */
+  --text-base: 0.9375rem; /* 15 */
+  --text-md: 1.0625rem; /* 17 */
+  --text-lg: 1.25rem; /* 20 */
+  --text-xl: 1.5625rem; /* 25 */
+  --text-2xl: 2rem; /* 32 */
+  --text-3xl: 2.5rem; /* 40 */
+  --text-display: 3.25rem; /* 52 */
+
+  --leading-display: 1.04;
+  --leading-heading: 1.2;
+  --leading-ui: 1.35;
+  --leading-reading: 1.6;
+
+  --tracking-tight: -0.01em;
+  --tracking-small: 0.012em;
+
+  /* Space. 4px base; names are multiples of 4. */
+  --space-0-5: 0.125rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  --gutter: var(--space-4);
+  --measure: 68ch;
+  --content-max: 76rem;
+
+  /* Control sizing: dense by default, never below a 32px hit area on touch. */
+  --control-height-sm: 1.75rem;
+  --control-height-md: 2.125rem;
+  --control-height-touch: 2.75rem;
+
+  /* Edges */
+  --radius-none: 0;
+  --radius-control: 2px;
+  --hairline: 1px solid var(--color-line);
+  --focus-ring: 0 0 0 2px var(--color-canvas), 0 0 0 4px var(--color-accent);
+
+  /* Motion. See DECISIONS.md 010. */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+
+  --duration-press: 70ms;
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 240ms;
+  --duration-spatial: 320ms;
+
+  /* Distance multiplier: movement scales to zero under reduced motion. */
+  --motion-distance: 1;
+  --press-scale: 0.97;
+}
+
+:root[data-direction="swiss"] {
+  --font-display: var(--font-schibsted), system-ui, sans-serif;
+  --font-ui: var(--font-schibsted), system-ui, sans-serif;
+  --font-reading: var(--font-schibsted), system-ui, sans-serif;
+
+  --display-weight: 700;
+  --display-tracking: -0.038em;
+  --heading-weight: 650;
+  --text-display: 4rem; /* 64: the grotesk carries more scale contrast than the serif */
+  --leading-display: 0.96;
+  --leading-reading: 1.5;
+
+  --color-accent: #9db7d5;
+  --color-accent-strong: #b3c8e0;
+  --color-accent-wash: rgb(157 183 213 / 0.1);
+  --color-accent-line: rgb(157 183 213 / 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    /*
+     * Reduced, not removed: state changes still crossfade so the eye can see
+     * what changed, but nothing travels or scales.
+     */
+    --motion-distance: 0;
+    --press-scale: 1;
+    --duration-spatial: 160ms;
+    --duration-slow: 160ms;
+  }
+}
+
+@media (pointer: coarse) {
+  :root {
+    --control-height-sm: 2.25rem;
+    --control-height-md: var(--control-height-touch);
+  }
+}

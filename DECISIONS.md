@@ -56,3 +56,34 @@ The brief asks for clean, minimal, modern and stylised, not nerdy or game-like. 
 - Swiss: a single characterful grotesk, large scale contrast.
 
 The rejected direction is deleted after review.
+
+## 010. Motion system
+
+Three curves, five durations, used everywhere:
+
+| Token | Value | Use |
+|---|---|---|
+| `ease-out` | cubic-bezier(0.22, 1, 0.36, 1) | Anything responding to input or entering. Fast start reads as immediate. |
+| `ease-in-out` | cubic-bezier(0.65, 0, 0.35, 1) | Things travelling between two resting places (reorders). |
+| `ease-in` | cubic-bezier(0.55, 0, 1, 0.45) | Exits: accelerate out of the way. |
+| `press` | 70ms | Release of a pressed state. Press itself applies with no transition. |
+| `fast` | 120ms | Hover, colour changes, exits. |
+| `base` | 180ms | Popovers, small reveals. |
+| `slow` | 240ms | Indicators sliding between options. |
+| `spatial` | 320ms | Rows moving to new positions. |
+
+Only `transform` and `opacity` animate. Hover changes colour only; nothing lifts or grows on hover.
+
+Reduced motion is a real variant rather than an off switch. Distances and press scale collapse to zero, long durations shorten, and state changes still crossfade so the change remains visible. Motion's `reducedMotion="user"` does the same for JS animations: it drops transform and layout animation and keeps opacity.
+
+Layout animation on reorder is limited to lists of 100 visible items or fewer. Past that, measuring every row costs frames, and the list crossfades instead.
+
+Tokens live in `tokens.css`; `src/lib/motion.ts` mirrors them for Motion, and a test fails if the two drift.
+
+## 011. Colour
+
+Warm near-black ground (`#1a1917`) with surfaces stepped up in lightness instead of shadows. The Editorial direction uses a brass accent (`#c8a565`), taken from the label frames on card-catalogue drawers. Swiss uses a cool steel (`#9db7d5`). The accent marks only current, selected and focused things, plus the primary action.
+
+Progress states do not get a colour each, which would turn into a rainbow. They get small drawn glyphs and a text label; only "playing" uses the accent. The error colour is a muted coral and appears nowhere else.
+
+Text colours are checked against the canvas: body 14.6:1, muted 8.0:1, faint 5.0:1, accent 8.0:1.
