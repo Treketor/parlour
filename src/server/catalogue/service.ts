@@ -4,6 +4,7 @@ import { IgdbError } from "../igdb/errors";
 import { mapGames, type GameBatch } from "../igdb/map";
 import { gamesByIdQuery, normaliseSearch, searchGamesQuery } from "../igdb/query";
 import { igdbGames } from "../igdb/schema";
+import { rankResults } from "./rank";
 
 /*
  * The caching policy between the app and IGDB (DECISIONS.md 028):
@@ -45,15 +46,18 @@ export function createCatalogue({ store, igdb, now = Date.now }: Dependencies) {
       const query = normaliseSearch(input);
       if (query.length < MIN_QUERY_LENGTH) return [];
 
+      // The cache keeps IGDB's order; ranking is applied on the way out, so it can change freely.
+      const ranked = async (ids: readonly number[]) => rankResults(query, await inOrder(ids));
+
       const cached = await store.readSearch(query);
-      if (cached && cached.expiresAt.getTime() > now()) return inOrder(cached.gameIds);
+      if (cached && cached.expiresAt.getTime() > now()) return ranked(cached.gameIds);
 
       try {
         const ids = await fetchAndStore(searchGamesQuery(query));
         await store.writeSearch(query, ids, new Date(now() + SEARCH_CACHE_MS));
-        return inOrder(ids);
+        return ranked(ids);
       } catch (error) {
-        if (cached && error instanceof IgdbError) return inOrder(cached.gameIds);
+        if (cached && error instanceof IgdbError) return ranked(cached.gameIds);
         throw error;
       }
     },
