@@ -18,7 +18,7 @@ const inks: Swatch[] = [
   { token: "text", role: "Titles, values", contrast: "14.0" },
   { token: "text-muted", role: "Secondary text, labels", contrast: "8.7" },
   { token: "text-faint", role: "Metadata, placeholders", contrast: "6.0" },
-  { token: "accent", role: "Selected, current, focus, primary action", contrast: "7.6" },
+  { token: "accent", role: "Selected, current, focus, primary action", contrast: "8.5" },
   { token: "danger", role: "Errors only", contrast: "7.0" },
 ];
 
@@ -99,7 +99,7 @@ export function TypeSection() {
     <Section
       id="type"
       title="Type"
-      intro="A major-third scale from a 15px interface base. Display sizes use the display face with tightened tracking; everything with a number in it uses tabular lining figures so columns line up."
+      intro="One grotesk, Schibsted Grotesk, at every size. Hierarchy comes from size, weight and tracking: display sizes are bold and tightly set, interface text is regular. Numbers that stack in columns use tabular figures so they line up."
     >
       <div className={styles.typeScale}>
         {typeSteps.map((step) => (
@@ -129,7 +129,7 @@ export function TypeSection() {
             four evenings. Worth playing blind, with the sound up.
           </p>
           <p className={styles.caption}>
-            Notes and descriptions: reading face, 15px, 68 character measure.
+            Notes and descriptions: 15px, 1.5 line height, 68 character measure.
           </p>
         </div>
         <div>

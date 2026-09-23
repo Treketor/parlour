@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Providers } from "@/components/Providers";
-import { fontVariables } from "./fonts";
+import { schibstedGrotesk } from "./fonts";
 import "@/styles/tokens.css";
 import "@/styles/global.css";
 
@@ -16,7 +16,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={fontVariables} data-direction="editorial">
+    <html lang="en" className={schibstedGrotesk.variable}>
       <body>
         <Providers>{children}</Providers>
       </body>
