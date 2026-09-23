@@ -87,30 +87,249 @@ export type Database = {
           },
         ];
       };
+      game_external_ids: {
+        Row: {
+          game_id: number;
+          source: string;
+          uid: string;
+        };
+        Insert: {
+          game_id: number;
+          source: string;
+          uid: string;
+        };
+        Update: {
+          game_id?: number;
+          source?: string;
+          uid?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_external_ids_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_genres: {
+        Row: {
+          game_id: number;
+          genre_id: number;
+        };
+        Insert: {
+          game_id: number;
+          genre_id: number;
+        };
+        Update: {
+          game_id?: number;
+          genre_id?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_genres_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_genres_genre_id_fkey";
+            columns: ["genre_id"];
+            isOneToOne: false;
+            referencedRelation: "genres";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_media: {
+        Row: {
+          game_id: number;
+          height: number | null;
+          image_id: string;
+          kind: string;
+          position: number;
+          width: number | null;
+        };
+        Insert: {
+          game_id: number;
+          height?: number | null;
+          image_id: string;
+          kind: string;
+          position?: number;
+          width?: number | null;
+        };
+        Update: {
+          game_id?: number;
+          height?: number | null;
+          image_id?: string;
+          kind?: string;
+          position?: number;
+          width?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_media_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_platforms: {
+        Row: {
+          game_id: number;
+          platform_id: number;
+        };
+        Insert: {
+          game_id: number;
+          platform_id: number;
+        };
+        Update: {
+          game_id?: number;
+          platform_id?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_platforms_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_platforms_platform_id_fkey";
+            columns: ["platform_id"];
+            isOneToOne: false;
+            referencedRelation: "platforms";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_videos: {
+        Row: {
+          game_id: number;
+          name: string | null;
+          position: number;
+          video_id: string;
+        };
+        Insert: {
+          game_id: number;
+          name?: string | null;
+          position?: number;
+          video_id: string;
+        };
+        Update: {
+          game_id?: number;
+          name?: string | null;
+          position?: number;
+          video_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_videos_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       games: {
         Row: {
           cover_image_id: string | null;
+          critic_rating: number | null;
+          critic_rating_count: number;
           fetched_at: string;
           first_release_date: string | null;
+          game_type: string | null;
+          id: number;
+          igdb_rating: number | null;
+          igdb_rating_count: number;
+          igdb_updated_at: string | null;
+          name: string;
+          parent_game_id: number | null;
+          slug: string;
+          stale_after: string;
+          summary: string | null;
+          version_parent_id: number | null;
+        };
+        Insert: {
+          cover_image_id?: string | null;
+          critic_rating?: number | null;
+          critic_rating_count?: number;
+          fetched_at?: string;
+          first_release_date?: string | null;
+          game_type?: string | null;
+          id: number;
+          igdb_rating?: number | null;
+          igdb_rating_count?: number;
+          igdb_updated_at?: string | null;
+          name: string;
+          parent_game_id?: number | null;
+          slug: string;
+          stale_after?: string;
+          summary?: string | null;
+          version_parent_id?: number | null;
+        };
+        Update: {
+          cover_image_id?: string | null;
+          critic_rating?: number | null;
+          critic_rating_count?: number;
+          fetched_at?: string;
+          first_release_date?: string | null;
+          game_type?: string | null;
+          id?: number;
+          igdb_rating?: number | null;
+          igdb_rating_count?: number;
+          igdb_updated_at?: string | null;
+          name?: string;
+          parent_game_id?: number | null;
+          slug?: string;
+          stale_after?: string;
+          summary?: string | null;
+          version_parent_id?: number | null;
+        };
+        Relationships: [];
+      };
+      genres: {
+        Row: {
           id: number;
           name: string;
           slug: string;
         };
         Insert: {
-          cover_image_id?: string | null;
-          fetched_at?: string;
-          first_release_date?: string | null;
           id: number;
           name: string;
           slug: string;
         };
         Update: {
-          cover_image_id?: string | null;
-          fetched_at?: string;
-          first_release_date?: string | null;
           id?: number;
           name?: string;
           slug?: string;
+        };
+        Relationships: [];
+      };
+      igdb_search_cache: {
+        Row: {
+          expires_at: string;
+          fetched_at: string;
+          game_ids: number[];
+          query: string;
+        };
+        Insert: {
+          expires_at: string;
+          fetched_at?: string;
+          game_ids: number[];
+          query: string;
+        };
+        Update: {
+          expires_at?: string;
+          fetched_at?: string;
+          game_ids?: number[];
+          query?: string;
         };
         Relationships: [];
       };
@@ -184,20 +403,29 @@ export type Database = {
       platforms: {
         Row: {
           abbreviation: string | null;
+          fetched_at: string;
+          generation: number | null;
           id: number;
           name: string;
+          platform_type: string | null;
           slug: string;
         };
         Insert: {
           abbreviation?: string | null;
+          fetched_at?: string;
+          generation?: number | null;
           id: number;
           name: string;
+          platform_type?: string | null;
           slug: string;
         };
         Update: {
           abbreviation?: string | null;
+          fetched_at?: string;
+          generation?: number | null;
           id?: number;
           name?: string;
+          platform_type?: string | null;
           slug?: string;
         };
         Relationships: [];
@@ -222,6 +450,27 @@ export type Database = {
           created_at?: string;
           display_name?: string | null;
           id?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      provider_tokens: {
+        Row: {
+          access_token: string;
+          expires_at: string;
+          provider: string;
+          updated_at: string;
+        };
+        Insert: {
+          access_token: string;
+          expires_at: string;
+          provider: string;
+          updated_at?: string;
+        };
+        Update: {
+          access_token?: string;
+          expires_at?: string;
+          provider?: string;
           updated_at?: string;
         };
         Relationships: [];
@@ -265,6 +514,51 @@ export type Database = {
           },
         ];
       };
+      release_dates: {
+        Row: {
+          game_id: number;
+          id: number;
+          label: string | null;
+          platform_id: number | null;
+          precision: string;
+          region: string | null;
+          released_on: string | null;
+        };
+        Insert: {
+          game_id: number;
+          id: number;
+          label?: string | null;
+          platform_id?: number | null;
+          precision: string;
+          region?: string | null;
+          released_on?: string | null;
+        };
+        Update: {
+          game_id?: number;
+          id?: number;
+          label?: string | null;
+          platform_id?: number | null;
+          precision?: string;
+          region?: string | null;
+          released_on?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "release_dates_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "release_dates_platform_id_fkey";
+            columns: ["platform_id"];
+            isOneToOne: false;
+            referencedRelation: "platforms";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       tags: {
         Row: {
           created_at: string;
@@ -299,7 +593,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      store_igdb_games: { Args: { batch: Json }; Returns: undefined };
     };
     Enums: {
       [_ in never]: never;
