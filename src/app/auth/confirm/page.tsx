@@ -7,10 +7,11 @@ import { parseEmailOtpType } from "@/lib/auth/otp";
 import { safeRedirectPath } from "@/lib/auth/redirect";
 import { firstParam } from "@/lib/search-params";
 import { confirmSignIn } from "../actions";
+import { AutoSubmitForm } from "./AutoSubmitForm";
 import styles from "../../sign-in/sign-in.module.css";
 
 export const metadata: Metadata = {
-  title: "Finish signing in",
+  title: "Signing in",
   // A one-time link page has no business in search results or link previews.
   robots: { index: false, follow: false },
 };
@@ -25,17 +26,17 @@ export default async function ConfirmPage({ searchParams }: PageProps<"/auth/con
 
   return (
     <>
-      <PageHeader title="Finish signing in" />
+      <PageHeader title="Signing you in" />
       <div className={styles.panel}>
         {usable ? (
-          <form action={confirmSignIn} className={styles.form}>
-            <p>Press the button to sign in to Parlour on this device.</p>
+          <AutoSubmitForm action={confirmSignIn} className={styles.form}>
+            <p>One moment. If nothing happens, press the button.</p>
             <input type="hidden" name="next" value={next} />
             {tokenHash && <input type="hidden" name="token_hash" value={tokenHash} />}
             {type && <input type="hidden" name="type" value={type} />}
             {code && <input type="hidden" name="code" value={code} />}
             <SubmitButton>Sign in to Parlour</SubmitButton>
-          </form>
+          </AutoSubmitForm>
         ) : (
           <Notice
             tone="error"

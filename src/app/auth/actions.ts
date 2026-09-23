@@ -75,9 +75,9 @@ export async function sendSignInLink(
 }
 
 /**
- * Finishes sign-in from an emailed link. This runs on a button press rather
- * than when the link opens, because email security scanners open links
- * automatically and would otherwise use up the one-time token.
+ * Finishes sign-in from an emailed link. The confirm page submits this as soon
+ * as it loads in a browser, rather than the server acting on the GET, so link
+ * scanners that fetch pages without running scripts cannot spend the token.
  */
 export async function confirmSignIn(formData: FormData): Promise<never> {
   const next = safeRedirectPath(formData.get("next")?.toString());

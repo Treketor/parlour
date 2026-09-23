@@ -4,7 +4,7 @@
 
 1. Design and motion system (done)
 2. App shell, routing, empty, error and legal pages (done)
-3. Database schema, row-level security, auth (awaiting review)
+3. Database schema, row-level security, auth (done)
 4. IGDB integration: proxy, token and rate handling, catalogue cache
 5. Search and add to library
 6. Library browsing: list and grid, filter and sort
@@ -23,16 +23,14 @@
   - Logic with tests: rating keyboard and pointer model, catalogue sorting, date formatting, motion token parity (41 tests).
 - Stage 2: app shell (44 tests; header with sliding current-page marker, footer with attribution, skip link, page entrance), Library and Queue empty states, Search page and form, 404, error and root error pages, Terms, Privacy and Data sources. Home is now the Library; `/system` sits inside the shell and is linked from the footer. After review: a mobile menu replaced the tab row, and the doubled clear button in search is fixed.
 
-- Stage 3: Supabase project, schema (profiles, per-platform library entries, tags, queue, change history, minimal catalogue), row-level security with 22 pgTAP access tests, generated types, data layer, emailed-link sign-in with a scanner-proof confirm page, sign-out, signed-out states for Library and Queue, loading skeletons, privacy page updated for accounts. 69 unit tests. After review: mobile menu navigation no longer shows two pages at once, and nav links show pending feedback.
+- Stage 3: Supabase project, schema (profiles, per-platform library entries, tags, queue, change history, minimal catalogue), row-level security with 22 pgTAP access tests, generated types, data layer, emailed-link sign-in with a scanner-proof confirm page, sign-out, signed-out states for Library and Queue, loading skeletons, privacy page updated for accounts. 69 unit tests. After review: mobile menu navigation no longer shows two pages at once, and nav links show pending feedback; emailed links sign you in without a second click.
 
 ## Next
 
-- Finish sign-in setup in the Supabase dashboard (README, "Sign-in settings"; the email template step waits for custom SMTP), then sign in once to check the signed-in states.
 - Stage 4: IGDB integration.
 
 ## Known issues
 
-- The signed-in states (library count, queue, sign-out) have not yet been seen in a browser: that needs the account from the dashboard steps.
 - Until custom SMTP is set up (before launch), sign-in emails only reach Supabase team members, and links only work in the browser that asked for them.
 
 - Search says it is not connected when a query is submitted; replaced by real results in stage 5.

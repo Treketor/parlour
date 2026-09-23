@@ -186,3 +186,7 @@ Before Parlour is public (stage 11), a custom email service (SMTP) is required a
 Found at stage 3 review: after tapping a page in the mobile menu, the menu faded out straight away, which uncovered the old page while the new one was still loading. The new page then faded in on top of it, so you briefly saw two pages and two fades.
 
 Now the menu stays up until the new page has arrived, then disappears at once, and the page's own entrance is the only motion. The tapped item shows a small spinner if the wait is noticeable (after 80ms). On desktop, a tapped nav link shows a faint marker straight away, ahead of the real marker sliding over. Both use Next's `useLinkStatus`. Closing the menu by hand still animates.
+
+## 027. Emailed links sign you in straight away
+
+Revises 023 after review. The confirm page submits itself as soon as it loads, showing "Signing you in", so a link is one click, not two. With the default email template the one-time token is already spent at Supabase's own endpoint before the page loads, so the extra button protected nothing. Submitting from the page (rather than acting on the GET) still keeps link scanners that do not run scripts from spending a `token_hash` token once the template changes. The button remains as a fallback when JavaScript is off.
