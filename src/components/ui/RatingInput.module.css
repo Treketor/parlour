@@ -1,0 +1,136 @@
+.rating {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(9rem, 15rem) auto;
+  align-items: center;
+  column-gap: var(--space-3);
+  row-gap: var(--space-1-5);
+}
+
+.readout {
+  display: flex;
+  align-items: baseline;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.number {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  line-height: 1;
+  animation: rollUp var(--duration-base) var(--ease-out);
+}
+
+.number[data-direction="down"] {
+  animation-name: rollDown;
+}
+
+@keyframes rollUp {
+  from {
+    opacity: 0;
+    transform: translateY(calc(0.4em * var(--motion-distance)));
+  }
+}
+
+@keyframes rollDown {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-0.4em * var(--motion-distance)));
+  }
+}
+
+.outOf {
+  margin-left: 0.15em;
+  color: var(--color-text-faint);
+  font-size: var(--text-sm);
+}
+
+.unrated {
+  color: var(--color-text-faint);
+  font-size: var(--text-sm);
+}
+
+.track {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 2px;
+  height: var(--control-height-sm);
+  padding-block: var(--space-1);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.track:focus-visible {
+  outline-offset: 3px;
+}
+
+.cell {
+  position: relative;
+  border-radius: 1px;
+  background: var(--color-surface-raised);
+}
+
+.cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-accent);
+  opacity: 0;
+  /* A small stagger shows which way the value moved across the scale. */
+  transition: opacity var(--duration-fast) var(--ease-out) calc(var(--index) * 8ms);
+}
+
+.cell[data-filled]::before {
+  opacity: 1;
+}
+
+/* Hover preview is quieter than a committed value, so it never reads as saved. */
+.track[data-previewing] .cell[data-filled]::before {
+  opacity: 0.45;
+  transition-delay: 0s;
+}
+
+.track[aria-invalid="true"] .cell {
+  outline: 1px solid var(--color-danger);
+  outline-offset: -1px;
+}
+
+.clear {
+  display: inline-grid;
+  place-items: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-text-faint);
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.clear[data-hidden] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .clear:hover {
+    color: var(--color-text);
+  }
+}
+
+.rating[data-disabled] .track,
+.rating[data-disabled] .readout {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.error {
+  grid-column: 1 / -1;
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+}
