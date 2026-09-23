@@ -1,0 +1,44 @@
+.notice {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-6);
+  border: 1px dashed var(--color-line-strong);
+  animation: noticeIn var(--duration-base) var(--ease-out);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  line-height: var(--leading-heading);
+}
+
+.body {
+  max-width: 48ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-reading);
+}
+
+.action {
+  margin-top: var(--space-2);
+}
+
+/* Errors get a solid edge in the error colour; empty states stay quiet. */
+.error {
+  border-style: solid;
+  border-color: var(--color-danger);
+}
+
+.error .title {
+  color: var(--color-danger);
+}
+
+@keyframes noticeIn {
+  from {
+    opacity: 0;
+    transform: translateY(calc(4px * var(--motion-distance)));
+  }
+}
