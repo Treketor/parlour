@@ -1,0 +1,77 @@
+.group {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--color-control-line);
+  border-radius: var(--radius-control);
+  background: var(--color-canvas);
+}
+
+.segment {
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  place-items: center;
+  height: calc(var(--control-height-md) - 6px);
+  padding-inline: var(--space-3);
+  border: 0;
+  border-radius: 1px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--ui-strong-weight);
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.sm .segment {
+  height: calc(var(--control-height-sm) - 6px);
+  padding-inline: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.segment::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  background: var(--color-surface-raised);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .segment[aria-checked="false"]:hover::before {
+    opacity: 1;
+  }
+
+  .segment[aria-checked="false"]:hover {
+    color: var(--color-text);
+  }
+}
+
+.segment[aria-checked="false"]:active::before {
+  background: var(--color-surface-pressed);
+  opacity: 1;
+  transition-duration: 0s;
+}
+
+.segment[aria-checked="true"] {
+  color: var(--color-on-accent);
+}
+
+.segment:focus-visible {
+  outline-offset: 1px;
+}
+
+.indicator {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--color-accent);
+}
+
+.label {
+  position: relative;
+}

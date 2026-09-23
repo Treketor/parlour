@@ -1,0 +1,21 @@
+.glyph {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.label .glyph {
+  color: inherit;
+}
+
+.active {
+  color: var(--color-accent);
+}

@@ -1,0 +1,89 @@
+.tag {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 1.5rem;
+  padding-inline: var(--space-2);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.removable {
+  padding-right: 0;
+}
+
+.toggle {
+  touch-action: manipulation;
+  transition: transform var(--duration-press) var(--ease-out);
+}
+
+.toggle::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--color-surface-raised);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .toggle:hover:not(:disabled)::before {
+    opacity: 1;
+  }
+
+  .toggle:hover:not(:disabled) {
+    color: var(--color-text);
+  }
+}
+
+.toggle:active:not(:disabled) {
+  transform: scale(var(--press-scale));
+  transition-duration: 0s;
+}
+
+.toggle[aria-pressed="true"] {
+  border-color: var(--color-accent-line);
+  color: var(--color-accent);
+}
+
+.toggle[aria-pressed="true"]::before {
+  background: var(--color-accent-wash);
+  opacity: 1;
+}
+
+.toggle:disabled,
+.tag[data-disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.remove {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: calc(1.5rem - 2px);
+  margin-left: var(--space-1);
+  border: 0;
+  border-left: 1px solid var(--color-line);
+  background: transparent;
+  color: var(--color-text-faint);
+}
+
+@media (hover: hover) {
+  .remove:hover:not(:disabled) {
+    color: var(--color-text);
+  }
+}
+
+.remove:focus-visible {
+  outline-offset: -2px;
+}
