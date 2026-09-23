@@ -148,3 +148,29 @@ Revises 018 after review. Below 40rem the header is one row: wordmark, "Add a ga
 The panel drops from the header on the solid canvas (no scrim, no blur) and lists the three destinations at 32px, with the reference pages beneath. While it is open the page and footer are `inert` and the page does not scroll. Escape returns focus to the button; following a link closes it; widening the window past the breakpoint closes it. Under reduced motion the strokes snap and the panel only fades.
 
 Also fixed at review: search inputs showed the browser's own clear button beside ours. The native one is hidden globally.
+
+## 022. Database: Supabase, migrations in the repo, security in the database
+
+- Hosted Supabase project `parlour` (Tokyo region, free tier), created at stage 3.
+- Migrations are SQL files in `supabase/migrations`, applied in order and named by the version the database recorded. There's no local Docker stack, so they are applied to the hosted project directly; nothing is edited in the dashboard.
+- Every personal table carries `user_id` and has row-level security from the migration that creates it: owners read and write their own rows, nobody else sees them, and signed-out visitors have no grants at all. Multi-user later means opening sign-up, not rewriting access.
+- The shared catalogue (`games`, `platforms`) is readable by anyone and writable only by the server's service role. It is deliberately minimal until stage 4 reads the IGDB docs.
+- Values that the app treats as fixed sets (progress, ownership) are `text` with check constraints, not Postgres enums, because enums are awkward to change.
+- `entry_events` records every ownership, progress and rating change. Only a trigger writes it, so it can be trusted as history, and later it can feed an activity view without new plumbing.
+- The queue orders by a fractional-index string with byte collation, so a move rewrites one row and sorts identically in Postgres and JavaScript.
+- Trigger functions that bypass row-level security have `EXECUTE` revoked, after the Supabase security advisor flagged them as callable through the API.
+- Access rules are tested with pgTAP (22 assertions: ownership, cross-user reads and writes, constraint enforcement, history integrity, signed-out access). The tests run in a rolled-back transaction, so they can run against the hosted project safely.
+
+## 023. Sign-in by emailed link, invite-only
+
+- Passwordless: `signInWithOtp` with `shouldCreateUser: false`. Accounts are created in the dashboard, and public sign-up is switched off there as well, because the app-level flag alone would not stop someone calling the API directly.
+- An address without an account gets the same "check your email" response as one with an account, so the form does not reveal who has one.
+- The emailed link opens a Parlour page with a "Sign in to Parlour" button, and the token is used only when it's pressed. Email security scanners open links automatically and would otherwise spend the one-time token before the person does.
+- The confirm step accepts both link formats Supabase can send (`token_hash` and PKCE `code`), so it works before and after the email template is changed.
+- The post-sign-in destination (`next`) is only ever a same-site path; anything else falls back to the library. This is tested against the usual open-redirect tricks.
+- A Next.js proxy refreshes the session cookie on every request and never redirects; each page decides what signed-out visitors see. Because the header shows signed-in state, every page now renders per request rather than statically. That cost is fine for a personal app; if it matters later, the header can read the session on the client instead.
+- The publishable key (`sb_publishable_...`) is used rather than the legacy anon key, as Supabase recommends for new projects.
+
+## 024. Data layer narrows database strings
+
+Rows arrive with `progress` and `ownership` as plain strings. `toLibraryEntry` converts them to the app's types and throws `UnexpectedDataError` on anything unknown. The database constraints make that impossible today, so if it ever fires, the schema and the app have drifted, and a loud failure is better than a wrong screen.
