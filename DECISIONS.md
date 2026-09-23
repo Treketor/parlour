@@ -118,3 +118,9 @@ Chosen at stage 1 review because it reads as more deliberate and less generated.
 - Accent is steel (`#9db7d5`, 8.5:1 on the canvas). Brass and the two Editorial faces are gone from the code, along with the direction switch.
 - Display size moved from 52px to 64px. With no serif to separate titles from interface text, scale contrast does that work.
 - The motion switch stays on `/system` and becomes a user setting later.
+
+## 017. Name: Parlour
+
+Replaces the working name from 008. Parlour games are the ones people play together in the front room, and a parlour is a room for sitting and talking. That covers both halves of the app: a personal catalogue now, game clubs later. It points at games without sounding like gaming culture.
+
+Rejected: Shelfmark (an iOS reading tracker with the same shelf model already uses it), Holdings (no connection to games), Couch Club (clear but expected, and "couch" names are crowded), Player Two (taken). Names that say "video game book club" outright clash with existing sites of that name. British spelling kept on purpose.

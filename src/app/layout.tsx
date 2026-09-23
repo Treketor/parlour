@@ -5,7 +5,7 @@ import "@/styles/tokens.css";
 import "@/styles/global.css";
 
 export const metadata: Metadata = {
-  title: { default: "Shelfmark", template: "%s | Shelfmark" },
+  title: { default: "Parlour", template: "%s | Parlour" },
   description: "A personal catalogue of games.",
 };
 

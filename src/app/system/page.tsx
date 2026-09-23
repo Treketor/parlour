@@ -23,7 +23,7 @@ export default function SystemPage() {
   return (
     <div className={styles.page}>
       <header className={styles.masthead}>
-        <span className={styles.wordmark}>Shelfmark</span>
+        <span className={styles.wordmark}>Parlour</span>
         <ReviewControls />
       </header>
 

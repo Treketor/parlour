@@ -17,13 +17,13 @@
 ## Done
 
 - Scaffold: Next.js 16, strict TypeScript, ESLint, Prettier, Vitest.
+- Named Parlour (DECISIONS.md 017).
 - Stage 1: tokens (colour, type, space, edges, motion), base components with their states, and the `/system` review page. Swiss direction chosen at review; Editorial removed. `/` redirects to `/system` until stage 2.
   - Components: Button, IconButton, Spinner, TextField, Select, Checkbox, SegmentedControl, MenuSelect, RatingInput, Tag, ProgressGlyph, GameCover, GameCard, CatalogueList, ListHeader, ListRow, Skeleton, Notice.
   - Logic with tests: rating keyboard and pointer model, catalogue sorting, date formatting, motion token parity (41 tests).
 
 ## Next
 
-- Choose a product name. Working name Shelfmark is taken by a reading tracker; Holdings is the recommendation. The repo gets created once it is settled.
 - Stage 2: app shell.
 
 ## Known issues

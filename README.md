@@ -1,6 +1,6 @@
-# Shelfmark
+# Parlour
 
-A personal catalogue of games: what I own, what I've played, and what I'm playing next.
+A catalogue of the games I own, have played and want to play next, with monthly game clubs planned for later.
 
 Status: early development. See [PROGRESS.md](PROGRESS.md) for where things stand and [DECISIONS.md](DECISIONS.md) for why they are the way they are.
 
