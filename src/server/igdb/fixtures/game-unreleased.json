@@ -1,0 +1,88 @@
+[
+  {
+    "id": 81249,
+    "cover": {
+      "id": 91183,
+      "height": 800,
+      "image_id": "co1ycv",
+      "width": 600
+    },
+    "external_games": [
+      {
+        "id": 1910920,
+        "uid": "506437",
+        "external_game_source": 14
+      },
+      {
+        "id": 1457765,
+        "uid": "68922",
+        "external_game_source": 3
+      }
+    ],
+    "genres": [
+      {
+        "id": 12,
+        "name": "Role-playing (RPG)",
+        "slug": "role-playing-rpg"
+      },
+      {
+        "id": 31,
+        "name": "Adventure",
+        "slug": "adventure"
+      }
+    ],
+    "name": "The Elder Scrolls VI",
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "generation": 9,
+        "name": "Xbox Series X|S",
+        "slug": "series-x-s",
+        "platform_type": 1
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "slug": "win",
+        "platform_type": 4
+      }
+    ],
+    "release_dates": [
+      {
+        "id": 209899,
+        "human": "TBD",
+        "platform": 169,
+        "date_format": 7,
+        "release_region": 8
+      },
+      {
+        "id": 209900,
+        "human": "TBD",
+        "platform": 6,
+        "date_format": 7,
+        "release_region": 8
+      }
+    ],
+    "screenshots": [
+      {
+        "id": 1872449,
+        "height": 792,
+        "image_id": "sc144sh",
+        "width": 1407
+      }
+    ],
+    "slug": "the-elder-scrolls-vi",
+    "summary": "The Elder Scrolls VI is an upcoming single-player action RPG from Bethesda Game Studios, serving as the sixth main entry in The Elder Scrolls series and the follow-up to 2011's Skyrim. The game is built on Creation Engine 3 and entered active production in 2023 following the completion of Starfield. Director Todd Howard has described the project as aiming to be the \"ultimate fantasy-world simulator.\"",
+    "updated_at": 1790069541,
+    "videos": [
+      {
+        "id": 40407,
+        "name": "Announcement Trailer",
+        "video_id": "OkFdqqyI8y4"
+      }
+    ],
+    "game_type": 0
+  }
+]

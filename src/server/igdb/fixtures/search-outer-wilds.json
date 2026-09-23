@@ -1,0 +1,345 @@
+[
+  {
+    "id": 11737,
+    "aggregated_rating": 84.71428571428571,
+    "aggregated_rating_count": 7,
+    "artworks": [
+      {
+        "id": 170866,
+        "height": 1080,
+        "image_id": "ar3nua",
+        "width": 1920
+      },
+      {
+        "id": 170865,
+        "height": 1080,
+        "image_id": "ar3nu9",
+        "width": 1920
+      },
+      {
+        "id": 170867,
+        "height": 3018,
+        "image_id": "ar3nub",
+        "width": 6250
+      }
+    ],
+    "cover": {
+      "id": 286788,
+      "height": 1600,
+      "image_id": "co65ac",
+      "width": 1200
+    },
+    "external_games": [
+      {
+        "id": 1902707,
+        "uid": "489335",
+        "external_game_source": 14
+      },
+      {
+        "id": 111832,
+        "uid": "49344",
+        "external_game_source": 3
+      },
+      {
+        "id": 2118690,
+        "uid": "d5e3beaf-bdc6-4983-a70d-584444b0f92b",
+        "external_game_source": 26
+      },
+      {
+        "id": 2628481,
+        "uid": "5a1f3f34df1f4c21850b997aa08da19e",
+        "external_game_source": 26
+      },
+      {
+        "id": 2175778,
+        "uid": "229826",
+        "external_game_source": 36
+      },
+      {
+        "id": 2082214,
+        "uid": "C596FKDKMQN7",
+        "external_game_source": 11
+      },
+      {
+        "id": 323909,
+        "uid": "753640",
+        "external_game_source": 1
+      },
+      {
+        "id": 1931605,
+        "uid": "B07SH7MWDW",
+        "platform": 49,
+        "external_game_source": 20
+      }
+    ],
+    "first_release_date": 1559001600,
+    "genres": [
+      {
+        "id": 9,
+        "name": "Puzzle",
+        "slug": "puzzle"
+      },
+      {
+        "id": 13,
+        "name": "Simulator",
+        "slug": "simulator"
+      },
+      {
+        "id": 31,
+        "name": "Adventure",
+        "slug": "adventure"
+      },
+      {
+        "id": 32,
+        "name": "Indie",
+        "slug": "indie"
+      }
+    ],
+    "name": "Outer Wilds",
+    "platforms": [
+      {
+        "id": 169,
+        "abbreviation": "Series X|S",
+        "generation": 9,
+        "name": "Xbox Series X|S",
+        "slug": "series-x-s",
+        "platform_type": 1
+      },
+      {
+        "id": 48,
+        "abbreviation": "PS4",
+        "generation": 8,
+        "name": "PlayStation 4",
+        "slug": "ps4--1",
+        "platform_type": 1
+      },
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "slug": "win",
+        "platform_type": 4
+      },
+      {
+        "id": 167,
+        "abbreviation": "PS5",
+        "generation": 9,
+        "name": "PlayStation 5",
+        "slug": "ps5",
+        "platform_type": 1
+      },
+      {
+        "id": 49,
+        "abbreviation": "XONE",
+        "generation": 8,
+        "name": "Xbox One",
+        "slug": "xboxone",
+        "platform_type": 1
+      },
+      {
+        "id": 130,
+        "abbreviation": "Switch",
+        "generation": 8,
+        "name": "Nintendo Switch",
+        "slug": "switch",
+        "platform_type": 1
+      }
+    ],
+    "rating": 89.28450683093399,
+    "rating_count": 884,
+    "release_dates": [
+      {
+        "id": 762499,
+        "date": 1571097600,
+        "human": "Oct 15, 2019",
+        "platform": 48,
+        "date_format": 0,
+        "release_region": 8
+      },
+      {
+        "id": 762500,
+        "date": 1663200000,
+        "human": "Sep 15, 2022",
+        "platform": 167,
+        "date_format": 0,
+        "release_region": 8
+      },
+      {
+        "id": 762502,
+        "date": 1663200000,
+        "human": "Sep 15, 2022",
+        "platform": 169,
+        "date_format": 0,
+        "release_region": 8
+      },
+      {
+        "id": 536384,
+        "date": 1701907200,
+        "human": "Dec 07, 2023",
+        "platform": 130,
+        "date_format": 0,
+        "release_region": 8
+      },
+      {
+        "id": 536749,
+        "date": 1702339200,
+        "human": "Dec 12, 2023",
+        "platform": 130,
+        "date_format": 0,
+        "release_region": 5
+      },
+      {
+        "id": 795750,
+        "date": 1559001600,
+        "human": "May 28, 2019",
+        "platform": 6,
+        "date_format": 0,
+        "release_region": 8
+      },
+      {
+        "id": 795751,
+        "date": 1559001600,
+        "human": "May 28, 2019",
+        "platform": 49,
+        "date_format": 0,
+        "release_region": 8
+      }
+    ],
+    "screenshots": [
+      {
+        "id": 218140,
+        "height": 1080,
+        "image_id": "t794u9kjqyfxhgvl5o2y",
+        "width": 1920
+      },
+      {
+        "id": 218139,
+        "height": 1080,
+        "image_id": "yjycncgevwe969ydemvo",
+        "width": 1920
+      },
+      {
+        "id": 218136,
+        "height": 1080,
+        "image_id": "g3wcomoxrsuet9cuhl9q",
+        "width": 1920
+      },
+      {
+        "id": 1395178,
+        "height": 1440,
+        "image_id": "sctwiy",
+        "width": 2560
+      },
+      {
+        "id": 218137,
+        "height": 1080,
+        "image_id": "orzxlqmjgfz1p8rcvjt8",
+        "width": 1920
+      },
+      {
+        "id": 218138,
+        "height": 1080,
+        "image_id": "cbpowo64w2mrilceihsx",
+        "width": 1920
+      }
+    ],
+    "slug": "outer-wilds",
+    "summary": "Outer Wilds is a critically-acclaimed and award-winning open world mystery about a solar system trapped in an endless time loop. The newest member of the space program in a small village on the planet Timber Hearth, the player navigates a space shuttle and travels across their solar system to get to the bottom of its mysteries by exploring the cosmos and gathering the knowledge hidden within each of the system's planets, left behind by another civilization in the distant past.",
+    "updated_at": 1790130879,
+    "videos": [
+      {
+        "id": 26228,
+        "name": "Outer Wilds | Xbox One Announce Trailer",
+        "video_id": "1Lr2IYLAb_Y"
+      },
+      {
+        "id": 34676,
+        "name": "Release Date Trailer",
+        "video_id": "2EnIpUkQ__M"
+      },
+      {
+        "id": 26227,
+        "name": "Outer Wilds | Reveal Trailer",
+        "video_id": "YS2KB_cFrTo"
+      },
+      {
+        "id": 39667,
+        "name": "Launch Trailer",
+        "video_id": "ZKJUMMCJvGM"
+      },
+      {
+        "id": 72418,
+        "name": "Release Date Trailer",
+        "video_id": "hul3b4TbQVI"
+      }
+    ],
+    "game_type": 0
+  },
+  {
+    "id": 304188,
+    "cover": {
+      "id": 603252,
+      "height": 800,
+      "image_id": "cocxh0",
+      "width": 600
+    },
+    "external_games": [
+      {
+        "id": 2921742,
+        "uid": "1609403074",
+        "external_game_source": 14
+      }
+    ],
+    "first_release_date": 1716854400,
+    "genres": [
+      {
+        "id": 31,
+        "name": "Adventure",
+        "slug": "adventure"
+      },
+      {
+        "id": 32,
+        "name": "Indie",
+        "slug": "indie"
+      }
+    ],
+    "name": "​Outer Wilds: A Thrilling Graphical Text Adventure",
+    "platforms": [
+      {
+        "id": 6,
+        "abbreviation": "PC",
+        "name": "PC (Microsoft Windows)",
+        "slug": "win",
+        "platform_type": 4
+      }
+    ],
+    "release_dates": [
+      {
+        "id": 599850,
+        "date": 1716854400,
+        "human": "May 28, 2024",
+        "platform": 6,
+        "date_format": 0,
+        "release_region": 8
+      }
+    ],
+    "screenshots": [
+      {
+        "id": 1332359,
+        "height": 475,
+        "image_id": "scsk1z",
+        "width": 634
+      },
+      {
+        "id": 1332360,
+        "height": 720,
+        "image_id": "scsk20",
+        "width": 959
+      }
+    ],
+    "slug": "outer-wilds-a-thrilling-graphical-text-adventure",
+    "summary": "The original text adventure prototype for Outer Wilds, released to the public in celebration of the original game's fifth anniversary.",
+    "updated_at": 1789737457,
+    "game_type": 0
+  }
+]
