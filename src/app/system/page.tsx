@@ -21,18 +21,14 @@ const sections = [
 
 export default function SystemPage() {
   return (
-    <div className={styles.page}>
-      <header className={styles.masthead}>
-        <span className={styles.wordmark}>Parlour</span>
-        <ReviewControls />
-      </header>
-
+    <>
       <div className={styles.intro}>
         <h1 className={styles.title}>Design system</h1>
         <p className={styles.lead}>
           The tokens, components and motion every screen is built from. If something on a later
           screen is not on this page, it should be added here first.
         </p>
+        <ReviewControls />
       </div>
 
       <div className={styles.body}>
@@ -46,15 +42,15 @@ export default function SystemPage() {
           </ol>
         </nav>
 
-        <main className={styles.sections}>
+        <div className={styles.sections}>
           <ColourSection />
           <TypeSection />
           <SpaceSection />
           <MotionSection />
           <ControlsSection />
           <CatalogueSection />
-        </main>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

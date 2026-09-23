@@ -78,6 +78,9 @@
   --gutter: var(--space-4);
   --measure: 68ch;
   --content-max: 76rem;
+  --header-height: 3.5rem;
+  /* Total sticky header height: on narrow screens the nav adds a second row. */
+  --header-offset: calc(var(--header-height) + 2.75rem);
 
   /* Control sizing: dense by default, never below a 32px hit area on touch. */
   --control-height-sm: 1.75rem;
@@ -126,6 +129,18 @@
   --press-scale: 1;
   --duration-spatial: 160ms;
   --duration-slow: 160ms;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --header-offset: var(--header-height);
+  }
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --gutter: var(--space-8);
+  }
 }
 
 @media (pointer: coarse) {

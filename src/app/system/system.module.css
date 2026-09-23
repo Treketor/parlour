@@ -1,36 +1,8 @@
 /* Page frame */
 
-.page {
-  max-width: var(--content-max);
-  margin-inline: auto;
-  padding: 0 var(--gutter) var(--space-20);
-}
-
-@media (min-width: 48rem) {
-  .page {
-    --gutter: var(--space-8);
-  }
-}
-
-.masthead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3) var(--space-6);
-  padding-block: var(--space-4);
-  border-bottom: var(--hairline);
-}
-
-.wordmark {
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  font-weight: var(--display-weight);
-  letter-spacing: var(--display-tracking);
-}
-
 .reviewControls {
   display: flex;
+  margin-top: var(--space-2);
   flex-wrap: wrap;
   gap: var(--space-2);
 }
@@ -93,7 +65,7 @@
   /* Shares the sections' top rule so the index and first title start on one line. */
   .index {
     position: sticky;
-    top: 0;
+    top: var(--header-offset);
     align-self: start;
     padding-top: var(--space-6);
     border-top: var(--hairline);
@@ -117,7 +89,7 @@
   min-width: 0;
   padding-top: var(--space-6);
   border-top: var(--hairline);
-  scroll-margin-top: var(--space-6);
+  scroll-margin-top: calc(var(--header-offset) + var(--space-6));
 }
 
 .sectionHead {

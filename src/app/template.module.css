@@ -1,0 +1,10 @@
+.page {
+  animation: pageIn var(--duration-base) var(--ease-out);
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(calc(6px * var(--motion-distance)));
+  }
+}
