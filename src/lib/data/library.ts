@@ -3,6 +3,7 @@ import { OWNERSHIP_STATES, type Ownership } from "@/lib/ownership";
 import { PROGRESS_STATES, type Progress } from "@/lib/progress";
 import { isRating, type Rating } from "@/lib/rating";
 import type { Database, Tables } from "@/lib/supabase/database.types";
+import { entryKey } from "./add-entry";
 
 type Client = SupabaseClient<Database>;
 
@@ -68,4 +69,34 @@ export async function countLibraryEntries(client: Client): Promise<number> {
 
   if (error) throw error;
   return count ?? 0;
+}
+
+export type EntryStatus = { entryId: string; ownership: Ownership; progress: Progress };
+
+/**
+ * The signed-in person's entries for these games, keyed by game and platform,
+ * so search results can show what is already in the library.
+ */
+export async function libraryStatusFor(
+  client: Client,
+  gameIds: readonly number[],
+): Promise<Map<string, EntryStatus>> {
+  if (gameIds.length === 0) return new Map();
+
+  const { data, error } = await client
+    .from("library_entries")
+    .select("id, game_id, platform_id, ownership, progress")
+    .in("game_id", [...gameIds]);
+  if (error) throw error;
+
+  return new Map(
+    data.map((row) => [
+      entryKey(row.game_id, row.platform_id),
+      {
+        entryId: row.id,
+        ownership: oneOf(OWNERSHIP_STATES, "ownership", row.ownership),
+        progress: oneOf(PROGRESS_STATES, "progress", row.progress),
+      },
+    ]),
+  );
 }
