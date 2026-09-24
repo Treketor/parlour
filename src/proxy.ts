@@ -1,7 +1,10 @@
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { strayCodeRedirect } from "@/lib/auth/stray-code";
 import { updateSession } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
+  const confirm = strayCodeRedirect(request.nextUrl);
+  if (confirm) return NextResponse.redirect(confirm);
   return updateSession(request);
 }
 

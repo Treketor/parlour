@@ -409,3 +409,7 @@ Revises 040 after review: one source, IGDB, was not credible enough on its own, 
 - **The main column is at least a screen tall,** so the footer starts below the fold and streamed sections do not push it down. On the game page this took layout shift from 0.13 to 0.02.
 - Game pages describe themselves with the first 160 characters of the summary.
 - The disabled rating's faint "/10" is left as it is: WCAG exempts inactive controls from contrast.
+
+## 051. A sign-in code finishes sign-in wherever it lands
+
+Supabase returns an emailed link to the address the app asked for only when that address is on the project's redirect list. Otherwise it falls back to the Site URL, the home page. Nothing there finished sign-in, so a small mismatch in the dashboard left you signed out with no error. The proxy now forwards any `?code=` outside the confirm page to it, keeping the page it landed on as the place to return to. The redirect list should still name the confirm page, since a code sent to a different domain cannot be finished: its other half is a cookie on the domain that asked.
