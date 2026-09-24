@@ -1,15 +1,21 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, type Transition } from "motion/react";
 import Link from "next/link";
-import { useEffect, useRef, useState, useTransition, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { useLayoutTransition } from "@/components/Providers";
-import { Button, IconButton } from "@/components/ui/Button";
+import { Button, ButtonLink, IconButton } from "@/components/ui/Button";
 import { GameCover } from "@/components/ui/GameCover";
 import { CloseIcon, PlusIcon } from "@/components/ui/icons";
 import { ProgressGlyph } from "@/components/ui/ProgressGlyph";
 import { RatingInput } from "@/components/ui/RatingInput";
-import { MenuSelect, type MenuOption } from "@/components/ui/MenuSelect";
 import { Select } from "@/components/ui/Select";
 import { Tag } from "@/components/ui/Tag";
 import { TextArea } from "@/components/ui/TextArea";
@@ -154,6 +160,7 @@ export function EntryEditor({
   // Dates are offered, not asked for: the fields appear once one is set or
   // you ask for them, so a library can be filled in without them.
   const [addingDates, setAddingDates] = useState(false);
+  const [managingTags, setManagingTags] = useState(false);
   const hasDates = item.startedOn !== null || item.finishedOn !== null;
   const showDates = Boolean(dates?.started) && (hasDates || addingDates);
 
@@ -184,9 +191,13 @@ export function EntryEditor({
         </IconButton>
       </header>
 
+      {/*
+        Five labelled sections, in the order a game is usually dealt with:
+        where it stands, whether it is next, what you thought, how you file
+        it, what you noted (DECISIONS.md 048).
+      */}
       <div className={styles.fields}>
-        {/* Ownership first: it decides whether progress applies at all. */}
-        <motion.div className={styles.status} {...section}>
+        <EditorSection title="Status" layout={section}>
           <div className={styles.pair}>
             <Select
               label="Ownership"
@@ -215,17 +226,6 @@ export function EntryEditor({
               <p className={styles.passed}>Passed on, so there is no progress to track.</p>
             )}
           </div>
-          <QueueControl
-            title={item.title}
-            position={queuePosition}
-            onQueue={onQueue}
-            onUnqueue={onUnqueue}
-          />
-          {queueError && (
-            <p className={styles.error} role="alert">
-              {queueError}
-            </p>
-          )}
           {/* Offered right under progress, which is what makes a date mean something. */}
           {dates?.started && !showDates && (
             <Button
@@ -237,33 +237,45 @@ export function EntryEditor({
               Add dates
             </Button>
           )}
-        </motion.div>
+          <AnimatePresence initial={false}>
+            {dates && showDates && (
+              <motion.div
+                key="dates"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: transition.enter }}
+                exit={{ opacity: 0, transition: transition.exit }}
+              >
+                <DateFields
+                  item={item}
+                  showFinished={dates.finished}
+                  error={errors.dates}
+                  onSave={(patch) => save("dates", patch)}
+                  onError={(message) => setError("dates", message)}
+                  onRemove={() => {
+                    setAddingDates(false);
+                    save("dates", { startedOn: null, finishedOn: null });
+                  }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </EditorSection>
 
-        <AnimatePresence initial={false}>
-          {dates && showDates && (
-            <motion.div
-              key="dates"
-              {...section}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: transition.enter }}
-              exit={{ opacity: 0, transition: transition.exit }}
-            >
-              <DateFields
-                item={item}
-                showFinished={dates.finished}
-                error={errors.dates}
-                onSave={(patch) => save("dates", patch)}
-                onError={(message) => setError("dates", message)}
-                onRemove={() => {
-                  setAddingDates(false);
-                  save("dates", { startedOn: null, finishedOn: null });
-                }}
-              />
-            </motion.div>
+        <EditorSection title="Queue" layout={section}>
+          <QueueControl
+            title={item.title}
+            position={queuePosition}
+            onQueue={onQueue}
+            onUnqueue={onUnqueue}
+          />
+          {queueError && (
+            <p className={styles.error} role="alert">
+              {queueError}
+            </p>
           )}
-        </AnimatePresence>
+        </EditorSection>
 
-        <motion.div {...section}>
+        <EditorSection title="Your rating" layout={section}>
           <RatingInput
             label="Your rating"
             value={item.rating}
@@ -272,12 +284,27 @@ export function EntryEditor({
               if (rating !== item.rating) save("rating", { rating });
             }}
           />
-        </motion.div>
+        </EditorSection>
 
-        <motion.div {...section}>
+        <EditorSection
+          title={managingTags ? "All your tags" : "Tags"}
+          layout={section}
+          action={
+            allTags.length > 0 && (
+              <Button
+                size="sm"
+                variant="quiet"
+                onClick={() => setManagingTags((current) => !current)}
+              >
+                {managingTags ? "Done" : "Manage"}
+              </Button>
+            )
+          }
+        >
           <TagField
             item={item}
             allTags={allTags}
+            managing={managingTags}
             gamesWithTag={gamesWithTag}
             error={errors.tags}
             onError={(message) => setError("tags", message)}
@@ -285,19 +312,40 @@ export function EntryEditor({
             onTagCreated={onTagCreated}
             onTagDeleted={onTagDeleted}
           />
-        </motion.div>
+        </EditorSection>
 
-        <motion.div {...section}>
+        <EditorSection title="Notes" layout={section}>
           <NotesField
             item={item}
             error={errors.notes}
             onSave={(notes) => save("notes", { notes })}
           />
-        </motion.div>
+        </EditorSection>
       </div>
 
       <RemoveEntry item={item} onRemoved={onRemoved} />
     </article>
+  );
+}
+
+type EditorSectionProps = {
+  title: string;
+  /** A control beside the heading, e.g. "Manage". */
+  action?: ReactNode;
+  layout: { layout: "position"; transition: { layout: Transition } };
+  children: ReactNode;
+};
+
+/** One labelled part of the editor, ruled off from the next. */
+function EditorSection({ title, action, layout, children }: EditorSectionProps) {
+  return (
+    <motion.section className={styles.section} aria-label={title} {...layout}>
+      <div className={styles.sectionHead}>
+        <h3 className={styles.sectionTitle}>{title}</h3>
+        {action}
+      </div>
+      {children}
+    </motion.section>
   );
 }
 
@@ -308,36 +356,31 @@ type QueueControlProps = {
   onUnqueue: () => void;
 };
 
-const queueOptions: ReadonlyArray<MenuOption<QueuePlace>> = [
-  { value: "next", label: "Play next", description: "First in line" },
-  { value: "last", label: "At the end", description: "After everything already queued" },
-];
-
-/** Whether this game is lined up to play, and where; or a way to line it up. */
+/**
+ * Whether this game is lined up to play, and where; or one press to line it
+ * up at the back. The order itself is arranged on the queue page.
+ */
 function QueueControl({ title, position, onQueue, onUnqueue }: QueueControlProps) {
   if (position === null) {
     return (
-      <MenuSelect
-        action
+      <Button
         size="sm"
-        label={`Add ${title} to your queue`}
-        placeholder="Add to queue"
-        options={queueOptions}
-        value={null}
-        onChange={onQueue}
+        icon={<PlusIcon width={12} height={12} />}
+        aria-label={`Add ${title} to your queue`}
+        onClick={() => onQueue("last")}
         className={styles.queueAdd}
-      />
+      >
+        Add to queue
+      </Button>
     );
   }
   return (
     <div className={styles.queued}>
-      <p>
-        <Link href="/queue" className={styles.gameLink}>
-          Number {position} in your queue
-        </Link>
-      </p>
-      <Button size="sm" onClick={onUnqueue}>
-        Take off queue
+      <ButtonLink size="sm" href="/queue">
+        Number {position} in your queue
+      </ButtonLink>
+      <Button size="sm" variant="quiet" onClick={onUnqueue}>
+        Remove from queue
       </Button>
     </div>
   );
@@ -460,6 +503,8 @@ function DateInput({ label, value, onCommit, onIncomplete }: DateInputProps) {
 type TagFieldProps = {
   item: LibraryItem;
   allTags: readonly EntryTag[];
+  /** Deleting tags instead of choosing them; switched from the section heading. */
+  managing: boolean;
   gamesWithTag: (tagId: string) => string[];
   error: string | undefined;
   onError: (message: string | undefined) => void;
@@ -479,6 +524,7 @@ const PENDING_TAG = "pending:";
 function TagField({
   item,
   allTags,
+  managing,
   gamesWithTag,
   error,
   onError,
@@ -487,7 +533,8 @@ function TagField({
   onTagDeleted,
 }: TagFieldProps) {
   const [draft, setDraft] = useState("");
-  const [managing, setManaging] = useState(false);
+  // Your other tags are offered while you are adding one, not all the time.
+  const [adding, setAdding] = useState(false);
   const [, startTagging] = useTransition();
 
   const onEntry = (name: string) => item.tags.some((tag) => sameTagName(tag.name, name));
@@ -548,75 +595,64 @@ function TagField({
   }
 
   return (
-    <fieldset className={styles.tags}>
-      <legend className={styles.legend}>Tags</legend>
-
-      <div className={styles.tagGroup}>
-        <h3 className={styles.groupLabel}>On this game</h3>
-        {item.tags.length > 0 ? (
-          <ul className={styles.tagList} aria-label="Tags on this game">
-            {item.tags.map((tag) => (
-              <li key={tag.id}>
-                <Tag
-                  tone="applied"
-                  onRemove={() => remove(tag)}
-                  removeLabel={`Take the tag ${tag.name} off this game`}
-                  disabled={tag.id.startsWith(PENDING_TAG)}
-                >
-                  {tag.name}
-                </Tag>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className={styles.none}>None yet</p>
-        )}
-      </div>
-
-      <TextField
-        label="Add a tag"
-        hideLabel
-        placeholder="Add a tag, then press Enter"
-        maxLength={TAG_MAX_LENGTH}
-        autoComplete="off"
-        enterKeyHint="done"
-        value={draft}
-        error={error}
-        onChange={(event) => setDraft(event.target.value)}
-        onKeyDown={onKeyDown}
-      />
-
-      {allTags.length > 0 && (
-        <div className={styles.tagGroup}>
-          <div className={styles.groupHead}>
-            <h3 className={styles.groupLabel}>{managing ? "All your tags" : "Your other tags"}</h3>
-            <Button size="sm" onClick={() => setManaging((current) => !current)}>
-              {managing ? "Done" : "Manage tags"}
-            </Button>
-          </div>
-          {managing ? (
-            <ManageTags
-              allTags={allTags}
-              gamesWithTag={gamesWithTag}
-              onDeleted={onTagDeleted}
-              onError={onError}
-            />
-          ) : suggestions.length > 0 ? (
-            <div className={styles.tagList} role="group" aria-label="Your other tags">
+    <div className={styles.tags}>
+      {managing ? (
+        <ManageTags
+          allTags={allTags}
+          gamesWithTag={gamesWithTag}
+          onDeleted={onTagDeleted}
+          onError={onError}
+        />
+      ) : (
+        <>
+          {item.tags.length > 0 && (
+            <ul className={styles.tagList} aria-label="Tags on this game">
+              {item.tags.map((tag) => (
+                <li key={tag.id}>
+                  <Tag
+                    tone="applied"
+                    onRemove={() => remove(tag)}
+                    removeLabel={`Take the tag ${tag.name} off this game`}
+                    disabled={tag.id.startsWith(PENDING_TAG)}
+                  >
+                    {tag.name}
+                  </Tag>
+                </li>
+              ))}
+            </ul>
+          )}
+          <TextField
+            label="Add a tag"
+            hideLabel
+            placeholder="Add a tag, then press Enter"
+            maxLength={TAG_MAX_LENGTH}
+            autoComplete="off"
+            enterKeyHint="done"
+            value={draft}
+            error={error}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={onKeyDown}
+            onFocus={() => setAdding(true)}
+            onBlur={() => setAdding(false)}
+          />
+          {(adding || search) && suggestions.length > 0 && (
+            <div
+              className={styles.tagList}
+              role="group"
+              aria-label="Your other tags"
+              // Keeps focus in the field, so a press on a suggestion is not lost to its blur.
+              onPointerDown={(event) => event.preventDefault()}
+            >
               {suggestions.map((tag) => (
                 <Tag key={tag.id} tone="suggestion" onToggle={() => add(tag.name)}>
                   {tag.name}
                 </Tag>
               ))}
             </div>
-          ) : (
-            <p className={styles.none}>
-              {search ? "No other tags match" : "All your tags are on this game"}
-            </p>
           )}
-        </div>
+        </>
       )}
-    </fieldset>
+    </div>
   );
 }
 
@@ -729,6 +765,7 @@ function NotesField({ item, error, onSave }: NotesFieldProps) {
   return (
     <TextArea
       label="Notes"
+      hideLabel
       placeholder="What stuck with you, where you left off, what to try next time"
       maxLength={NOTES_MAX_LENGTH}
       value={notes}
