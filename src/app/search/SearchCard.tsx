@@ -12,7 +12,8 @@ import type { EntryStatus } from "@/lib/data/library";
 import { formatDate } from "@/lib/format";
 import { igdbImageUrl } from "@/lib/igdb-images";
 import { OWNERSHIP_STATES, ownershipLabel, type Ownership } from "@/lib/ownership";
-import { combinedScore, compactCount } from "@/lib/scores";
+import { orderPlatforms } from "@/lib/platforms";
+import { combinedScore, compactCount, scoreTier } from "@/lib/scores";
 import { addToLibrary, changeOwnership } from "./actions";
 import styles from "./search.module.css";
 
@@ -29,6 +30,8 @@ const ownershipOptions = OWNERSHIP_STATES.map((state) => ({
 type SearchCardProps = {
   game: CatalogueGame;
   statuses: Readonly<Record<string, EntryStatus>>;
+  /** Entries per platform in your library: the likeliest platform is picked first. */
+  habits: Readonly<Record<number, number>>;
   signedIn: boolean;
   returnTo: string;
 };
@@ -41,12 +44,14 @@ const PENDING = "pending";
  * it or change its ownership; both happen on screen at once and are
  * confirmed by the server behind them.
  */
-export function SearchCard({ game, statuses, signedIn, returnTo }: SearchCardProps) {
+export function SearchCard({ game, statuses, habits, signedIn, returnTo }: SearchCardProps) {
+  const [platforms] = useState(() => orderPlatforms(game.platforms, habits));
   const [entries, setEntries] = useState<Record<string, EntryStatus>>(() => ({ ...statuses }));
+  // A platform already in your library first, otherwise the likeliest one.
   const [platformId, setPlatformId] = useState<number | null>(
     () =>
-      game.platforms.find((platform) => statuses[entryKey(game.id, platform.id)])?.id ??
-      game.platforms[0]?.id ??
+      platforms.find((platform) => statuses[entryKey(game.id, platform.id)])?.id ??
+      platforms[0]?.id ??
       null,
   );
   const [error, setError] = useState<string | null>(null);
@@ -54,8 +59,8 @@ export function SearchCard({ game, statuses, signedIn, returnTo }: SearchCardPro
 
   const key = platformId === null ? null : entryKey(game.id, platformId);
   const entry = key ? entries[key] : undefined;
-  const platform = game.platforms.find((item) => item.id === platformId);
-  const alsoOn = game.platforms.filter(
+  const platform = platforms.find((item) => item.id === platformId);
+  const alsoOn = platforms.filter(
     (item) => item.id !== platformId && entries[entryKey(game.id, item.id)],
   );
   const score = combinedScore(
@@ -129,6 +134,7 @@ export function SearchCard({ game, statuses, signedIn, returnTo }: SearchCardPro
           {score && (
             <span
               className={styles.score}
+              data-tier={scoreTier(score.value)}
               title={`Player and critic score from ${score.count.toLocaleString("en-GB")} ratings on IGDB`}
             >
               <span aria-hidden="true">
@@ -144,7 +150,7 @@ export function SearchCard({ game, statuses, signedIn, returnTo }: SearchCardPro
       </div>
 
       <div className={styles.cardControls}>
-        {game.platforms.length > 1 ? (
+        {platforms.length > 1 ? (
           <Select
             size="sm"
             hideLabel
@@ -155,7 +161,7 @@ export function SearchCard({ game, statuses, signedIn, returnTo }: SearchCardPro
               setPlatformId(Number(event.target.value));
             }}
           >
-            {game.platforms.map((item) => (
+            {platforms.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
                 {entries[entryKey(game.id, item.id)] ? " (in library)" : ""}

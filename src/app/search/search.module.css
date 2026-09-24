@@ -65,12 +65,16 @@
   }
 }
 
-/* Text sits in fixed-height slots so controls line up across a row of cards. */
+/*
+ * Cover, text and controls start at the same height in every card of a row:
+ * the title and meta lines have fixed heights, and the controls hang from
+ * the top, so a card with an extra note grows downwards without moving its
+ * neighbours.
+ */
 .card {
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  align-content: start;
   gap: var(--space-3);
-  height: 100%;
 }
 
 .cardCover {
@@ -121,8 +125,19 @@
 }
 
 .score strong {
-  color: var(--color-text);
   font-weight: var(--ui-strong-weight);
+}
+
+.score[data-tier="high"] strong {
+  color: var(--color-score-high);
+}
+
+.score[data-tier="mid"] strong {
+  color: var(--color-score-mid);
+}
+
+.score[data-tier="low"] strong {
+  color: var(--color-score-low);
 }
 
 .scoreCount {
@@ -131,14 +146,22 @@
 
 .cardControls {
   display: grid;
-  align-content: end;
+  align-content: start;
   gap: var(--space-2);
 }
 
+/*
+ * A game on one platform has nothing to choose, so it reads as a quiet,
+ * fixed field: same height, border box and text inset as the pickers
+ * beside it, so the two line up across a row.
+ */
 .singlePlatform {
   display: flex;
   align-items: center;
   height: var(--control-height-sm);
+  padding-inline: var(--space-2);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
   color: var(--color-text-muted);
   font-size: var(--text-xs);
   overflow: hidden;
