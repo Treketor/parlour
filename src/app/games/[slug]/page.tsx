@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { cache } from "react";
+import { Suspense, cache } from "react";
 import { GameCover } from "@/components/ui/GameCover";
 import { ExternalIcon } from "@/components/ui/icons";
 import {
@@ -9,15 +9,14 @@ import {
   platformHabits,
   type EntryStatus,
 } from "@/lib/data/library";
-import { formatDate } from "@/lib/format";
-import { guideLinks, releaseLines, storeLinks } from "@/lib/game-detail";
+import { guideLinks, releaseLines, releaseState, storeLinks } from "@/lib/game-detail";
 import { igdbImageUrl } from "@/lib/igdb-images";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalogue } from "@/server/catalogue";
 import { LibraryPanel } from "./LibraryPanel";
 import { MediaGallery } from "./MediaGallery";
 import { ReleaseTable } from "./ReleaseTable";
-import { Scores } from "./Scores";
+import { GameScores, GameScoresSkeleton } from "./Scores";
 import { Trailers } from "./Trailers";
 import styles from "./game.module.css";
 
@@ -48,7 +47,11 @@ export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
   const releases = releaseLines(game.releases);
   const links = [...storeLinks(game.externalIds), ...guideLinks(game.name)];
   const media = [...game.screenshots, ...game.artworks];
-  const released = game.firstReleaseDate ? new Date(`${game.firstReleaseDate}T00:00:00Z`) : null;
+  const release = releaseState(
+    game.firstReleaseDate,
+    game.releases,
+    new Date().toISOString().slice(0, 10),
+  );
 
   return (
     <article className={styles.page} aria-labelledby="game-title">
@@ -74,7 +77,9 @@ export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
             {game.name}
           </h1>
           <div className={styles.facts}>
-            <p>{released ? formatDate(released) : "Release date TBA"}</p>
+            <p className={styles.releaseState} data-status={release.status}>
+              {release.label}
+            </p>
             {game.genres.length > 0 && (
               <ul className={styles.genres} aria-label="Genres">
                 {game.genres.map((genre) => (
@@ -87,7 +92,9 @@ export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
           </div>
         </header>
 
-        <Scores game={game} />
+        <Suspense fallback={<GameScoresSkeleton />}>
+          <GameScores game={game} released={release.status === "released"} />
+        </Suspense>
 
         {game.summary && <p className={styles.summary}>{game.summary}</p>}
 

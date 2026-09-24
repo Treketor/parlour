@@ -17,6 +17,19 @@ const sources = [
     terms: "Used through the IGDB API, provided by Twitch, for non-commercial use.",
   },
   {
+    name: "RAWG",
+    href: "https://rawg.io",
+    provides: "Metacritic's metascore and RAWG's own player rating, on game pages.",
+    terms:
+      "Used through the RAWG API, free for personal projects with a link to RAWG wherever its data appears.",
+  },
+  {
+    name: "Steam",
+    href: "https://store.steampowered.com",
+    provides: "The share of positive user reviews, for games sold on Steam.",
+    terms: "Read from the Steam store's public review summary; no account or key is involved.",
+  },
+  {
     name: "IsThereAnyDeal",
     href: "https://isthereanydeal.com",
     provides: "Current prices by store and price history for your region.",
@@ -38,8 +51,8 @@ export default function DataSourcesPage() {
         <p>
           Parlour does not write its own game data. Everything about a game comes from the services
           below, through their official APIs, cached so they are not asked twice for the same thing.
-          IGDB is connected; IsThereAnyDeal and YouTube are not yet, and this page is updated as
-          they are. Parlour is not affiliated with or endorsed by any of them.
+          IGDB, RAWG, Steam and YouTube are connected; IsThereAnyDeal is not yet, and this page is
+          updated when it is. Parlour is not affiliated with or endorsed by any of them.
         </p>
 
         <dl className={styles.sources}>

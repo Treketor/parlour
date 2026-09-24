@@ -83,28 +83,41 @@
   font-size: var(--text-xs);
 }
 
-/* Scores: two figures on one rule, each with what it rests on beneath. */
+/*
+ * Scores: critics and players side by side on one rule. Each column leads
+ * with one figure and lists the other sources beneath, smaller, so the
+ * credible number reads first and the rest are there to compare.
+ */
 .scores {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-8);
-  margin: 0;
-  padding-block: var(--space-4);
+  display: grid;
+  gap: var(--space-6) var(--space-10);
+  padding-block: var(--space-5);
   border-block: var(--hairline);
 }
 
-.score {
-  display: grid;
-  gap: var(--space-1);
+@media (min-width: 40rem) {
+  .scores {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.score dd {
-  margin: 0;
+.scoreColumn {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
 }
 
 .scoreLabel {
   color: var(--color-text-faint);
+  font-family: var(--font-ui);
   font-size: var(--text-xs);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.scorePrimary {
+  display: grid;
+  gap: var(--space-1);
 }
 
 .scoreValue {
@@ -115,21 +128,88 @@
   line-height: 1;
 }
 
-.scoreValue[data-tier="high"] {
+.scoreValue[data-tier="high"],
+.scoreOtherValue[data-tier="high"] {
   color: var(--color-score-high);
 }
 
-.scoreValue[data-tier="mid"] {
+.scoreValue[data-tier="mid"],
+.scoreOtherValue[data-tier="mid"] {
   color: var(--color-score-mid);
 }
 
-.scoreValue[data-tier="low"] {
+.scoreValue[data-tier="low"],
+.scoreOtherValue[data-tier="low"] {
   color: var(--color-score-low);
+}
+
+.scoreSource {
+  font-size: var(--text-sm);
+  font-weight: var(--ui-strong-weight);
 }
 
 .scoreCount {
   color: var(--color-text-faint);
   font-size: var(--text-xs);
+}
+
+.scoreEmpty {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.scoreOthers {
+  display: grid;
+  margin: var(--space-2) 0 0;
+  border-top: var(--hairline);
+}
+
+.scoreOther {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--space-3);
+  padding-block: var(--space-2);
+  border-bottom: var(--hairline);
+  font-size: var(--text-sm);
+}
+
+.scoreOther dd {
+  margin: 0;
+}
+
+.scoreOtherValue {
+  font-weight: var(--ui-strong-weight);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.scoreOtherBasis {
+  grid-column: 1 / -1;
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}
+
+.scoreLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.scoreEmpty .scoreLink {
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+}
+
+.scoreCredits {
+  grid-column: 1 / -1;
+  color: var(--color-text-faint);
+  font-size: var(--text-2xs);
 }
 
 .summary {
@@ -519,30 +599,13 @@
   height: 5rem;
 }
 
-/* The last frame stands for the rest: the count sits on a canvas-coloured scrim. */
-.more {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: var(--color-scrim);
-  color: var(--color-text);
-  font-size: var(--text-xl);
-  font-weight: var(--display-weight);
-  font-variant-numeric: tabular-nums;
-}
-
 .moreButton {
   justify-self: start;
 }
 
-.scoreElsewhere {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
+/* An upcoming or unannounced release is marked in the accent: it is news, not history. */
+.releaseState[data-status="upcoming"],
+.releaseState[data-status="unannounced"] {
   color: var(--color-accent);
-  font-size: var(--text-xs);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
+  font-weight: var(--ui-strong-weight);
 }
