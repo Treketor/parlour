@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useId, useMemo, useState, type MouseEvent } from "react";
 import { useLayoutTransition, useShouldReduceMotion } from "@/components/Providers";
 import { PageHeader } from "@/components/shell/PageHeader";
-import { Button } from "@/components/ui/Button";
+import { Button, IconButton } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { GameCard } from "@/components/ui/GameCard";
 import { CatalogueList, ListHeader, ListRow } from "@/components/ui/ListRow";
@@ -15,7 +15,7 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Select } from "@/components/ui/Select";
 import { Tag } from "@/components/ui/Tag";
 import { TextField } from "@/components/ui/TextField";
-import { SearchIcon } from "@/components/ui/icons";
+import { CloseIcon, FilterIcon, SearchIcon } from "@/components/ui/icons";
 import { showsProgress } from "@/lib/data/edit-entry";
 import type { EntryTag, LibraryItem } from "@/lib/data/library";
 import { formatCount } from "@/lib/format";
@@ -50,6 +50,9 @@ const LAYOUTS = [
 
 const TEXT_FILTER_ID = "library-filter";
 
+/** Matches the breakpoint in library.module.css where the filters sit inline. */
+const WIDE_TOOLBAR = "(min-width: 48rem)";
+
 /** The "no filter" choice in each menu. Not a valid ownership, platform id or tag name. */
 const ANY = "";
 
@@ -81,6 +84,19 @@ export function LibraryBrowser({
   const [openId, setOpenId] = useState(initialEntryId);
   const openItem = items.find((item) => item.id === openId);
   const panelHeadingId = useId();
+  const sheetHeadingId = useId();
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Widening past the phone layout puts every filter back in the toolbar, so the sheet goes.
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const wide = window.matchMedia(WIDE_TOOLBAR);
+    const close = () => {
+      if (wide.matches) setSheetOpen(false);
+    };
+    wide.addEventListener("change", close);
+    return () => wide.removeEventListener("change", close);
+  }, [sheetOpen]);
   const { layout, sort, filters } = view;
   const reduceMotion = useShouldReduceMotion();
   const move = useLayoutTransition("move");
@@ -101,6 +117,13 @@ export function LibraryBrowser({
   const platforms = useMemo(() => platformOptions(items), [items]);
   const tags = useMemo(() => tagOptions(items), [items]);
   const filtered = hasFilters(filters);
+  // What the Filters button counts: the choices hidden in the sheet, not the title filter beside it.
+  const activeFilters = [
+    filters.progress.length > 0,
+    filters.ownership !== null,
+    filters.platformId !== null,
+    filters.tag !== null,
+  ].filter(Boolean).length;
 
   // Back and forward move between an open entry and the library behind it.
   useEffect(() => {
@@ -185,6 +208,75 @@ export function LibraryBrowser({
   function removeItem(id: string) {
     closeEntry();
     setItems((current) => current.filter((item) => item.id !== id));
+  }
+
+  /** The ownership, platform and tag filters: inline in the toolbar, labelled in the sheet. */
+  function filterSelects(inline: boolean) {
+    return (
+      <>
+        <Select
+          label="Ownership"
+          hideLabel={inline}
+          options={ownershipOptions}
+          value={filters.ownership ?? ANY}
+          onChange={(next) =>
+            filter({ ownership: OWNERSHIP_STATES.find((state) => state === next) ?? null })
+          }
+        />
+        <Select
+          label="Platform"
+          hideLabel={inline}
+          options={platforms}
+          value={filters.platformId === null ? ANY : String(filters.platformId)}
+          onChange={(next) => filter({ platformId: Number(next) || null })}
+        />
+        {/* The first option is "Any tag"; the filter appears once there is a real one. */}
+        {tags.length > 1 && (
+          <Select
+            label="Tag"
+            hideLabel={inline}
+            options={tags}
+            value={filters.tag ?? ANY}
+            onChange={(next) => filter({ tag: next === ANY ? null : next })}
+          />
+        )}
+      </>
+    );
+  }
+
+  function sortSelect(inline: boolean) {
+    return (
+      <Select
+        label="Sort by"
+        hideLabel={inline}
+        options={LIBRARY_SORTS}
+        value={sort.key}
+        onChange={(next) => {
+          const key = parseLibrarySort(next);
+          update({ ...view, sort: { key, direction: naturalDirection(key) } });
+        }}
+        className={inline ? styles.sort : undefined}
+      />
+    );
+  }
+
+  function progressChips() {
+    if (progress.length < 2) return null;
+    return (
+      <div className={styles.progressFilters} role="group" aria-label="Filter by progress">
+        {progress.map(({ progress: state, count }) => (
+          <Tag
+            key={state}
+            selected={filters.progress.includes(state)}
+            onToggle={() => toggleProgress(state)}
+          >
+            <ProgressGlyph progress={state} />
+            {progressLabel[state]}
+            <span className={styles.chipCount}>{count}</span>
+          </Tag>
+        ))}
+      </div>
+    );
   }
 
   const entryHref = (id: string) => `?${new URLSearchParams({ entry: id }).toString()}`;
@@ -273,46 +365,21 @@ export function LibraryBrowser({
               onClear={() => filter({ text: "" })}
               className={styles.textFilter}
             />
-            <Select
-              label="Ownership"
-              hideLabel
-              options={ownershipOptions}
-              value={filters.ownership ?? ANY}
-              onChange={(next) =>
-                filter({ ownership: OWNERSHIP_STATES.find((state) => state === next) ?? null })
-              }
-            />
-            <Select
-              label="Platform"
-              hideLabel
-              options={platforms}
-              value={filters.platformId === null ? ANY : String(filters.platformId)}
-              onChange={(next) => filter({ platformId: Number(next) || null })}
-            />
-            {/* The first option is "Any tag"; the filter appears once there is a real one. */}
-            {tags.length > 1 && (
-              <Select
-                label="Tag"
-                hideLabel
-                options={tags}
-                value={filters.tag ?? ANY}
-                onChange={(next) => filter({ tag: next === ANY ? null : next })}
-              />
-            )}
+            <div className={styles.wideOnly}>{filterSelects(true)}</div>
           </div>
 
           <div className={styles.arrange}>
-            <Select
-              label="Sort by"
-              hideLabel
-              options={LIBRARY_SORTS}
-              value={sort.key}
-              onChange={(next) => {
-                const key = parseLibrarySort(next);
-                update({ ...view, sort: { key, direction: naturalDirection(key) } });
-              }}
-              className={styles.sort}
-            />
+            {/* On phones the selects and chips fold into one button and a sheet. */}
+            <Button
+              className={styles.narrowOnly}
+              icon={<FilterIcon width={16} height={16} />}
+              aria-haspopup="dialog"
+              onClick={() => setSheetOpen(true)}
+            >
+              Filters
+              {activeFilters > 0 && <span className={styles.filterCount}>{activeFilters}</span>}
+            </Button>
+            <div className={styles.wideOnly}>{sortSelect(true)}</div>
             <SegmentedControl
               label="Layout"
               options={LAYOUTS}
@@ -322,6 +389,34 @@ export function LibraryBrowser({
           </div>
         </div>
 
+        <Modal open={sheetOpen} onClose={() => setSheetOpen(false)} labelledBy={sheetHeadingId}>
+          <div className={styles.sheet}>
+            <div className={styles.sheetHead}>
+              <h2 id={sheetHeadingId} className={styles.sheetTitle}>
+                Filter and sort
+              </h2>
+              <IconButton label="Close" variant="quiet" onClick={() => setSheetOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </div>
+            {progressChips()}
+            {filterSelects(false)}
+            {sortSelect(false)}
+            <div className={styles.sheetActions}>
+              <Button variant="primary" onClick={() => setSheetOpen(false)}>
+                {visible.length === items.length
+                  ? `Show all ${formatCount(items.length, "game")}`
+                  : `Show ${formatCount(visible.length, "game")}`}
+              </Button>
+              {filtered && (
+                <Button variant="quiet" onClick={clearFilters}>
+                  Clear filters
+                </Button>
+              )}
+            </div>
+          </div>
+        </Modal>
+
         {/* Always in the page, so screen readers hear the count change as filters apply. */}
         <p className="visually-hidden" role="status">
           {status}
@@ -329,21 +424,7 @@ export function LibraryBrowser({
 
         {(progress.length > 1 || (filtered && visible.length > 0)) && (
           <div className={styles.refine}>
-            {progress.length > 1 && (
-              <div className={styles.progressFilters} role="group" aria-label="Filter by progress">
-                {progress.map(({ progress: state, count }) => (
-                  <Tag
-                    key={state}
-                    selected={filters.progress.includes(state)}
-                    onToggle={() => toggleProgress(state)}
-                  >
-                    <ProgressGlyph progress={state} />
-                    {progressLabel[state]}
-                    <span className={styles.chipCount}>{count}</span>
-                  </Tag>
-                ))}
-              </div>
-            )}
+            <div className={styles.wideOnly}>{progressChips()}</div>
             {/* With nothing left, the notice below says so and offers the same way out. */}
             {filtered && visible.length > 0 && (
               <div className={styles.result}>

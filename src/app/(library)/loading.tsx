@@ -18,16 +18,23 @@ export default function LibraryLoading() {
             <div className={`${styles.textFilter} ${styles.controlSkeleton}`}>
               <Skeleton />
             </div>
-            <div className={styles.controlSkeleton}>
-              <Skeleton />
-            </div>
-            <div className={styles.controlSkeleton}>
-              <Skeleton />
+            <div className={styles.wideOnly}>
+              <div className={styles.controlSkeleton}>
+                <Skeleton />
+              </div>
+              <div className={styles.controlSkeleton}>
+                <Skeleton />
+              </div>
             </div>
           </div>
           <div className={styles.arrange}>
-            <div className={`${styles.sort} ${styles.controlSkeleton}`}>
+            <div className={`${styles.narrowOnly} ${styles.controlSkeleton}`}>
               <Skeleton />
+            </div>
+            <div className={styles.wideOnly}>
+              <div className={`${styles.sort} ${styles.controlSkeleton}`}>
+                <Skeleton />
+              </div>
             </div>
             <div className={`${styles.layoutSkeleton} ${styles.controlSkeleton}`}>
               <Skeleton />

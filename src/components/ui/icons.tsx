@@ -76,3 +76,12 @@ export function SortIcon({ direction, ...props }: IconProps & { direction: "asc"
     </Icon>
   );
 }
+
+/** Filters: three rules narrowing downwards, the way a list is narrowed. */
+export function FilterIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M3 4.5h10M5 8h6M7 11.5h2" />
+    </Icon>
+  );
+}
