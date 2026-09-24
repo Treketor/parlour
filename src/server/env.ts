@@ -23,6 +23,10 @@ export const serverEnv = {
   get supabaseSecretKey() {
     return required("SUPABASE_SECRET_KEY");
   },
+  /** Optional: without it, the game page's prices section is left out. */
+  get itadApiKey(): string | undefined {
+    return process.env.ITAD_API_KEY || undefined;
+  },
   /** Optional: without it, Metacritic and RAWG scores are simply not looked up. */
   get rawgApiKey(): string | undefined {
     return process.env.RAWG_API_KEY || undefined;
