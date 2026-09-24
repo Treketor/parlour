@@ -84,6 +84,10 @@ export function nextSort(
   if (current.key === key) {
     return { key, direction: current.direction === "asc" ? "desc" : "asc" };
   }
-  // Ratings and dates are most useful highest or newest first.
-  return { key, direction: key === "rating" || key === "added" ? "desc" : "asc" };
+  return { key, direction: naturalDirection(key) };
+}
+
+/** Where each order starts: ratings and dates are most useful highest or newest first. */
+export function naturalDirection(key: SortKey): SortDirection {
+  return key === "rating" || key === "added" ? "desc" : "asc";
 }
