@@ -373,3 +373,12 @@ Revises 040 after review: one source, IGDB, was not credible enough on its own, 
 - **A third library layout, Covers:** the art alone, each cover still named for screen readers and in a tooltip. Grid and Covers take a covers-per-row setting: "Fit to screen", or 3 to 10. A chosen count applies from 40rem; phones show about half of it and never fewer than two (`narrowColumns`), so ten across a desktop is five across a phone. The count is kept in the address (`cols`) and remembered with the layout. Changing it crossfades, as a new sort does.
 - **Pictures on the game page hover like covers in the library:** a faint light over the image and a small press, instead of zooming in.
 - **The footer credits every source in use:** IGDB, Metacritic via RAWG, Steam and IsThereAnyDeal.
+
+## 047. The play queue
+
+- **What it is:** an ordered list of library entries you mean to play next, numbered because the order is the content. The first is marked "Up next". Each row opens the entry in the library's editor.
+- **Adding:** from the entry editor, "Add to queue" asks one question: Play next (first in line) or At the end. A queued entry shows "Number 3 in your queue", linked to the queue, with "Take off queue". Changes show at once and are put back with a reason if refused.
+- **Reordering** uses dnd-kit's classic packages (core 6, sortable 10), stable and React 19 ready; the newer @dnd-kit/react is still pre-1.0. A drag starts from a handle, after 4px of travel so a tap stays a tap. The keyboard does everything the pointer does: focus a handle, Space to pick up, arrows to move, Space to drop, Escape to cancel. Each step is announced ("Link's Awakening dropped at number 1"). Neighbours slide aside with the app's easing, or jump with reduced motion. The drag context gets a stable id, because dnd-kit's own counter differs between server and browser and broke hydration.
+- **Order is a fractional-index key** (the `fractional-indexing` library, CC0): a move writes one row, keyed between its new neighbours. The server reads the neighbours' keys itself, and refuses a move whose neighbours are no longer in that order, since the queue changed in another tab. The page then reloads rather than guessing. Two adds at once that pick the same key are settled by the unique index and a second try.
+- **Finishing, completing or abandoning a game takes it off the queue,** in the same action that saves the progress. The editor updates its queue state from the result.
+- Removing a row fades it out before it leaves, and the server is told at once.
