@@ -178,3 +178,10 @@
 .addDates {
   margin-left: calc(-1 * var(--space-3));
 }
+
+.gameLink {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}

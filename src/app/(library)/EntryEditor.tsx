@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
+import Link from "next/link";
 import { useEffect, useRef, useState, useTransition, type KeyboardEvent } from "react";
 import { useLayoutTransition } from "@/components/Providers";
 import { Button, IconButton } from "@/components/ui/Button";
@@ -154,6 +155,9 @@ export function EntryEditor({
           <p className={styles.facts}>
             <span>{item.platform}</span>
             {item.year !== null && <span>{item.year}</span>}
+            <Link href={`/games/${item.slug}`} className={styles.gameLink}>
+              Game page
+            </Link>
           </p>
           <p className={styles.saveState} role="status">
             {saving ? "Saving" : saved ? "Saved" : ""}

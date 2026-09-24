@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import type { ReactNode } from "react";
+
 import { ButtonLink } from "@/components/ui/Button";
 import { GameCover } from "@/components/ui/GameCover";
 import { CheckIcon } from "@/components/ui/icons";
@@ -46,14 +49,17 @@ export function SearchCard(props: SearchResultProps) {
 
   return (
     <article className={styles.card} aria-labelledby={`game-${game.id}`}>
-      <GameCover
-        title={game.name}
-        src={game.coverImageId ? igdbImageUrl(game.coverImageId, "cover_big", true) : undefined}
-        className={styles.cardCover}
-      />
+      <CoverLink game={game} className={styles.cardCover}>
+        <GameCover
+          title={game.name}
+          src={game.coverImageId ? igdbImageUrl(game.coverImageId, "cover_big", true) : undefined}
+        />
+      </CoverLink>
       <div className={styles.cardText}>
         <h3 id={`game-${game.id}`} className={styles.cardTitle}>
-          {game.name}
+          <Link href={`/games/${game.slug}`} className={styles.titleLink}>
+            {game.name}
+          </Link>
         </h3>
         <GameFacts game={game} />
       </div>
@@ -69,19 +75,47 @@ export function SearchRow(props: SearchResultProps) {
 
   return (
     <article className={styles.row} aria-labelledby={`game-${game.id}`}>
-      <GameCover
-        title={game.name}
-        src={game.coverImageId ? igdbImageUrl(game.coverImageId, "cover_big") : undefined}
-        className={styles.rowCover}
-      />
+      <CoverLink game={game} className={styles.rowCover}>
+        <GameCover
+          title={game.name}
+          src={game.coverImageId ? igdbImageUrl(game.coverImageId, "cover_big") : undefined}
+        />
+      </CoverLink>
       <div className={styles.rowText}>
         <h3 id={`game-${game.id}`} className={styles.rowTitle}>
-          {game.name}
+          <Link href={`/games/${game.slug}`} className={styles.titleLink}>
+            {game.name}
+          </Link>
         </h3>
         <GameFacts game={game} />
       </div>
       <SearchControls {...props} state={state} className={styles.rowControls} />
     </article>
+  );
+}
+
+/**
+ * The cover also opens the game page, for a pointer. Keyboards and screen
+ * readers get one stop per game, the title, rather than two identical links.
+ */
+function CoverLink({
+  game,
+  className,
+  children,
+}: {
+  game: CatalogueGame;
+  className: string | undefined;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      href={`/games/${game.slug}`}
+      className={cx(styles.coverLink, className)}
+      tabIndex={-1}
+      aria-hidden="true"
+    >
+      {children}
+    </Link>
   );
 }
 
@@ -117,13 +151,22 @@ function GameFacts({ game }: { game: CatalogueGame }) {
   );
 }
 
-type SearchControlsProps = SearchResultProps & {
+export type SearchControlsProps = SearchResultProps & {
   state: SearchEntryState;
+  /** The "Also in your library on" note; off where the entries are listed anyway. */
+  showAlsoOn?: boolean;
   className?: string | undefined;
 };
 
 /** Pick the platform, then add the game or change its ownership there. */
-function SearchControls({ game, signedIn, returnTo, state, className }: SearchControlsProps) {
+export function SearchControls({
+  game,
+  signedIn,
+  returnTo,
+  state,
+  showAlsoOn = true,
+  className,
+}: SearchControlsProps) {
   const { platforms, platform, entry } = state;
 
   return (
@@ -183,7 +226,7 @@ function SearchControls({ game, signedIn, returnTo, state, className }: SearchCo
           />
         ))}
 
-      {state.alsoOn.length > 0 && (
+      {showAlsoOn && state.alsoOn.length > 0 && (
         <p className={styles.alsoOn}>
           Also in your library on {state.alsoOn.map((item) => item.name).join(", ")}
         </p>

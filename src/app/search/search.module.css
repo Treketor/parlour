@@ -283,3 +283,27 @@
 .cardError:empty {
   display: none;
 }
+
+.coverLink {
+  display: block;
+  touch-action: manipulation;
+}
+
+.coverLink:active {
+  transform: scale(calc(1 - 0.02 * var(--motion-distance)));
+}
+
+.titleLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .titleLink:hover,
+  .card:has(.coverLink:hover) .titleLink,
+  .row:has(.coverLink:hover) .titleLink {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+}
