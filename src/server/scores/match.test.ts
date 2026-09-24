@@ -55,6 +55,30 @@ describe("pickRawgMatch", () => {
     expect(match?.id).toBe(5);
   });
 
+  it("sees past RAWG's year in brackets, and refuses its later namesake", () => {
+    const match = pickRawgMatch(ocarina, [
+      candidate({
+        id: 25097,
+        slug: "the-legend-of-zelda-ocarina-of-time",
+        name: "The Legend of Zelda: Ocarina of Time (1998)",
+      }),
+      candidate({
+        id: 1019942,
+        slug: "the-legend-of-zelda-ocarina-of-time-2",
+        name: "The Legend of Zelda: Ocarina of Time",
+        released: "2026-11-05",
+      }),
+    ]);
+    expect(match?.id).toBe(25097);
+  });
+
+  it("does not let a shared slug override a different year", () => {
+    const match = pickRawgMatch(ocarina, [
+      candidate({ slug: ocarina.slug, name: "Something Else", released: "2015-01-01" }),
+    ]);
+    expect(match).toBeNull();
+  });
+
   it("returns nothing when no title matches", () => {
     expect(pickRawgMatch(ocarina, [candidate({ name: "Zelda Classic" })])).toBeNull();
   });

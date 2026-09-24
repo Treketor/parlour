@@ -16,9 +16,14 @@ export type RawgCandidate = {
   ratings_count: number;
 };
 
-/** "Pokémon: Let's Go, Pikachu!" and "Pokemon Lets Go Pikachu" compare equal. */
+/**
+ * "Pokémon: Let's Go, Pikachu!" and "Pokemon Lets Go Pikachu" compare equal.
+ * A trailing year in brackets is dropped: RAWG names a game "Ocarina of Time
+ * (1998)" to tell it from a later namesake, and the year is checked separately.
+ */
 export function normaliseTitle(name: string): string {
   return name
+    .replace(/\s*\((?:19|20)\d{2}\)\s*$/, "")
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .toLowerCase()
@@ -41,7 +46,9 @@ export function pickRawgMatch(
   const released = year(game.firstReleaseDate);
 
   const matches = candidates.filter((candidate) => {
-    if (normaliseTitle(candidate.name) !== title) return false;
+    // The same slug in both databases counts as the same title, however it is styled.
+    const sameTitle = normaliseTitle(candidate.name) === title || candidate.slug === game.slug;
+    if (!sameTitle) return false;
     const candidateYear = year(candidate.released);
     // Either side may not know the year yet; then the title has to carry it.
     return released === null || candidateYear === null || Math.abs(candidateYear - released) <= 1;
