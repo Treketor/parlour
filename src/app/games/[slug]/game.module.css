@@ -1,0 +1,446 @@
+/*
+ * A catalogue record: cover and library on the left, the record on the
+ * right. On phones the cover sits beside the title block instead, so the
+ * facts are visible without scrolling past a full-width poster.
+ */
+.page {
+  display: grid;
+  gap: var(--space-8);
+  padding-block: var(--space-10) var(--space-16);
+}
+
+@media (min-width: 60rem) {
+  .page {
+    grid-template-columns: 16rem minmax(0, 1fr);
+    gap: var(--space-12);
+    align-items: start;
+  }
+}
+
+.side {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (min-width: 60rem) {
+  .side {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-6));
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+}
+
+.cover {
+  width: 100%;
+}
+
+.main {
+  display: grid;
+  gap: var(--space-10);
+  min-width: 0;
+}
+
+.header {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.title {
+  font-size: var(--text-3xl);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  line-height: var(--leading-display);
+  overflow-wrap: anywhere;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* Scores: two figures on one rule, each with what it rests on beneath. */
+.scores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  margin: 0;
+  padding-block: var(--space-4);
+  border-block: var(--hairline);
+}
+
+.score {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.score dd {
+  margin: 0;
+}
+
+.scoreLabel {
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}
+
+.scoreValue {
+  color: var(--color-text-muted);
+  font-size: var(--text-2xl);
+  font-weight: var(--display-weight);
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1;
+}
+
+.scoreValue[data-tier="high"] {
+  color: var(--color-score-high);
+}
+
+.scoreValue[data-tier="mid"] {
+  color: var(--color-score-mid);
+}
+
+.scoreValue[data-tier="low"] {
+  color: var(--color-score-low);
+}
+
+.scoreCount {
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}
+
+.summary {
+  max-width: 68ch;
+  color: var(--color-text-muted);
+  line-height: var(--leading-reading);
+  white-space: pre-line;
+}
+
+.section {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.sectionTitle {
+  padding-bottom: var(--space-2);
+  border-bottom: var(--hairline);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--ui-strong-weight);
+  letter-spacing: 0;
+}
+
+/* Releases: platform, date and regions in columns that line up down the table. */
+.releases {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.releases th,
+.releases td {
+  padding: var(--space-2) var(--space-4) var(--space-2) 0;
+  border-bottom: var(--hairline);
+  text-align: left;
+  vertical-align: baseline;
+}
+
+.releases th {
+  font-weight: var(--ui-strong-weight);
+}
+
+.releaseDate {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.regions {
+  color: var(--color-text-faint);
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .gallery {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.thumb,
+.trailerPoster {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border: 0;
+  background: var(--color-surface);
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+.thumb img,
+.trailerPoster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .thumb:hover img,
+  .trailerPoster:hover img {
+    transform: scale(calc(1 + 0.03 * var(--motion-distance)));
+  }
+}
+
+.thumb:active img,
+.trailerPoster:active img {
+  transform: scale(calc(1 - 0.02 * var(--motion-distance)));
+  transition-duration: 0s;
+}
+
+.thumb:focus-visible,
+.trailerPoster:focus-visible {
+  outline-offset: 2px;
+}
+
+/* The large view: the picture fills the box's width, with its counter and controls around it. */
+.viewer {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.viewerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.viewerTitle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--ui-strong-weight);
+  letter-spacing: 0;
+}
+
+.viewerCount {
+  color: var(--color-text-faint);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.viewerFrame {
+  position: relative;
+  display: grid;
+  aspect-ratio: 16 / 9;
+  background: var(--color-canvas);
+}
+
+.viewerImage {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.viewerNav {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.trailers {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .trailers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.trailer {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.trailerFrame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--color-surface);
+}
+
+.trailerPlayer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* The play mark: a square of canvas colour, so it reads over any poster without a shadow. */
+.play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.play svg {
+  box-sizing: content-box;
+  padding: var(--space-3);
+  background: var(--color-canvas);
+  color: var(--color-text);
+}
+
+.trailerName {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.links {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-6);
+  }
+}
+
+.link {
+  display: grid;
+  gap: var(--space-0-5);
+  padding-block: var(--space-3);
+  border-bottom: var(--hairline);
+  color: inherit;
+  text-decoration: none;
+}
+
+.linkLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  font-weight: var(--ui-strong-weight);
+}
+
+@media (hover: hover) {
+  .link:hover .linkLabel {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.linkIcon {
+  color: var(--color-text-faint);
+}
+
+.linkDescription {
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}
+
+/* Your library, beside the cover on phones and under it from 60rem. */
+.panel {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.panelTitle {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--ui-strong-weight);
+  letter-spacing: 0;
+}
+
+.entries {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border-top: var(--hairline);
+  list-style: none;
+}
+
+.entry {
+  display: grid;
+  gap: var(--space-0-5);
+  padding-block: var(--space-2);
+  border-bottom: var(--hairline);
+  color: inherit;
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  a.entry:hover .entryPlatform {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.entryPlatform {
+  font-weight: var(--ui-strong-weight);
+}
+
+.entryStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}
+
+/* Loading: the same boxes, filled with placeholders. */
+.skeletonTitle {
+  height: calc(var(--text-3xl) * var(--leading-display));
+}
+
+.skeletonBlock {
+  height: 5rem;
+}
+
+/* The last frame stands for the rest: the count sits on a canvas-coloured scrim. */
+.more {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--color-scrim);
+  color: var(--color-text);
+  font-size: var(--text-xl);
+  font-weight: var(--display-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.moreButton {
+  justify-self: start;
+}
