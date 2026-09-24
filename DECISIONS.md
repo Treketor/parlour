@@ -238,3 +238,15 @@ Revises 030 after review.
 - **Platform picker, not a row per platform.** One card per game with a platform select keeps the grid tidy. Platforms already in the library are marked in the picker, and "Also in your library on ..." notes other platforms. The picker starts on a platform already in the library, if any.
 - **Ownership is editable after adding.** The Add control turns into an ownership picker ("✓ Owned") in the accent colour. Changing it is optimistic and reverts with a message if the server refuses. Progress ("Want to play") is no longer shown in search; that belongs to the library.
 - **Sort.** Best match (the ranking above, default), Most rated, Newest, Oldest, Title. Undated games go last in both date orders. The choice is kept in the address without a server round trip, and cards travel to their new places; under reduced motion the grid fades into the new order instead.
+
+## 033. Search card refinements from review
+
+- **Default platform.** IGDB lists platforms in no useful order, so cards opened on Google Stadia or Mac. Platforms are now ordered, and the picker opens on the first:
+  1. a platform you already have this game on;
+  2. your own habit, once a platform has at least 3 games in your library (fewer is chance: one stray Xbox 360 entry should not steer every game);
+  3. a fixed common-ownership order: PC, PS5, Switch, Switch 2, Xbox Series X|S, PS4, Xbox One;
+  4. everything else by console generation, newest first;
+  5. rarely owned ports and dead services last (Mac, Linux, iOS, Android, web, VR, Stadia).
+- **Score colour.** 85 and up in the accent, 70 to 84 in plain text, below 70 in a muted clay (`--color-score-low`, 7.3:1 on the canvas). It is deliberately not the error coral: a low score is information, not a fault. The accent stays the only accent colour.
+- **Alignment.** Card controls hang from the top instead of sitting at the bottom, so a card with an extra "Also in your library on..." note grows downwards without shifting its neighbours. A single platform is drawn as a quiet fixed field with the same box and text inset as the pickers beside it.
+- **Sorting crossfades.** Changing sort fades the grid out (120ms, ease in) and back in, in its new order (180ms, ease out). On a 40-card grid, cards travelling 2,500px in 320ms read as a blur rather than a move. A literal blur filter was ruled out: filters are neither transform nor opacity, and blurring 40 cover images drops frames.

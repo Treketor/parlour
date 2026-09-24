@@ -6,7 +6,7 @@
 2. App shell, routing, empty, error and legal pages (done)
 3. Database schema, row-level security, auth (done)
 4. IGDB integration: proxy, token and rate handling, catalogue cache (done)
-5. Search and add to library (awaiting review)
+5. Search and add to library (done)
 6. Library browsing: list and grid, filter and sort
 7. Library entry editing: progress, ownership, rating, tags, notes
 8. Game detail page: media, release info, scores, trailers, walkthrough links
@@ -27,11 +27,15 @@
 
 - Stage 4: IGDB client (shared stored token, rate limiter, retries, validated responses), catalogue tables for summaries, scores with counts, genres, per-platform release dates, media, trailers and store ids, atomic batch writes, search cache, and `searchCatalogue` / `ensure` for stage 5. 12 more pgTAP access tests, 4 live end-to-end tests, 125 unit tests. No UI yet: search is wired up in stage 5.
 
-- Stage 5: search in a cover grid, with a platform picker, compact score and add or ownership change on each card; ranking over up to 200 IGDB candidates so official games lead; five sort orders with animated reordering; signed-out, empty, too-short and IGDB-failure states; results skeleton. 163 unit tests, 4 live tests.
+- Stage 5: search in a cover grid, with a platform picker, compact score and add or ownership change on each card; ranking over up to 200 IGDB candidates so official games lead; five sort orders; signed-out, empty, too-short and IGDB-failure states; results skeleton. After review: smarter default platform, score colour bands, aligned card controls, sort crossfade. 175 unit tests, 4 live tests.
 
 ## Next
 
 - Stage 6: library browsing (list and grid, filter and sort).
+
+## Later
+
+- Search filters: released games only, a release-year range, platform. Suggested at stage 5 review; the library filters in stage 6 come first.
 
 ## Known issues
 
