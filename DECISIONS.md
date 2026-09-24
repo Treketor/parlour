@@ -344,3 +344,10 @@ Revises 040 after review: one source, IGDB, was not credible enough on its own, 
 - "Remove dates" keeps its own padding, so its hover fill lines up with the fields.
 - Unreleased games say so: "Coming 19 Nov 2026", "Coming Q3 2027" or "Release date not announced", as exactly as the date is known, in the accent colour.
 - Images and trailers each have "Show all" and "Show fewer".
+
+## 044. Release dates that read as the future; RAWG titles with years
+
+- The section is "Release dates", and a date still to come is marked "Upcoming", so an unreleased game's table never reads as history.
+- "Remove dates" and "Manage tags" are outlined buttons like the rest.
+- RAWG names a game "Ocarina of Time (1998)" to tell it from a later namesake. Matching now drops a trailing bracketed year, and treats a slug shared with IGDB as the same title. Both still have to fall within a year of IGDB's date.
+- Metacritic's user score is not offered: RAWG carries only the metascore, and nothing else offers it legitimately. Players stay led by Steam.
