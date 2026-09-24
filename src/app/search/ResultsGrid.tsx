@@ -2,7 +2,6 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
-import { useShouldReduceMotion } from "@/components/Providers";
 import { Select } from "@/components/ui/Select";
 import type { CatalogueGame } from "@/lib/catalogue";
 import type { EntryStatus } from "@/lib/data/library";
@@ -16,13 +15,20 @@ type ResultsGridProps = {
   query: string;
   games: CatalogueGame[];
   statuses: Record<string, EntryStatus>;
+  habits: Record<number, number>;
   signedIn: boolean;
   initialSort: SearchSort;
 };
 
-export function ResultsGrid({ query, games, statuses, signedIn, initialSort }: ResultsGridProps) {
+export function ResultsGrid({
+  query,
+  games,
+  statuses,
+  habits,
+  signedIn,
+  initialSort,
+}: ResultsGridProps) {
   const [sort, setSort] = useState<SearchSort>(initialSort);
-  const reduceMotion = useShouldReduceMotion();
   const sorted = useMemo(() => sortResults(games, sort), [games, sort]);
   const returnTo = `/search?q=${encodeURIComponent(query)}${sort === "best" ? "" : `&sort=${sort}`}`;
 
@@ -58,25 +64,32 @@ export function ResultsGrid({ query, games, statuses, signedIn, initialSort }: R
         </Select>
       </div>
 
-      <motion.ul
-        className={styles.grid}
-        // Reduced motion: cards do not travel; the grid fades in its new order instead.
-        key={reduceMotion ? sort : "grid"}
-        initial={reduceMotion ? { opacity: 0 } : false}
-        animate={{ opacity: 1, transition: transition.enter }}
-      >
-        <AnimatePresence initial={false}>
+      {/*
+        A new sort fades the grid out and back in, in its new order. Cards
+        travelling across a 40-card grid read as a blur rather than a move
+        (DECISIONS.md 033).
+      */}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.ul
+          key={sort}
+          className={styles.grid}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: transition.enter }}
+          exit={{ opacity: 0, transition: transition.exit }}
+        >
           {sorted.map((game) => (
-            <motion.li
-              key={game.id}
-              layout={reduceMotion ? false : "position"}
-              transition={{ layout: transition.move }}
-            >
-              <SearchCard game={game} statuses={statuses} signedIn={signedIn} returnTo={returnTo} />
-            </motion.li>
+            <li key={game.id}>
+              <SearchCard
+                game={game}
+                statuses={statuses}
+                habits={habits}
+                signedIn={signedIn}
+                returnTo={returnTo}
+              />
+            </li>
           ))}
-        </AnimatePresence>
-      </motion.ul>
+        </motion.ul>
+      </AnimatePresence>
     </section>
   );
 }
