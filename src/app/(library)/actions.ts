@@ -8,6 +8,7 @@ import {
   type EditResult,
 } from "@/lib/data/edit-entry";
 import type { EntryTag } from "@/lib/data/library";
+import { DONE_PROGRESS } from "@/lib/data/queue";
 import { createClient } from "@/lib/supabase/server";
 import type { TablesUpdate } from "@/lib/supabase/database.types";
 
@@ -55,6 +56,17 @@ export async function updateEntry(input: unknown): Promise<EditResult> {
   if (error || data.length === 0) {
     if (error) console.error("Updating an entry failed", error);
     return { status: "failed", message: "That change was not saved. Try again." };
+  }
+
+  // A game you have finished or given up on is no longer one to play next.
+  if (patch.progress && DONE_PROGRESS.includes(patch.progress)) {
+    const { data: removed, error: queueError } = await supabase
+      .from("queue_items")
+      .delete()
+      .eq("entry_id", request.entryId)
+      .select("id");
+    if (queueError) console.error("Taking a finished game off the queue failed", queueError);
+    if (removed && removed.length > 0) return { status: "saved", unqueued: true };
   }
   return { status: "saved" };
 }

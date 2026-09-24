@@ -24,7 +24,13 @@ export type EntryPatch = {
   finishedOn?: string | null;
 };
 
-export type EditResult = { status: "saved" } | { status: "failed"; message: string };
+export type EditResult =
+  | {
+      status: "saved";
+      /** True when the change took the game off the queue (it was finished or given up). */
+      unqueued?: boolean;
+    }
+  | { status: "failed"; message: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
