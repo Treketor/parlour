@@ -11,8 +11,8 @@
 7. Library entry editing: progress, ownership, rating, tags, notes (done)
 8. Game detail page: media, release info, scores, trailers, walkthrough links (done)
 9. Prices: IsThereAnyDeal matching, current prices, history chart (done)
-10. Play queue (awaiting review)
-11. Accessibility, performance and reduced-motion pass; README screenshots; deploy
+10. Play queue (done)
+11. Accessibility, performance and reduced-motion pass; README screenshots; deploy (deploy in progress)
 
 ## Done
 
@@ -51,9 +51,14 @@
 
 - Stage 10: the play queue: add from the entry editor (play next or at the end), reorder by dragging or from the keyboard with announcements, remove, and finished games leave the queue on their own.
 
+- Stage 10 review: sort by platform with headings; a one-row library toolbar with a Filters panel; a sectioned entry editor; one-press queueing; queue rows drag from anywhere.
+
+- Stage 11: the search list became a catalogue table. axe audit of every page and open state, fixing busy buttons without a name, unreachable tag suggestions and focus lost after the editor closed. Responsive WebP covers, eager first results, no footer shift. README with screenshots. Functions pinned to Tokyo, next to the database.
+
 ## Next
 
-- Stage 11: accessibility and performance passes, README with screenshots, and deployment.
+- Deploy: import the repo in Vercel, add the environment variables, add the production URL to Supabase's redirect URLs.
+- Custom SMTP (Resend suggested) once there is a domain, then the Magic Link template change in the README.
 
 ## Later
 
@@ -65,5 +70,4 @@
 
 - Until custom SMTP is set up (before launch), sign-in emails only reach Supabase team members, and links only work in the browser that asked for them.
 - The browser logs a warning about an unused preloaded stylesheet a few seconds after load. It comes from Next prefetching the Design system page linked in the footer, and it is harmless.
-- Cover art appears in search results; library views pick it up in stage 6.
 - Progress glyphs are 12px. The paused mark is the least legible at that size; accepted at review as still distinguishable.
