@@ -1,14 +1,15 @@
 import type { CatalogueGame } from "@/lib/catalogue";
 import type { IgdbClient } from "../igdb/client";
 import { IgdbError } from "../igdb/errors";
-import { mapGames, type GameBatch } from "../igdb/map";
-import { gamesByIdQuery, normaliseSearch, searchGamesQuery } from "../igdb/query";
-import { igdbGames } from "../igdb/schema";
-import { rankResults } from "./rank";
+import { mapGames, toCandidate, type GameBatch } from "../igdb/map";
+import { gamesByIdQuery, normaliseSearch, searchCandidatesQuery } from "../igdb/query";
+import { igdbCandidates, igdbGames } from "../igdb/schema";
+import { rankCandidates } from "./rank";
 
 /*
- * The caching policy between the app and IGDB (DECISIONS.md 028):
- * - a search is answered from the cache for a day, then asked again;
+ * The caching policy between the app and IGDB (DECISIONS.md 028, 031):
+ * - a search asks IGDB for many light candidates, ranks them, and fetches
+ *   full details only for the best; the ranked list is cached for a day;
  * - a game is refetched only once its record is past stale_after;
  * - if IGDB fails, an expired cached answer is better than none.
  */
@@ -28,12 +29,6 @@ export type CatalogueStore = {
 type Dependencies = { store: CatalogueStore; igdb: IgdbClient; now?: () => number };
 
 export function createCatalogue({ store, igdb, now = Date.now }: Dependencies) {
-  async function fetchAndStore(body: string): Promise<number[]> {
-    const games = await igdb.query("games", body, igdbGames);
-    if (games.length > 0) await store.storeBatch(mapGames(games));
-    return games.map((game) => game.id);
-  }
-
   /** Reads games back in the order given; ids that are not stored are skipped. */
   async function inOrder(ids: readonly number[]): Promise<CatalogueGame[]> {
     if (ids.length === 0) return [];
@@ -41,55 +36,55 @@ export function createCatalogue({ store, igdb, now = Date.now }: Dependencies) {
     return ids.flatMap((id) => byId.get(id) ?? []);
   }
 
-  return {
-    async search(input: string): Promise<CatalogueGame[]> {
-      const query = normaliseSearch(input);
-      if (query.length < MIN_QUERY_LENGTH) return [];
+  /**
+   * Makes sure these games are stored and fresh, fetching only the ones that
+   * are missing or stale. Library entries reference stored games, so this
+   * runs before anything is added.
+   */
+  async function ensure(ids: readonly number[]): Promise<CatalogueGame[]> {
+    const wanted = [...new Set(ids)];
+    if (wanted.length === 0) return [];
 
-      // The cache keeps IGDB's order; ranking is applied on the way out, so it can change freely.
-      const ranked = async (ids: readonly number[]) => rankResults(query, await inOrder(ids));
+    const staleAfter = await store.staleAfter(wanted);
+    const toFetch = wanted.filter((id) => {
+      const staleAt = staleAfter.get(id);
+      return staleAt === undefined || staleAt.getTime() <= now();
+    });
 
-      const cached = await store.readSearch(query);
-      if (cached && cached.expiresAt.getTime() > now()) return ranked(cached.gameIds);
-
+    if (toFetch.length > 0) {
       try {
-        const ids = await fetchAndStore(searchGamesQuery(query));
-        await store.writeSearch(query, ids, new Date(now() + SEARCH_CACHE_MS));
-        return ranked(ids);
+        const games = await igdb.query("games", gamesByIdQuery(toFetch), igdbGames);
+        if (games.length > 0) await store.storeBatch(mapGames(games));
       } catch (error) {
-        if (cached && error instanceof IgdbError) return ranked(cached.gameIds);
-        throw error;
+        // Stale is fine to show; missing is not.
+        const missing = toFetch.some((id) => !staleAfter.has(id));
+        if (missing || !(error instanceof IgdbError)) throw error;
       }
-    },
+    }
 
-    /**
-     * Makes sure these games are stored and fresh, fetching only the ones that
-     * are missing or stale. Library entries reference stored games, so this
-     * runs before anything is added.
-     */
-    async ensure(ids: readonly number[]): Promise<CatalogueGame[]> {
-      const wanted = [...new Set(ids)];
-      if (wanted.length === 0) return [];
+    return inOrder(wanted);
+  }
 
-      const staleAfter = await store.staleAfter(wanted);
-      const toFetch = wanted.filter((id) => {
-        const staleAt = staleAfter.get(id);
-        return staleAt === undefined || staleAt.getTime() <= now();
-      });
+  async function search(input: string): Promise<CatalogueGame[]> {
+    const query = normaliseSearch(input);
+    if (query.length < MIN_QUERY_LENGTH) return [];
 
-      if (toFetch.length > 0) {
-        try {
-          await fetchAndStore(gamesByIdQuery(toFetch));
-        } catch (error) {
-          // Stale is fine to show; missing is not.
-          const missing = toFetch.some((id) => !staleAfter.has(id));
-          if (missing || !(error instanceof IgdbError)) throw error;
-        }
-      }
+    const cached = await store.readSearch(query);
+    if (cached && cached.expiresAt.getTime() > now()) return inOrder(cached.gameIds);
 
-      return inOrder(wanted);
-    },
-  };
+    try {
+      const candidates = await igdb.query("games", searchCandidatesQuery(query), igdbCandidates);
+      const ids = rankCandidates(query, candidates.map(toCandidate));
+      const games = await ensure(ids);
+      await store.writeSearch(query, ids, new Date(now() + SEARCH_CACHE_MS));
+      return games;
+    } catch (error) {
+      if (cached && error instanceof IgdbError) return inOrder(cached.gameIds);
+      throw error;
+    }
+  }
+
+  return { search, ensure };
 }
 
 export type Catalogue = ReturnType<typeof createCatalogue>;

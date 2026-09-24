@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { gamesByIdQuery, normaliseSearch, quote, searchGamesQuery } from "./query";
+import { gamesByIdQuery, normaliseSearch, quote, searchCandidatesQuery } from "./query";
 
 describe("quote", () => {
   it("wraps plain text in double quotes", () => {
@@ -27,17 +27,18 @@ describe("normaliseSearch", () => {
   });
 });
 
-describe("searchGamesQuery", () => {
-  it("searches playable game types only, without editions", () => {
-    const query = searchGamesQuery("hades");
+describe("searchCandidatesQuery", () => {
+  it("asks widely for playable game types, without editions, with only ranking fields", () => {
+    const query = searchCandidatesQuery("hades");
     expect(query).toContain('search "hades";');
+    expect(query).toContain("fields name,total_rating_count,hypes;");
     expect(query).toContain("where game_type = (0,4,8,9,10,11) & version_parent = null;");
-    expect(query).toContain("limit 20;");
+    expect(query).toContain("limit 200;");
   });
 
   it("clamps the limit to what IGDB allows", () => {
-    expect(searchGamesQuery("x", 9000)).toContain("limit 500;");
-    expect(searchGamesQuery("x", 0)).toContain("limit 1;");
+    expect(searchCandidatesQuery("x", 9000)).toContain("limit 500;");
+    expect(searchCandidatesQuery("x", 0)).toContain("limit 1;");
   });
 });
 

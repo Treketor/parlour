@@ -68,10 +68,14 @@ export function normaliseSearch(input: string): string {
   return input.trim().replace(/\s+/g, " ").toLowerCase().slice(0, 100);
 }
 
-export function searchGamesQuery(term: string, limit = 20): string {
+/**
+ * Wide and light: up to 200 name matches with only what ranking needs. Full
+ * details are fetched afterwards for the best few (DECISIONS.md 031).
+ */
+export function searchCandidatesQuery(term: string, limit = 200): string {
   return [
     `search ${quote(term)};`,
-    `fields ${GAME_FIELDS};`,
+    "fields name,total_rating_count,hypes;",
     // Editions ("Gold Edition") point at their main game through version_parent;
     // listing them separately would fill results with near-duplicates.
     `where game_type = (${SEARCHABLE_GAME_TYPES.join(",")}) & version_parent = null;`,

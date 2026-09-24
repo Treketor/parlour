@@ -71,3 +71,13 @@ export const igdbGame = z.object({
 export type IgdbGame = z.infer<typeof igdbGame>;
 
 export const igdbGames = z.array(igdbGame);
+
+/** A search candidate: just enough to rank, before full details are fetched. */
+export const igdbCandidate = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  total_rating_count: z.number().int().optional(),
+  hypes: z.number().int().optional(),
+});
+
+export const igdbCandidates = z.array(igdbCandidate);

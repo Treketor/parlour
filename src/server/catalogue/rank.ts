@@ -1,14 +1,30 @@
-import type { CatalogueGame } from "@/lib/catalogue";
-
 /*
- * IGDB orders search results by how closely the name matches, and nothing
- * else, so two games both called "Hades" come back in no useful order. This
- * keeps IGDB's order as the last word but puts exact title matches first,
- * then titles starting with the search, and within each of those puts games
- * more people have rated first.
+ * IGDB orders search results by name similarity alone. For a franchise like
+ * "pokemon" that surfaces dozens of fan games and ROM hacks with no ratings
+ * before any official release (Pokémon Red sat at position 30). So search
+ * asks IGDB for a wide set of candidates and ranks them here: mostly by how
+ * widely a game is rated, with a smaller boost for how well the title matches.
+ * DECISIONS.md 031.
  */
 
-function comparable(value: string): string {
+export type Candidate = {
+  id: number;
+  name: string;
+  /** IGDB users plus critics. */
+  ratingCount: number;
+  /** Follows before release: the only popularity signal an unreleased game has. */
+  hypes: number;
+};
+
+/** How many ranked results a search returns. */
+export const RESULT_LIMIT = 40;
+
+// Title match is worth this much, in powers of ten of ratings: an exact title
+// counts like having 10x the ratings, a prefix match like 3x.
+const EXACT_BOOST = 1;
+const PREFIX_BOOST = 0.5;
+
+export function comparable(value: string): string {
   return value
     .normalize("NFKD")
     .replace(/[̀-ͯ]/g, "")
@@ -17,21 +33,22 @@ function comparable(value: string): string {
     .trim();
 }
 
-function matchTier(name: string, query: string): number {
-  const title = comparable(name);
-  if (title === query) return 0;
-  if (title.startsWith(query)) return 1;
-  return 2;
+function score(candidate: Candidate, query: string): number {
+  const title = comparable(candidate.name);
+  const boost = title === query ? EXACT_BOOST : title.startsWith(query) ? PREFIX_BOOST : 0;
+  return Math.log10(1 + candidate.ratingCount + candidate.hypes) + boost;
 }
 
-function popularity(game: CatalogueGame): number {
-  return game.igdbRatingCount + game.criticRatingCount;
-}
-
-export function rankResults(query: string, games: readonly CatalogueGame[]): CatalogueGame[] {
+/** Candidate ids, best first; IGDB's own order breaks ties. */
+export function rankCandidates(
+  query: string,
+  candidates: readonly Candidate[],
+  limit = RESULT_LIMIT,
+): number[] {
   const wanted = comparable(query);
-  return games
-    .map((game, index) => ({ game, index, tier: matchTier(game.name, wanted) }))
-    .sort((a, b) => a.tier - b.tier || popularity(b.game) - popularity(a.game) || a.index - b.index)
-    .map(({ game }) => game);
+  return candidates
+    .map((candidate, index) => ({ id: candidate.id, index, score: score(candidate, wanted) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, limit)
+    .map(({ id }) => id);
 }

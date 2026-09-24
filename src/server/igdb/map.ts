@@ -7,6 +7,7 @@ import {
   type DatePrecision,
   type ExternalSource,
 } from "./constants";
+import type { Candidate } from "../catalogue/rank";
 import type { IgdbGame } from "./schema";
 
 /*
@@ -181,6 +182,20 @@ function mapGame(game: IgdbGame): GameRow {
       position,
     })),
     external_ids: [...externalIds.values()],
+  };
+}
+
+export function toCandidate(candidate: {
+  id: number;
+  name: string;
+  total_rating_count?: number | undefined;
+  hypes?: number | undefined;
+}): Candidate {
+  return {
+    id: candidate.id,
+    name: cleanText(candidate.name),
+    ratingCount: candidate.total_rating_count ?? 0,
+    hypes: candidate.hypes ?? 0,
   };
 }
 

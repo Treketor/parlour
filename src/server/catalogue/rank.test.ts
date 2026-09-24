@@ -1,49 +1,67 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import type { CatalogueGame } from "@/lib/catalogue";
-import { rankResults } from "./rank";
+import pokemon from "../igdb/fixtures/candidates-pokemon.json";
+import { igdbCandidates } from "../igdb/schema";
+import { toCandidate } from "../igdb/map";
+import { comparable, rankCandidates, type Candidate } from "./rank";
 
-function game(id: number, name: string, ratings = 0): CatalogueGame {
-  return {
-    id,
-    slug: `game-${id}`,
-    name,
-    summary: null,
-    firstReleaseDate: null,
-    coverImageId: null,
-    gameType: "Main Game",
-    platforms: [],
-    igdbRating: null,
-    igdbRatingCount: ratings,
-    criticRating: null,
-    criticRatingCount: 0,
-  };
+function candidate(id: number, name: string, ratingCount = 0, hypes = 0): Candidate {
+  return { id, name, ratingCount, hypes };
 }
 
-const ids = (games: CatalogueGame[]) => games.map((item) => item.id);
+describe("rankCandidates", () => {
+  it("puts official Pokémon games above unrated fan games (real IGDB response)", () => {
+    const candidates = igdbCandidates.parse(pokemon).map(toCandidate);
+    const byId = new Map(candidates.map((item) => [item.id, item]));
 
-describe("rankResults", () => {
+    const top = rankCandidates("pokemon", candidates, 10).map((id) => byId.get(id));
+
+    for (const game of top) expect(game?.ratingCount).toBeGreaterThanOrEqual(100);
+    const mostRated = Math.max(...candidates.map((item) => item.ratingCount));
+    expect(top[0]?.ratingCount).toBe(mostRated);
+  });
+
   it("puts the widely rated game first among exact title matches", () => {
-    const results = rankResults("hades", [game(1, "Hades", 0), game(2, "Hades", 1757)]);
-    expect(ids(results)).toEqual([2, 1]);
+    expect(
+      rankCandidates("hades", [candidate(1, "Hades", 0), candidate(2, "Hades", 1757)]),
+    ).toEqual([2, 1]);
   });
 
-  it("ranks exact matches, then prefix matches, then the rest", () => {
-    const results = rankResults("hades", [
-      game(1, "H.A.D.E.S Zero", 500),
-      game(2, "Hades II", 900),
-      game(3, "Hades", 10),
+  it("does not let an unrated exact title beat a well-rated prefix match", () => {
+    const ids = rankCandidates("hades", [candidate(1, "Hades", 0), candidate(2, "Hades II", 172)]);
+    expect(ids).toEqual([2, 1]);
+  });
+
+  it("lets title match decide between games with similar ratings", () => {
+    const ids = rankCandidates("tunic", [
+      candidate(1, "Tunic Trails", 120),
+      candidate(2, "Tunic", 100),
     ]);
-    expect(ids(results)).toEqual([3, 2, 1]);
+    expect(ids).toEqual([2, 1]);
   });
 
-  it("ignores case, accents and punctuation when matching titles", () => {
-    const results = rankResults("pokemon", [game(1, "Pokémon Go Plus"), game(2, "POKÉMON")]);
-    expect(ids(results)).toEqual([2, 1]);
+  it("counts follows for unreleased games", () => {
+    const ids = rankCandidates("elder scrolls", [
+      candidate(1, "The Elder Scrolls Fan Remake", 2),
+      candidate(2, "The Elder Scrolls VI", 0, 900),
+    ]);
+    expect(ids).toEqual([2, 1]);
   });
 
   it("keeps IGDB's order when nothing else separates two games", () => {
-    const results = rankResults("outer", [game(5, "Outer Wilds"), game(6, "Outer Worlds")]);
-    expect(ids(results)).toEqual([5, 6]);
+    expect(
+      rankCandidates("outer", [candidate(5, "Outer Wilds"), candidate(6, "Outer Worlds")]),
+    ).toEqual([5, 6]);
+  });
+
+  it("returns at most the limit", () => {
+    const many = Array.from({ length: 60 }, (_, index) => candidate(index + 1, `Game ${index}`));
+    expect(rankCandidates("game", many)).toHaveLength(40);
+  });
+});
+
+describe("comparable", () => {
+  it("ignores case, accents and punctuation", () => {
+    expect(comparable("Pokémon: Let's Go, Eevee!")).toBe("pokemon let s go eevee");
   });
 });

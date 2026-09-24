@@ -60,8 +60,20 @@ function memoryStore() {
   return store;
 }
 
-function igdbReturning(data: unknown): IgdbClient & { query: ReturnType<typeof vi.fn> } {
-  return { query: vi.fn(async (_endpoint, _body, schema) => schema.parse(data)) };
+/**
+ * Answers like IGDB would from saved games: a search gets every game as a
+ * candidate, a lookup by id gets just those games.
+ */
+function igdbReturning(data: unknown[]): IgdbClient & { query: ReturnType<typeof vi.fn> } {
+  return {
+    query: vi.fn(
+      async (_endpoint: string, body: string, schema: { parse(value: unknown): unknown }) => {
+        const ids = /where id = (([d,]+))/.exec(body)?.[1]?.split(",").map(Number);
+        const rows = ids ? data.filter((row) => ids.includes((row as { id: number }).id)) : data;
+        return schema.parse(rows);
+      },
+    ),
+  } as IgdbClient & { query: ReturnType<typeof vi.fn> };
 }
 
 function failingIgdb(): IgdbClient & { query: ReturnType<typeof vi.fn> } {
@@ -73,7 +85,7 @@ function failingIgdb(): IgdbClient & { query: ReturnType<typeof vi.fn> } {
 }
 
 describe("catalogue.search", () => {
-  it("asks IGDB, stores the games and caches the result for a day", async () => {
+  it("ranks IGDB's candidates, stores the best and caches the result for a day", async () => {
     const store = memoryStore();
     const igdb = igdbReturning(searchOuterWilds);
     const catalogue = createCatalogue({ store, igdb, now: () => NOW });
@@ -81,9 +93,16 @@ describe("catalogue.search", () => {
     const results = await catalogue.search("  Outer   Wilds ");
 
     expect(results.map((game) => game.id)).toEqual([11737, 304188]);
-    expect(igdb.query).toHaveBeenCalledWith(
+    expect(igdb.query).toHaveBeenNthCalledWith(
+      1,
       "games",
       expect.stringContaining('search "outer wilds";'),
+      expect.anything(),
+    );
+    expect(igdb.query).toHaveBeenNthCalledWith(
+      2,
+      "games",
+      expect.stringContaining("where id = (11737,304188)"),
       expect.anything(),
     );
     expect(store.searches.get("outer wilds")?.expiresAt.getTime()).toBe(NOW + SEARCH_CACHE_MS);
@@ -95,9 +114,10 @@ describe("catalogue.search", () => {
     const catalogue = createCatalogue({ store, igdb, now: () => NOW });
 
     await catalogue.search("outer wilds");
+    igdb.query.mockClear();
     await catalogue.search("OUTER WILDS");
 
-    expect(igdb.query).toHaveBeenCalledTimes(1);
+    expect(igdb.query).not.toHaveBeenCalled();
   });
 
   it("asks again once the cached search has expired", async () => {
@@ -107,10 +127,12 @@ describe("catalogue.search", () => {
     const catalogue = createCatalogue({ store, igdb, now: () => time });
 
     await catalogue.search("outer wilds");
+    igdb.query.mockClear();
     time += SEARCH_CACHE_MS + 1;
     await catalogue.search("outer wilds");
 
-    expect(igdb.query).toHaveBeenCalledTimes(2);
+    // Asks for candidates again; the games themselves are still fresh, so no detail fetch.
+    expect(igdb.query).toHaveBeenCalledTimes(1);
   });
 
   it("serves an expired cached result when IGDB is down", async () => {
