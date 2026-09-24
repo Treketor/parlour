@@ -5,7 +5,7 @@ import { useEffect, useId, useMemo, useState, type MouseEvent } from "react";
 import { useLayoutTransition, useShouldReduceMotion } from "@/components/Providers";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { Button } from "@/components/ui/Button";
-import { Drawer } from "@/components/ui/Drawer";
+import { Modal } from "@/components/ui/Modal";
 import { GameCard } from "@/components/ui/GameCard";
 import { CatalogueList, ListHeader, ListRow } from "@/components/ui/ListRow";
 import type { MenuOption } from "@/components/ui/MenuSelect";
@@ -16,13 +16,16 @@ import { Select } from "@/components/ui/Select";
 import { Tag } from "@/components/ui/Tag";
 import { TextField } from "@/components/ui/TextField";
 import { SearchIcon } from "@/components/ui/icons";
+import { showsProgress } from "@/lib/data/edit-entry";
 import type { EntryTag, LibraryItem } from "@/lib/data/library";
 import { formatCount } from "@/lib/format";
 import {
   LIBRARY_SORTS,
   NO_FILTERS,
   filterEntries,
+  LIBRARY_PREFERENCES_COOKIE,
   hasFilters,
+  libraryPreferences,
   libraryViewParams,
   parseLibrarySort,
   parseLibraryView,
@@ -33,6 +36,7 @@ import {
 } from "@/lib/library-view";
 import { LAYOUT_ANIMATION_ITEM_LIMIT, transition } from "@/lib/motion";
 import { OWNERSHIP_STATES, ownershipLabel } from "@/lib/ownership";
+import { setPreferenceCookie } from "@/lib/preference-cookie";
 import { progressLabel, type Progress } from "@/lib/progress";
 import { naturalDirection, nextSort, sortEntries } from "@/lib/sort";
 import { EntryEditor } from "./EntryEditor";
@@ -81,11 +85,19 @@ export function LibraryBrowser({
   const reduceMotion = useShouldReduceMotion();
   const move = useLayoutTransition("move");
 
-  const visible = useMemo(
-    () => sortEntries(filterEntries(items, filters), sort.key, sort.direction),
-    [items, filters, sort],
+  // A game passed on has no progress to show, sort or filter by (DECISIONS.md 038).
+  const browsable = useMemo(
+    () =>
+      items.map((item) =>
+        showsProgress(item.ownership) ? item : { ...item, progress: undefined },
+      ),
+    [items],
   );
-  const progress = useMemo(() => progressCounts(items), [items]);
+  const visible = useMemo(
+    () => sortEntries(filterEntries(browsable, filters), sort.key, sort.direction),
+    [browsable, filters, sort],
+  );
+  const progress = useMemo(() => progressCounts(browsable), [browsable]);
   const platforms = useMemo(() => platformOptions(items), [items]);
   const tags = useMemo(() => tagOptions(items), [items]);
   const filtered = hasFilters(filters);
@@ -115,6 +127,8 @@ export function LibraryBrowser({
     // Kept in the address so a reload or the back button shows the same view,
     // without a server round trip: the whole library is already here.
     window.history.replaceState(window.history.state, "", addressFor(next, openId));
+    // Layout and order are also remembered for the next visit from the menu.
+    setPreferenceCookie(LIBRARY_PREFERENCES_COOKIE, libraryPreferences(next));
   }
 
   function openEntry(event: MouseEvent<HTMLAnchorElement>, id: string) {
@@ -148,6 +162,23 @@ export function LibraryBrowser({
       current.some((known) => known.id === tag.id)
         ? current
         : [...current, tag].sort((a, b) => a.name.localeCompare(b.name)),
+    );
+  }
+
+  function gamesWithTag(tagId: string): string[] {
+    return items
+      .filter((item) => item.tags.some((tag) => tag.id === tagId))
+      .map((item) => `${item.title} (${item.platform})`);
+  }
+
+  function forgetTag(tagId: string) {
+    setAllTags((current) => current.filter((tag) => tag.id !== tagId));
+    setItems((current) =>
+      current.map((item) =>
+        item.tags.some((tag) => tag.id === tagId)
+          ? { ...item, tags: item.tags.filter((tag) => tag.id !== tagId) }
+          : item,
+      ),
     );
   }
 
@@ -210,7 +241,7 @@ export function LibraryBrowser({
     <>
       {header}
       <div className={styles.browser}>
-        <Drawer open={openItem !== undefined} onClose={closeEntry} labelledBy={panelHeadingId}>
+        <Modal open={openItem !== undefined} onClose={closeEntry} labelledBy={panelHeadingId}>
           {openItem && (
             <EntryEditor
               key={openItem.id}
@@ -218,12 +249,14 @@ export function LibraryBrowser({
               headingId={panelHeadingId}
               allTags={allTags}
               onUpdate={updateItem}
+              gamesWithTag={gamesWithTag}
               onTagCreated={addKnownTag}
+              onTagDeleted={forgetTag}
               onRemoved={removeItem}
               onClose={closeEntry}
             />
           )}
-        </Drawer>
+        </Modal>
 
         <div className={styles.toolbar}>
           <div className={styles.filters}>

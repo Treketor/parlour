@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { SignInPrompt } from "@/components/shell/SignInPrompt";
 import { listLibrary, listTags } from "@/lib/data/library";
-import { parseLibraryView } from "@/lib/library-view";
+import {
+  LIBRARY_PREFERENCES_COOKIE,
+  parseLibraryView,
+  withLibraryPreferences,
+} from "@/lib/library-view";
+import { decodePreference } from "@/lib/preference-cookie";
 import { firstParam } from "@/lib/search-params";
 import { createClient } from "@/lib/supabase/server";
 import { LibraryBrowser } from "./LibraryBrowser";
@@ -31,12 +37,13 @@ export default async function LibraryPage({ searchParams }: PageProps<"/">) {
     searchParams,
   ]);
   const entry = firstParam(params.entry);
+  const remembered = decodePreference((await cookies()).get(LIBRARY_PREFERENCES_COOKIE)?.value);
 
   return (
     <LibraryBrowser
       items={items}
       tags={tags}
-      initialView={parseLibraryView(params)}
+      initialView={parseLibraryView(withLibraryPreferences(params, remembered))}
       initialEntryId={items.some((item) => item.id === entry) ? entry : null}
     />
   );

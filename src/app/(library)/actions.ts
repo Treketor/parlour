@@ -43,9 +43,14 @@ export async function updateEntry(input: unknown): Promise<EditResult> {
     .eq("id", request.entryId)
     .select("id");
 
-  // 23514: a check constraint, here the finish date against a start date saved earlier.
+  // 23514: a check constraint. The message names which one.
   if (error?.code === "23514") {
-    return { status: "failed", message: "The finish date cannot be before the start date." };
+    return {
+      status: "failed",
+      message: error.message.includes("progress_needs_ownership")
+        ? "Only a game you own can have progress. Mark it as owned first."
+        : "The finish date cannot be before the start date.",
+    };
   }
   if (error || data.length === 0) {
     if (error) console.error("Updating an entry failed", error);
@@ -112,6 +117,20 @@ export async function removeTag(input: unknown): Promise<EditResult> {
   if (error) {
     console.error("Removing a tag failed", error);
     return { status: "failed", message: "The tag was not removed. Try again." };
+  }
+  return { status: "saved" };
+}
+
+/** Deletes a tag everywhere: it comes off every game that has it. */
+export async function deleteTag(input: unknown): Promise<EditResult> {
+  const { tagId } = (input ?? {}) as Record<string, unknown>;
+  if (!isEntryId(tagId)) return NOT_UNDERSTOOD;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("tags").delete().eq("id", tagId).select("id");
+  if (error || data.length === 0) {
+    if (error) console.error("Deleting a tag failed", error);
+    return { status: "failed", message: "The tag was not deleted. Try again." };
   }
   return { status: "saved" };
 }

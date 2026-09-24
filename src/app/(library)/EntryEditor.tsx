@@ -1,6 +1,8 @@
 "use client";
 
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState, useTransition, type KeyboardEvent } from "react";
+import { useLayoutTransition } from "@/components/Providers";
 import { Button, IconButton } from "@/components/ui/Button";
 import { GameCover } from "@/components/ui/GameCover";
 import { CloseIcon } from "@/components/ui/icons";
@@ -13,18 +15,23 @@ import { TextField } from "@/components/ui/TextField";
 import {
   NOTES_MAX_LENGTH,
   TAG_MAX_LENGTH,
+  datesFor,
   datesInOrder,
   isIsoDate,
   normaliseTagName,
+  ownershipFits,
   progressChange,
   sameTagName,
+  showsProgress,
   todayIso,
+  tracksProgress,
   type EntryPatch,
 } from "@/lib/data/edit-entry";
 import type { EntryTag, LibraryItem } from "@/lib/data/library";
+import { transition } from "@/lib/motion";
 import { OWNERSHIP_STATES, ownershipLabel } from "@/lib/ownership";
 import { PROGRESS_STATES, progressDescription, progressLabel } from "@/lib/progress";
-import { addTag, removeEntry, removeTag, updateEntry } from "./actions";
+import { addTag, deleteTag, removeEntry, removeTag, updateEntry } from "./actions";
 import styles from "./entry-editor.module.css";
 
 const progressOptions = PROGRESS_STATES.map((state) => ({
@@ -34,15 +41,11 @@ const progressOptions = PROGRESS_STATES.map((state) => ({
   leading: <ProgressGlyph progress={state} />,
 }));
 
-const ownershipOptions = OWNERSHIP_STATES.map((state) => ({
-  value: state,
-  label: ownershipLabel[state],
-  description: {
-    owned: "You have it on this platform",
-    want_to_own: "On your list to buy",
-    not_interested: "Keep a record that you passed on it",
-  }[state],
-}));
+const ownershipDescription = {
+  owned: "You have it on this platform",
+  want_to_own: "On your list to buy",
+  not_interested: "Keep a record that you passed on it",
+} as const;
 
 /** Notes save this long after the last keystroke, and on leaving the field. */
 const NOTES_SAVE_DELAY_MS = 800;
@@ -50,16 +53,26 @@ const NOTES_SAVE_DELAY_MS = 800;
 /** Tags suggested under the tag field, from the ones already made. */
 const SUGGESTION_LIMIT = 8;
 
-type Field = "progress" | "ownership" | "rating" | "dates" | "notes" | "tags" | "remove";
+/**
+ * Years outside this range are a year still being typed ("0202" on the way
+ * to "2026") or a slip ("5012"), not a choice, so they are never saved.
+ */
+const EARLIEST_YEAR = 1950;
+const LATEST_YEAR = 2100;
+
+type Field = "progress" | "ownership" | "rating" | "dates" | "notes" | "tags";
 
 type EntryEditorProps = {
   item: LibraryItem;
-  /** Id for the title, which names the panel it sits in. */
+  /** Id for the title, which names the box it sits in. */
   headingId: string;
-  /** Every tag this person has, for suggestions. */
+  /** Every tag this person has, for suggestions and managing. */
   allTags: readonly EntryTag[];
+  /** Titles of the games carrying a tag, for the warning before deleting it. */
+  gamesWithTag: (tagId: string) => string[];
   onUpdate: (id: string, update: (item: LibraryItem) => LibraryItem) => void;
   onTagCreated: (tag: EntryTag) => void;
+  onTagDeleted: (tagId: string) => void;
   onRemoved: (id: string) => void;
   onClose: () => void;
 };
@@ -73,14 +86,17 @@ export function EntryEditor({
   item,
   headingId,
   allTags,
+  gamesWithTag,
   onUpdate,
   onTagCreated,
+  onTagDeleted,
   onRemoved,
   onClose,
 }: EntryEditorProps) {
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [saving, startSaving] = useTransition();
   const [saved, setSaved] = useState(false);
+  const move = useLayoutTransition("move");
 
   function setError(field: Field, message: string | undefined) {
     setErrors((current) => ({ ...current, [field]: message }));
@@ -111,6 +127,19 @@ export function EntryEditor({
     });
   }
 
+  const ownershipOptions = OWNERSHIP_STATES.map((state) => ({
+    value: state,
+    label: ownershipLabel[state],
+    ...(ownershipFits(state, item.progress)
+      ? { description: ownershipDescription[state] }
+      : { description: "Set progress back to Want to play first", disabled: true }),
+  }));
+  const tracked = tracksProgress(item.ownership);
+  const dates = tracked ? datesFor(item.progress) : null;
+
+  // Fields below one that appears or disappears slide to their new places.
+  const section = { layout: "position" as const, transition: { layout: move } };
+
   return (
     <article className={styles.editor} aria-labelledby={headingId}>
       <header className={styles.header}>
@@ -133,17 +162,8 @@ export function EntryEditor({
       </header>
 
       <div className={styles.fields}>
-        <div className={styles.pair}>
-          <Select
-            label="Progress"
-            options={progressOptions}
-            value={item.progress}
-            error={errors.progress}
-            onChange={(progress) => {
-              if (progress !== item.progress)
-                save("progress", progressChange(item, progress, todayIso()));
-            }}
-          />
+        {/* Ownership first: it decides whether progress applies at all. */}
+        <motion.div className={styles.pair} {...section}>
           <Select
             label="Ownership"
             options={ownershipOptions}
@@ -153,34 +173,76 @@ export function EntryEditor({
               if (ownership !== item.ownership) save("ownership", { ownership });
             }}
           />
-        </div>
+          {showsProgress(item.ownership) ? (
+            <Select
+              label="Progress"
+              options={progressOptions}
+              value={item.progress}
+              error={errors.progress}
+              disabled={!tracked}
+              {...(!tracked && { hint: "Mark it as owned to track progress" })}
+              onChange={(progress) => {
+                if (progress !== item.progress) {
+                  save("progress", progressChange(item, progress, todayIso()));
+                }
+              }}
+            />
+          ) : (
+            <p className={styles.passed}>Passed on, so there is no progress to track.</p>
+          )}
+        </motion.div>
 
-        <RatingInput
-          label="Your rating"
-          value={item.rating}
-          error={errors.rating}
-          onChange={(rating) => {
-            if (rating !== item.rating) save("rating", { rating });
-          }}
-        />
+        <AnimatePresence initial={false}>
+          {dates?.started && (
+            <motion.div
+              key="dates"
+              {...section}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: transition.enter }}
+              exit={{ opacity: 0, transition: transition.exit }}
+            >
+              <DateFields
+                item={item}
+                showFinished={dates.finished}
+                error={errors.dates}
+                onSave={(patch) => save("dates", patch)}
+                onError={(message) => setError("dates", message)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <DateFields
-          item={item}
-          error={errors.dates}
-          onSave={(patch) => save("dates", patch)}
-          onError={(message) => setError("dates", message)}
-        />
+        <motion.div {...section}>
+          <RatingInput
+            label="Your rating"
+            value={item.rating}
+            error={errors.rating}
+            onChange={(rating) => {
+              if (rating !== item.rating) save("rating", { rating });
+            }}
+          />
+        </motion.div>
 
-        <TagField
-          item={item}
-          allTags={allTags}
-          error={errors.tags}
-          onError={(message) => setError("tags", message)}
-          onUpdate={onUpdate}
-          onTagCreated={onTagCreated}
-        />
+        <motion.div {...section}>
+          <TagField
+            item={item}
+            allTags={allTags}
+            gamesWithTag={gamesWithTag}
+            error={errors.tags}
+            onError={(message) => setError("tags", message)}
+            onUpdate={onUpdate}
+            onTagCreated={onTagCreated}
+            onTagDeleted={onTagDeleted}
+          />
+        </motion.div>
 
-        <NotesField item={item} error={errors.notes} onSave={(notes) => save("notes", { notes })} />
+        <motion.div {...section}>
+          <NotesField
+            item={item}
+            error={errors.notes}
+            onSave={(notes) => save("notes", { notes })}
+          />
+        </motion.div>
       </div>
 
       <RemoveEntry item={item} onRemoved={onRemoved} />
@@ -190,44 +252,54 @@ export function EntryEditor({
 
 type DateFieldsProps = {
   item: LibraryItem;
+  showFinished: boolean;
   error: string | undefined;
   onSave: (patch: EntryPatch) => void;
   onError: (message: string | undefined) => void;
 };
 
-/** When you started and finished. Filled in for you when progress changes, if empty. */
-function DateFields({ item, error, onSave, onError }: DateFieldsProps) {
-  function change(field: "startedOn" | "finishedOn", raw: string) {
-    const value = raw === "" ? null : raw;
-    // Browsers only report a date once all of it is typed; a partial one is ignored.
-    if (value !== null && !isIsoDate(value)) return;
+/**
+ * When you started and finished, shown once they mean something. Filled in
+ * for you when progress changes, if empty.
+ */
+function DateFields({ item, showFinished, error, onSave, onError }: DateFieldsProps) {
+  function commit(field: "startedOn" | "finishedOn", value: string | null) {
     const next = { startedOn: item.startedOn, finishedOn: item.finishedOn, [field]: value };
     if (!datesInOrder(next.startedOn, next.finishedOn)) {
       onError("The finish date cannot be before the start date.");
       return;
     }
-    onSave({ [field]: value });
+    onError(undefined);
+    if (value !== item[field]) onSave({ [field]: value });
   }
 
   return (
     <fieldset className={styles.dates}>
-      {/* The two labels say it; the legend is there to group them for screen readers. */}
+      {/* The labels say it; the legend groups them for screen readers. */}
       <legend className="visually-hidden">Dates</legend>
       <div className={styles.pair}>
-        <TextField
+        <DateInput
           label="Started"
-          type="date"
-          value={item.startedOn ?? ""}
-          max={item.finishedOn ?? undefined}
-          onChange={(event) => change("startedOn", event.target.value)}
+          value={item.startedOn}
+          onCommit={(value) => commit("startedOn", value)}
+          onIncomplete={onError}
         />
-        <TextField
-          label="Finished"
-          type="date"
-          value={item.finishedOn ?? ""}
-          min={item.startedOn ?? undefined}
-          onChange={(event) => change("finishedOn", event.target.value)}
-        />
+        <AnimatePresence initial={false}>
+          {showFinished && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: transition.enter }}
+              exit={{ opacity: 0, transition: transition.exit }}
+            >
+              <DateInput
+                label="Finished"
+                value={item.finishedOn}
+                onCommit={(value) => commit("finishedOn", value)}
+                onIncomplete={onError}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       {error && (
         <p className={styles.error} role="alert">
@@ -238,21 +310,82 @@ function DateFields({ item, error, onSave, onError }: DateFieldsProps) {
   );
 }
 
+type DateInputProps = {
+  label: string;
+  value: string | null;
+  onCommit: (value: string | null) => void;
+  onIncomplete: (message: string) => void;
+};
+
+/**
+ * A date that is only judged once it is whole. Browsers report every
+ * keystroke of the year as a date ("0002", "0020", "0202"), and checking
+ * those against the start date refused the year before it was finished.
+ */
+function DateInput({ label, value, onCommit, onIncomplete }: DateInputProps) {
+  const [draft, setDraft] = useState(value ?? "");
+  // A date filled in from outside (progress changed) replaces the draft.
+  const [shown, setShown] = useState(value);
+  if (value !== shown) {
+    setShown(value);
+    setDraft(value ?? "");
+  }
+
+  const whole = (raw: string) => {
+    const year = Number(raw.slice(0, 4));
+    return isIsoDate(raw) && year >= EARLIEST_YEAR && year <= LATEST_YEAR;
+  };
+
+  return (
+    <TextField
+      label={label}
+      type="date"
+      value={draft}
+      onChange={(event) => {
+        const raw = event.target.value;
+        setDraft(raw);
+        // Picking from the calendar, or typing the last digit of a real year, saves at once.
+        if (raw === "" || whole(raw)) onCommit(raw === "" ? null : raw);
+      }}
+      onBlur={() => {
+        if (draft === (value ?? "") || draft === "" || whole(draft)) return;
+        onIncomplete(`Enter the whole ${label.toLowerCase()} date: day, month and year.`);
+      }}
+    />
+  );
+}
+
 type TagFieldProps = {
   item: LibraryItem;
   allTags: readonly EntryTag[];
+  gamesWithTag: (tagId: string) => string[];
   error: string | undefined;
   onError: (message: string | undefined) => void;
   onUpdate: EntryEditorProps["onUpdate"];
   onTagCreated: EntryEditorProps["onTagCreated"];
+  onTagDeleted: EntryEditorProps["onTagDeleted"];
 };
 
 /** A new tag's id until the server has made it. */
 const PENDING_TAG = "pending:";
 
-/** Anything true alongside progress: "Co-op", "Want to 100%", "Played with Sam". */
-function TagField({ item, allTags, error, onError, onUpdate, onTagCreated }: TagFieldProps) {
+/**
+ * Anything true alongside progress: "Co-op", "Want to 100%", "Played with
+ * Sam". Tags on this game are drawn in the accent with a remove control;
+ * your other tags are dashed with a plus, ready to add.
+ */
+function TagField({
+  item,
+  allTags,
+  gamesWithTag,
+  error,
+  onError,
+  onUpdate,
+  onTagCreated,
+  onTagDeleted,
+}: TagFieldProps) {
   const [draft, setDraft] = useState("");
+  const [managing, setManaging] = useState(false);
   const [, startTagging] = useTransition();
 
   const onEntry = (name: string) => item.tags.some((tag) => sameTagName(tag.name, name));
@@ -315,21 +448,29 @@ function TagField({ item, allTags, error, onError, onUpdate, onTagCreated }: Tag
   return (
     <fieldset className={styles.tags}>
       <legend className={styles.legend}>Tags</legend>
-      {item.tags.length > 0 && (
-        <ul className={styles.tagList} aria-label="Tags on this game">
-          {item.tags.map((tag) => (
-            <li key={tag.id}>
-              <Tag
-                onRemove={() => remove(tag)}
-                removeLabel={`Remove the tag ${tag.name}`}
-                disabled={tag.id.startsWith(PENDING_TAG)}
-              >
-                {tag.name}
-              </Tag>
-            </li>
-          ))}
-        </ul>
-      )}
+
+      <div className={styles.tagGroup}>
+        <h3 className={styles.groupLabel}>On this game</h3>
+        {item.tags.length > 0 ? (
+          <ul className={styles.tagList} aria-label="Tags on this game">
+            {item.tags.map((tag) => (
+              <li key={tag.id}>
+                <Tag
+                  tone="applied"
+                  onRemove={() => remove(tag)}
+                  removeLabel={`Take the tag ${tag.name} off this game`}
+                  disabled={tag.id.startsWith(PENDING_TAG)}
+                >
+                  {tag.name}
+                </Tag>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.none}>None yet</p>
+        )}
+      </div>
+
       <TextField
         label="Add a tag"
         hideLabel
@@ -342,16 +483,116 @@ function TagField({ item, allTags, error, onError, onUpdate, onTagCreated }: Tag
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={onKeyDown}
       />
-      {suggestions.length > 0 && (
-        <div className={styles.suggestions} role="group" aria-label="Your other tags">
-          {suggestions.map((tag) => (
-            <Tag key={tag.id} onToggle={() => add(tag.name)}>
-              {tag.name}
-            </Tag>
-          ))}
+
+      {allTags.length > 0 && (
+        <div className={styles.tagGroup}>
+          <div className={styles.groupHead}>
+            <h3 className={styles.groupLabel}>{managing ? "All your tags" : "Your other tags"}</h3>
+            <Button size="sm" variant="quiet" onClick={() => setManaging((current) => !current)}>
+              {managing ? "Done" : "Manage tags"}
+            </Button>
+          </div>
+          {managing ? (
+            <ManageTags
+              allTags={allTags}
+              gamesWithTag={gamesWithTag}
+              onDeleted={onTagDeleted}
+              onError={onError}
+            />
+          ) : suggestions.length > 0 ? (
+            <div className={styles.tagList} role="group" aria-label="Your other tags">
+              {suggestions.map((tag) => (
+                <Tag key={tag.id} tone="suggestion" onToggle={() => add(tag.name)}>
+                  {tag.name}
+                </Tag>
+              ))}
+            </div>
+          ) : (
+            <p className={styles.none}>
+              {search ? "No other tags match" : "All your tags are on this game"}
+            </p>
+          )}
         </div>
       )}
     </fieldset>
+  );
+}
+
+type ManageTagsProps = {
+  allTags: readonly EntryTag[];
+  gamesWithTag: (tagId: string) => string[];
+  onDeleted: (tagId: string) => void;
+  onError: (message: string | undefined) => void;
+};
+
+/**
+ * Deleting a tag takes it off every game, so it asks first and names them.
+ * Like removing a game, it waits for the server before it goes.
+ */
+function ManageTags({ allTags, gamesWithTag, onDeleted, onError }: ManageTagsProps) {
+  const [confirming, setConfirming] = useState<EntryTag | null>(null);
+  const [deleting, startDeleting] = useTransition();
+
+  function confirmDelete(tag: EntryTag) {
+    onError(undefined);
+    startDeleting(async () => {
+      const result = await deleteTag({ tagId: tag.id });
+      if (result.status === "saved") {
+        setConfirming(null);
+        onDeleted(tag.id);
+      } else {
+        onError(result.message);
+      }
+    });
+  }
+
+  if (confirming) {
+    const games = gamesWithTag(confirming.id);
+    return (
+      <div className={styles.confirm} role="group" aria-label={`Delete the tag ${confirming.name}`}>
+        <p className={styles.confirmText}>
+          {games.length === 0
+            ? `Delete the tag “${confirming.name}”? No games have it.`
+            : `Delete the tag “${confirming.name}”? It comes off ${
+                games.length === 1 ? "1 game" : `${games.length} games`
+              }:`}
+        </p>
+        {games.length > 0 && (
+          <ul className={styles.affected}>
+            {games.map((title) => (
+              <li key={title}>{title}</li>
+            ))}
+          </ul>
+        )}
+        <div className={styles.confirmActions}>
+          <Button
+            // The chip that asked has gone; focus moves to the question's answer.
+            autoFocus
+            variant="danger"
+            size="sm"
+            disabled={deleting}
+            onClick={() => confirmDelete(confirming)}
+          >
+            {deleting ? "Deleting" : "Delete tag"}
+          </Button>
+          <Button size="sm" variant="quiet" disabled={deleting} onClick={() => setConfirming(null)}>
+            Keep it
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ul className={styles.tagList} aria-label="All your tags">
+      {allTags.map((tag) => (
+        <li key={tag.id}>
+          <Tag onRemove={() => setConfirming(tag)} removeLabel={`Delete the tag ${tag.name}`}>
+            {tag.name}
+          </Tag>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -361,7 +602,7 @@ type NotesFieldProps = {
   onSave: (notes: string) => void;
 };
 
-/** Free text, saved shortly after typing stops and when the panel closes. */
+/** Free text, saved shortly after typing stops and when the box closes. */
 function NotesField({ item, error, onSave }: NotesFieldProps) {
   const [notes, setNotes] = useState(item.notes);
   // The newest text and save, for the timer and the close below to read.
@@ -380,7 +621,7 @@ function NotesField({ item, error, onSave }: NotesFieldProps) {
     return () => window.clearTimeout(timer);
   }, [notes]);
 
-  // Closing the panel mid-sentence still keeps the sentence.
+  // Closing the box mid-sentence still keeps the sentence.
   useEffect(() => flush, []);
 
   return (
@@ -452,7 +693,7 @@ function RemoveEntry({ item, onRemoved }: RemoveEntryProps) {
           )}
         </div>
       ) : (
-        <Button size="sm" variant="quiet" onClick={() => setConfirming(true)}>
+        <Button size="sm" variant="danger" onClick={() => setConfirming(true)}>
           Remove from library
         </Button>
       )}
