@@ -154,12 +154,12 @@
 }
 
 @media (hover: hover) {
-  .row:not(.header, .loading):hover::before {
+  .row:not(.header, .loading, .static):hover::before {
     opacity: 1;
   }
 }
 
-.row:not(.header, .loading):active::before {
+.row:not(.header, .loading, .static):active::before {
   background: var(--color-surface-raised);
   opacity: 1;
   transition-duration: 0s;

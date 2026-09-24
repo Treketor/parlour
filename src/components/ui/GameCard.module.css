@@ -32,23 +32,23 @@
 }
 
 @media (hover: hover) {
-  .card:not(.loading):hover .cover::before {
+  .card:not(.loading, .static):hover .cover::before {
     opacity: 0.06;
   }
 
-  .card:not(.loading):hover .title {
+  .card:not(.loading, .static):hover .title {
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.2em;
   }
 }
 
-.card:not(.loading):active .cover {
+.card:not(.loading, .static):active .cover {
   transform: scale(calc(1 - 0.02 * var(--motion-distance)));
   transition-duration: 0s;
 }
 
-.card:not(.loading):active .cover::before {
+.card:not(.loading, .static):active .cover::before {
   opacity: 0.1;
   transition-duration: 0s;
 }

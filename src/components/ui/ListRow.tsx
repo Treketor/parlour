@@ -39,13 +39,14 @@ export function CatalogueList({
 
 type ListRowProps = {
   game: ListRowData;
-  href: string;
+  /** Without one the row is plain text, with no hover or press state promising a link. */
+  href?: string | undefined;
   selected?: boolean;
 };
 
 export function ListRow({ game, href, selected = false }: ListRowProps) {
-  return (
-    <Link href={href} className={styles.row} aria-current={selected ? "true" : undefined}>
+  const content = (
+    <>
       <span className={styles.thumb}>
         <GameCover title={game.title} src={game.coverUrl} size="thumb" />
       </span>
@@ -77,6 +78,13 @@ export function ListRow({ game, href, selected = false }: ListRowProps) {
       <span className={cx(styles.cell, styles.added, styles.number)}>
         <time dateTime={game.addedAt.toISOString()}>{formatDate(game.addedAt)}</time>
       </span>
+    </>
+  );
+
+  if (href === undefined) return <div className={cx(styles.row, styles.static)}>{content}</div>;
+  return (
+    <Link href={href} className={styles.row} aria-current={selected ? "true" : undefined}>
+      {content}
     </Link>
   );
 }

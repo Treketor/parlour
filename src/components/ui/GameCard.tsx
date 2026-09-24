@@ -16,11 +16,16 @@ export type GameCardData = {
   rating?: Rating | null | undefined;
 };
 
-type GameCardProps = { game: GameCardData; href: string; className?: string | undefined };
+type GameCardProps = {
+  game: GameCardData;
+  /** Without one the card is plain, with no hover or press state promising a link. */
+  href?: string | undefined;
+  className?: string | undefined;
+};
 
 export function GameCard({ game, href, className }: GameCardProps) {
-  return (
-    <Link href={href} className={cx(styles.card, className)}>
+  const content = (
+    <>
       <GameCover title={game.title} src={game.coverUrl} className={styles.cover} />
       <span className={styles.title}>{game.title}</span>
       <span className={styles.meta}>
@@ -42,6 +47,15 @@ export function GameCard({ game, href, className }: GameCardProps) {
           )}
         </span>
       </span>
+    </>
+  );
+
+  if (href === undefined) {
+    return <div className={cx(styles.card, styles.static, className)}>{content}</div>;
+  }
+  return (
+    <Link href={href} className={cx(styles.card, className)}>
+      {content}
     </Link>
   );
 }
