@@ -23,4 +23,8 @@ export const serverEnv = {
   get supabaseSecretKey() {
     return required("SUPABASE_SECRET_KEY");
   },
+  /** Optional: without it, Metacritic and RAWG scores are simply not looked up. */
+  get rawgApiKey(): string | undefined {
+    return process.env.RAWG_API_KEY || undefined;
+  },
 };
