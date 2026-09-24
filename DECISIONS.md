@@ -413,3 +413,7 @@ Revises 040 after review: one source, IGDB, was not credible enough on its own, 
 ## 051. A sign-in code finishes sign-in wherever it lands
 
 Supabase returns an emailed link to the address the app asked for only when that address is on the project's redirect list. Otherwise it falls back to the Site URL, the home page. Nothing there finished sign-in, so a small mismatch in the dashboard left you signed out with no error. The proxy now forwards any `?code=` outside the confirm page to it, keeping the page it landed on as the place to return to. The redirect list should still name the confirm page, since a code sent to a different domain cannot be finished: its other half is a cookie on the domain that asked.
+
+## 052. Saying which sign-in limit was hit
+
+Supabase answers 429 for two different limits: a minute between links to one address, and a cap on the emails the whole project may send, which is 2 an hour on the built-in sender. Both used to read "wait a minute", which is wrong for the second. The project-wide cap, `over_email_send_rate_limit`, now says so. The cap can only be raised with custom SMTP, which is the next step once there is a domain.

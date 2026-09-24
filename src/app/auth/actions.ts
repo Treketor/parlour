@@ -49,7 +49,18 @@ export async function sendSignInLink(
   if (!error || error.code === "otp_disabled" || error.code === "signup_disabled") {
     return { status: "sent", email: checked.email };
   }
-  if (error.status === 429 || error.code === "over_email_send_rate_limit") {
+  // Two different limits share the 429. One spaces out links to one address by
+  // a minute; the other caps how many emails the project may send, which on
+  // Supabase's built-in sender is a couple an hour (DECISIONS.md 052).
+  if (error.code === "over_email_send_rate_limit") {
+    return {
+      status: "failed",
+      message:
+        "Too many sign-in emails have gone out in the last hour. Try again later, or use the last link you were sent.",
+      value,
+    };
+  }
+  if (error.status === 429) {
     return {
       status: "failed",
       message: "A link was sent very recently. Wait a minute, then ask for another.",
