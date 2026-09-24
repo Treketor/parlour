@@ -12,7 +12,7 @@
 8. Game detail page: media, release info, scores, trailers, walkthrough links (done)
 9. Prices: IsThereAnyDeal matching, current prices, history chart (done)
 10. Play queue (done)
-11. Accessibility, performance and reduced-motion pass; README screenshots; deploy (deploy in progress)
+11. Accessibility, performance and reduced-motion pass; README screenshots; deploy (done)
 
 ## Done
 
@@ -53,11 +53,10 @@
 
 - Stage 10 review: sort by platform with headings; a one-row library toolbar with a Filters panel; a sectioned entry editor; one-press queueing; queue rows drag from anywhere.
 
-- Stage 11: the search list became a catalogue table. axe audit of every page and open state, fixing busy buttons without a name, unreachable tag suggestions and focus lost after the editor closed. Responsive WebP covers, eager first results, no footer shift. README with screenshots. Functions pinned to Tokyo, next to the database.
+- Stage 11: the search list became a catalogue table. axe audit of every page and open state, fixing busy buttons without a name, unreachable tag suggestions and focus lost after the editor closed. Responsive WebP covers, eager first results, no footer shift. README with screenshots. Functions pinned to Tokyo, next to the database. Live at parlour-rose.vercel.app, deployed from `main` on every push.
 
 ## Next
 
-- Deploy: import the repo in Vercel, add the environment variables, add the production URL to Supabase's redirect URLs.
 - Custom SMTP (Resend suggested) once there is a domain, then the Magic Link template change in the README.
 
 ## Later

@@ -2,6 +2,8 @@
 
 A catalogue of the games I own, have played and want to play next.
 
+Live at [parlour-rose.vercel.app](https://parlour-rose.vercel.app). Search and game pages are open to anyone; libraries are invite-only.
+
 Parlour keeps one record per game per platform: what you own, how far you got, what you thought of it, and what you want to play next. Game data comes from IGDB, scores from Metacritic (via RAWG) and IGDB, and prices by region from IsThereAnyDeal.
 
 ![The library as a wall of covers](docs/screenshots/library-covers.png)
