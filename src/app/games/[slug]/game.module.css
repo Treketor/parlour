@@ -59,9 +59,28 @@
 .facts {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1) var(--space-4);
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+}
+
+.genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Genres are labels, boxed like tags, so they never read as part of the date. */
+.genre {
+  padding: var(--space-0-5) var(--space-2);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
 }
 
 /* Scores: two figures on one rule, each with what it rests on beneath. */
@@ -247,18 +266,45 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * A fixed frame, so stepping between pictures of different shapes does not
+ * resize the box, and short enough that the page shows around it. Pictures
+ * that overflowed it were what looked zoomed in.
+ */
 .viewerFrame {
   position: relative;
   display: grid;
-  aspect-ratio: 16 / 9;
+  /* A definite track, so the picture's percentage limits resolve against the frame. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+  height: min(70vh, 45rem);
   background: var(--color-canvas);
 }
 
+/* The whole picture, as large as the frame allows, never cropped or spilling out. */
 .viewerImage {
   grid-area: 1 / 1;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+/* A video keeps its 16:9 shape and is as large as fits under the header. */
+.videoFrame {
+  position: relative;
+  width: min(100%, calc(70vh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  margin-inline: auto;
+  background: var(--color-canvas);
+}
+
+.videoFrame iframe {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  border: 0;
 }
 
 .viewerNav {
@@ -290,14 +336,6 @@
   position: relative;
   aspect-ratio: 16 / 9;
   background: var(--color-surface);
-}
-
-.trailerPlayer {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
 }
 
 /* The play mark: a square of canvas colour, so it reads over any poster without a shadow. */
@@ -391,32 +429,85 @@
 
 .entry {
   display: grid;
-  gap: var(--space-0-5);
-  padding-block: var(--space-2);
+  gap: var(--space-1-5);
+  padding-block: var(--space-3);
   border-bottom: var(--hairline);
-  color: inherit;
   font-size: var(--text-sm);
-  text-decoration: none;
 }
 
-@media (hover: hover) {
-  a.entry:hover .entryPlatform {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
-  }
+.entryHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 
 .entryPlatform {
   font-weight: var(--ui-strong-weight);
 }
 
+.entryRating {
+  font-weight: var(--ui-strong-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.entryRatingOf {
+  color: var(--color-text-faint);
+  font-weight: 400;
+}
+
 .entryStatus {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1-5);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.entryDates {
   color: var(--color-text-faint);
   font-size: var(--text-xs);
+}
+
+.entryTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The same accent as tags on a game in the editor. */
+.entryTags li {
+  padding-inline: var(--space-1-5);
+  border: 1px solid var(--color-accent-line);
+  border-radius: var(--radius-control);
+  background: var(--color-accent-wash);
+  color: var(--color-accent);
+  font-size: var(--text-2xs);
+  line-height: 1.5;
+}
+
+/* Your words, a few lines of them; the whole note is in the editor. */
+.entryNotes {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--leading-reading);
+  white-space: pre-line;
+}
+
+.entryEdit {
+  justify-self: start;
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 }
 
 /* Loading: the same boxes, filled with placeholders. */
@@ -443,4 +534,15 @@
 
 .moreButton {
   justify-self: start;
+}
+
+.scoreElsewhere {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 }

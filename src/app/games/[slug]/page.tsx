@@ -3,7 +3,12 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { GameCover } from "@/components/ui/GameCover";
 import { ExternalIcon } from "@/components/ui/icons";
-import { libraryStatusFor, platformHabits, type EntryStatus } from "@/lib/data/library";
+import {
+  libraryStatusFor,
+  listLibrary,
+  platformHabits,
+  type EntryStatus,
+} from "@/lib/data/library";
 import { formatDate } from "@/lib/format";
 import { guideLinks, releaseLines, storeLinks } from "@/lib/game-detail";
 import { igdbImageUrl } from "@/lib/igdb-images";
@@ -32,9 +37,13 @@ export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getClaims();
   const signedIn = Boolean(auth?.claims);
-  const [statuses, habits] = signedIn
-    ? await Promise.all([libraryStatusFor(supabase, [game.id]), platformHabits(supabase)])
-    : [new Map<string, EntryStatus>(), {}];
+  const [statuses, habits, entries] = signedIn
+    ? await Promise.all([
+        libraryStatusFor(supabase, [game.id]),
+        platformHabits(supabase),
+        listLibrary(supabase, { gameId: game.id }),
+      ])
+    : [new Map<string, EntryStatus>(), {}, []];
 
   const releases = releaseLines(game.releases);
   const links = [...storeLinks(game.externalIds), ...guideLinks(game.name)];
@@ -52,6 +61,7 @@ export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
         <LibraryPanel
           game={game}
           statuses={Object.fromEntries(statuses)}
+          details={Object.fromEntries(entries.map((entry) => [entry.id, entry]))}
           habits={habits}
           signedIn={signedIn}
           returnTo={`/games/${game.slug}`}
@@ -63,12 +73,18 @@ export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
           <h1 id="game-title" className={styles.title}>
             {game.name}
           </h1>
-          <p className={styles.facts}>
-            <span>{released ? formatDate(released) : "Release date TBA"}</span>
-            {game.genres.map((genre) => (
-              <span key={genre}>{genre}</span>
-            ))}
-          </p>
+          <div className={styles.facts}>
+            <p>{released ? formatDate(released) : "Release date TBA"}</p>
+            {game.genres.length > 0 && (
+              <ul className={styles.genres} aria-label="Genres">
+                {game.genres.map((genre) => (
+                  <li key={genre} className={styles.genre}>
+                    {genre}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </header>
 
         <Scores game={game} />

@@ -5,7 +5,8 @@ import { ProgressGlyph } from "@/components/ui/ProgressGlyph";
 import type { CatalogueGame } from "@/lib/catalogue";
 import { entryKey } from "@/lib/data/add-entry";
 import { showsProgress } from "@/lib/data/edit-entry";
-import type { EntryStatus } from "@/lib/data/library";
+import type { EntryStatus, LibraryItem } from "@/lib/data/library";
+import { formatDate } from "@/lib/format";
 import { ownershipLabel } from "@/lib/ownership";
 import { platformLabel } from "@/lib/platforms";
 import { progressLabel } from "@/lib/progress";
@@ -16,17 +17,27 @@ import styles from "./game.module.css";
 type LibraryPanelProps = {
   game: CatalogueGame;
   statuses: Readonly<Record<string, EntryStatus>>;
+  /** Everything you have recorded on each entry, by entry id. */
+  details: Readonly<Record<string, LibraryItem>>;
   habits: Readonly<Record<number, number>>;
   signedIn: boolean;
   returnTo: string;
 };
 
 /**
- * This game in your library: an entry per platform you have it on, each
- * opening in the library's editor, and the same platform picker and add
- * button as search, so adding works the same everywhere.
+ * This game in your library: for each platform you have it on, your
+ * progress, rating, dates, tags and notes, with a link to edit them in the
+ * library. Below, the same platform picker and add button as search, so
+ * adding works the same everywhere.
  */
-export function LibraryPanel({ game, statuses, habits, signedIn, returnTo }: LibraryPanelProps) {
+export function LibraryPanel({
+  game,
+  statuses,
+  details,
+  habits,
+  signedIn,
+  returnTo,
+}: LibraryPanelProps) {
   const session = useSearchSession(statuses);
   const state = useSearchEntry(game, session, habits);
   const entries = state.platforms.flatMap((platform) => {
@@ -44,7 +55,11 @@ export function LibraryPanel({ game, statuses, habits, signedIn, returnTo }: Lib
         <ul className={styles.entries}>
           {entries.map(({ platform, entry }) => (
             <li key={platform.id}>
-              <EntryLink platform={platformLabel(platform.name)} entry={entry} />
+              <EntrySummary
+                platform={platformLabel(platform.name)}
+                entry={entry}
+                detail={details[entry.entryId]}
+              />
             </li>
           ))}
         </ul>
@@ -63,30 +78,58 @@ export function LibraryPanel({ game, statuses, habits, signedIn, returnTo }: Lib
   );
 }
 
-function EntryLink({ platform, entry }: { platform: string; entry: EntryStatus }) {
-  const status = (
-    <span className={styles.entryStatus}>
-      {showsProgress(entry.ownership) && <ProgressGlyph progress={entry.progress} />}
-      {showsProgress(entry.ownership)
-        ? `${progressLabel[entry.progress]}, ${ownershipLabel[entry.ownership].toLowerCase()}`
-        : ownershipLabel[entry.ownership]}
-    </span>
-  );
+type EntrySummaryProps = {
+  platform: string;
+  entry: EntryStatus;
+  /** Absent for an entry added on this page, which has nothing else recorded yet. */
+  detail: LibraryItem | undefined;
+};
 
-  // Just added: there is nothing to open until the server has made the entry.
-  if (entry.entryId === PENDING) {
-    return (
-      <span className={styles.entry}>
-        <span className={styles.entryPlatform}>{platform}</span>
-        {status}
-      </span>
-    );
-  }
+const day = (iso: string) => formatDate(new Date(`${iso}T00:00:00Z`));
+
+function EntrySummary({ platform, entry, detail }: EntrySummaryProps) {
+  const progress = showsProgress(entry.ownership);
+  const dates = [
+    detail?.startedOn ? `Started ${day(detail.startedOn)}` : null,
+    detail?.finishedOn ? `finished ${day(detail.finishedOn)}` : null,
+  ].filter((part) => part !== null);
 
   return (
-    <Link href={`/?entry=${entry.entryId}`} className={styles.entry}>
-      <span className={styles.entryPlatform}>{platform}</span>
-      {status}
-    </Link>
+    <div className={styles.entry}>
+      <div className={styles.entryHead}>
+        <span className={styles.entryPlatform}>{platform}</span>
+        {detail?.rating != null && (
+          <span className={styles.entryRating} aria-label={`Rated ${detail.rating} out of 10`}>
+            {detail.rating}
+            <span className={styles.entryRatingOf}>/10</span>
+          </span>
+        )}
+      </div>
+      <span className={styles.entryStatus}>
+        {progress && <ProgressGlyph progress={entry.progress} />}
+        {progress
+          ? `${progressLabel[entry.progress]}, ${ownershipLabel[entry.ownership].toLowerCase()}`
+          : ownershipLabel[entry.ownership]}
+      </span>
+      {dates.length > 0 && (
+        <span className={styles.entryDates}>
+          {dates.join(", ").replace(/^finished/, "Finished")}
+        </span>
+      )}
+      {detail && detail.tags.length > 0 && (
+        <ul className={styles.entryTags} aria-label="Tags">
+          {detail.tags.map((tag) => (
+            <li key={tag.id}>{tag.name}</li>
+          ))}
+        </ul>
+      )}
+      {detail?.notes && <p className={styles.entryNotes}>{detail.notes}</p>}
+      {/* Just added: there is nothing to open until the server has made the entry. */}
+      {entry.entryId !== PENDING && (
+        <Link href={`/?entry=${entry.entryId}`} className={styles.entryEdit}>
+          Edit in your library
+        </Link>
+      )}
+    </div>
   );
 }

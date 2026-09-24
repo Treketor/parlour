@@ -143,8 +143,12 @@ export type LibraryItem = {
  * personal library is hundreds of rows at most, and local filtering answers
  * on the keystroke instead of after a round trip (DECISIONS.md 034).
  */
-export async function listLibrary(client: Client): Promise<LibraryItem[]> {
-  const { data, error } = await client
+export async function listLibrary(
+  client: Client,
+  /** Only this game's entries, for its page. */
+  options: { gameId?: number } = {},
+): Promise<LibraryItem[]> {
+  let query = client
     .from("library_entries")
     .select(
       `id, game_id, platform_id, ownership, progress, rating, notes, started_on, finished_on, created_at,
@@ -153,6 +157,8 @@ export async function listLibrary(client: Client): Promise<LibraryItem[]> {
        entry_tags(tags(id, name))`,
     )
     .order("created_at", { ascending: false });
+  if (options.gameId !== undefined) query = query.eq("game_id", options.gameId);
+  const { data, error } = await query;
   if (error) throw error;
 
   return data.map((row) => {
