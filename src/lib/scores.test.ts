@@ -1,21 +1,40 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { MIN_CRITIC_RATINGS, scoreToShow } from "./scores";
+import { combinedScore, compactCount } from "./scores";
 
-describe("scoreToShow", () => {
-  it("rounds to a whole number and keeps the count", () => {
-    expect(scoreToShow(84.71, 7, MIN_CRITIC_RATINGS)).toEqual({ value: 85, count: 7 });
+describe("combinedScore", () => {
+  it("weights each average by how many ratings it rests on", () => {
+    // Hades: players 89 from 1,757, critics 94 from 17.
+    expect(combinedScore({ rating: 89, count: 1757 }, { rating: 94, count: 17 })).toEqual({
+      value: 89,
+      count: 1774,
+    });
   });
 
-  it("hides a score with too few ratings behind it", () => {
-    expect(scoreToShow(95, 2, MIN_CRITIC_RATINGS)).toBeNull();
+  it("works with only one kind of score", () => {
+    expect(combinedScore({ rating: null, count: 0 }, { rating: 84.7, count: 12 })).toEqual({
+      value: 85,
+      count: 12,
+    });
   });
 
-  it("shows a score at exactly the minimum", () => {
-    expect(scoreToShow(70, 3, MIN_CRITIC_RATINGS)).toEqual({ value: 70, count: 3 });
+  it("shows nothing with fewer than ten ratings behind it", () => {
+    expect(combinedScore({ rating: 95, count: 4 }, { rating: 90, count: 5 })).toBeNull();
   });
 
-  it("hides a missing score", () => {
-    expect(scoreToShow(null, 100, MIN_CRITIC_RATINGS)).toBeNull();
+  it("ignores a count with no score attached", () => {
+    expect(combinedScore({ rating: null, count: 50 }, { rating: 80, count: 3 })).toBeNull();
+  });
+});
+
+describe("compactCount", () => {
+  it.each([
+    [7, "7"],
+    [940, "940"],
+    [1000, "1k"],
+    [1774, "1.7k"],
+    [12_450, "12k"],
+  ])("%d reads as %s", (count, text) => {
+    expect(compactCount(count)).toBe(text);
   });
 });
