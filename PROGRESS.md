@@ -8,7 +8,7 @@
 4. IGDB integration: proxy, token and rate handling, catalogue cache (done)
 5. Search and add to library (done)
 6. Library browsing: list and grid, filter and sort (done)
-7. Library entry editing: progress, ownership, rating, tags, notes (awaiting review)
+7. Library entry editing: progress, ownership, rating, tags, notes (done)
 8. Game detail page: media, release info, scores, trailers, walkthrough links
 9. Prices: IsThereAnyDeal matching, current prices, history chart
 10. Play queue
@@ -33,6 +33,8 @@
 
 - Stage 6 review: every dropdown is now the app's own animated menu (it stays on screen, supports typeahead and truncates long names); search results can be shown as a list.
 
+- Stage 7 second review: dates are opt-in (no automatic filling); on phones the library filters and sort fold into a Filters box.
+
 - Stage 7 review: the entry opens in a centred box; progress, dates and ownership follow each other (with a database check); tags look different on and off a game, show in the library, and can be deleted with a warning; the library and search remember their layout and last search; dropdowns unfold from their box; larger search list covers.
 
 - Stage 7: an entry panel over the library, opened from any row or card and kept in the address; progress, ownership, rating, start and finish dates, tags and notes, each saved as it changes and rolled back with a reason if refused; start and finish dates filled in from progress when empty; removing an entry with an in-place confirmation.
@@ -44,6 +46,7 @@
 ## Later
 
 - Search filters: released games only, a release-year range, platform. Suggested at stage 5 review; the library filters in stage 6 come first.
+- Written reviews: a few lines alongside the 1 to 10 rating, to explain it. Suggested at stage 7 review.
 
 ## Known issues
 

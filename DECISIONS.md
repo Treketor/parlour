@@ -298,3 +298,8 @@ The card and the row share one hook and one set of controls, so adding works ide
 - **The library and search remember you,** in cookies so the server draws the right thing first with no flash. The library keeps its layout and order (filters are for the moment). Search keeps the last query, sort and layout, and going to Search from the menu or "Add a game" returns to it. Submitting an empty search forgets it. An address that sets these always wins, so shared links show what was shared.
 - **Dropdowns unfold from their box.** The menu sits 2px under its trigger and stretches down out of it, and its choices fade in once it has room, so the stretch never shows on the text.
 - **Search list covers are 4.5rem wide,** big enough to recognise, and each row is centred vertically.
+
+## 039. Dates are offered, not asked for; filters fold away on phones
+
+- **Start and finish dates are opt-in** (revises 037 and 038). Progress no longer fills in today's date, and the date fields stay hidden until a date exists or you choose "Add when you started" (or "...and finished"). Filling in a whole library should never feel like it needs dates for every game.
+- **On phones, the library toolbar is two rows:** the title filter, then a Filters button next to the List/Grid switch. The button shows how many filters are active, and opens a "Filter and sort" box with the progress chips, the ownership, platform and tag filters, the sort, and a "Show N games" button that reports what the filters leave. From 48rem everything is back inline, and an open box closes itself if the window widens past that point.
