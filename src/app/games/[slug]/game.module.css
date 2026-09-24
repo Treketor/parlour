@@ -620,3 +620,180 @@
   font-size: var(--text-2xs);
   font-weight: var(--ui-strong-weight);
 }
+
+/* A section heading with a control beside it, on the same rule. */
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--hairline);
+}
+
+.sectionHead .sectionTitle {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.regionPicker {
+  width: 13rem;
+}
+
+.priceNote {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.priceCredit {
+  color: var(--color-text-faint);
+  font-size: var(--text-2xs);
+}
+
+/*
+ * Prices: the best one now, large, with the lows beside it; then the year
+ * as a step line; then every shop, cheapest first.
+ */
+.prices {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.bestPrice {
+  display: grid;
+  gap: var(--space-1);
+}
+
+/* Proportional figures: fixed-width ones spaced the point in "£2.18" out like a gap. */
+.bestValue {
+  color: var(--color-accent);
+  font-size: var(--text-2xl);
+  font-weight: var(--display-weight);
+  font-variant-numeric: lining-nums;
+  line-height: 1;
+}
+
+.bestShop {
+  font-size: var(--text-sm);
+  font-weight: var(--ui-strong-weight);
+}
+
+.bestRegular {
+  color: var(--color-text-faint);
+  font-weight: 400;
+}
+
+.lows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+}
+
+.lows dt {
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}
+
+.lows dd {
+  margin: 0;
+  font-weight: var(--ui-strong-weight);
+}
+
+.priceChart {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.priceChart svg {
+  display: block;
+  width: 100%;
+  height: 7.5rem;
+  border-bottom: var(--hairline);
+  overflow: visible;
+}
+
+.priceLine {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+}
+
+.chartAxis {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--color-text-faint);
+  font-size: var(--text-2xs);
+}
+
+.chartAxis span:nth-child(2) {
+  text-align: center;
+}
+
+.deals {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border-top: var(--hairline);
+  list-style: none;
+}
+
+.deal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--space-4);
+  padding-block: var(--space-2);
+  border-bottom: var(--hairline);
+  color: inherit;
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .deal:hover .dealShop {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.dealShop {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  font-weight: var(--ui-strong-weight);
+}
+
+.dealNote {
+  grid-row: 2;
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}
+
+.dealNote:empty {
+  display: none;
+}
+
+.dealPrice {
+  display: inline-flex;
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.dealCut {
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+  font-weight: var(--ui-strong-weight);
+}
+
+.dealRegular {
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}

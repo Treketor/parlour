@@ -15,6 +15,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCatalogue } from "@/server/catalogue";
 import { LibraryPanel } from "./LibraryPanel";
 import { MediaGallery } from "./MediaGallery";
+import { GamePrices, GamePricesSkeleton } from "./Prices";
 import { ReleaseTable } from "./ReleaseTable";
 import { GameScores, GameScoresSkeleton } from "./Scores";
 import { Trailers } from "./Trailers";
@@ -98,6 +99,10 @@ export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
         </Suspense>
 
         {game.summary && <p className={styles.summary}>{game.summary}</p>}
+
+        <Suspense fallback={<GamePricesSkeleton />}>
+          <GamePrices game={game} />
+        </Suspense>
 
         {releases.length > 0 && (
           <section className={styles.section} aria-labelledby="released">
