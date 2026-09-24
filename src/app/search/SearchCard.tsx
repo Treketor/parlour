@@ -220,7 +220,8 @@ export function SearchControls({
             align="end"
             label={`Add ${game.name} on ${platform.name}`}
             placeholder="Add to library"
-            options={ownershipOptions}
+            // Adding is for games you have or want; passing on one is recorded after, if at all.
+            options={ownershipOptions.filter((option) => option.value !== "not_interested")}
             value={null}
             onChange={state.add}
           />
