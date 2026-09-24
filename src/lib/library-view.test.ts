@@ -6,6 +6,8 @@ import {
   filterEntries,
   hasFilters,
   libraryPreferences,
+  narrowColumns,
+  parseColumns,
   libraryViewParams,
   withLibraryPreferences,
   parseLibraryView,
@@ -47,6 +49,7 @@ describe("parseLibraryView", () => {
       }),
     ).toEqual({
       layout: "grid",
+      columns: null,
       sort: { key: "rating", direction: "asc" },
       filters: {
         progress: ["playing", "paused"],
@@ -106,7 +109,8 @@ describe("libraryViewParams", () => {
 
   it("round-trips through parseLibraryView", () => {
     const view: LibraryViewState = {
-      layout: "grid",
+      layout: "covers",
+      columns: 8,
       sort: { key: "platform", direction: "desc" },
       filters: {
         progress: ["finished", "completed"],
@@ -202,6 +206,7 @@ describe("libraryPreferences", () => {
   it("keeps the layout and order but not the filters", () => {
     const view: LibraryViewState = {
       layout: "grid",
+      columns: null,
       sort: { key: "title", direction: "desc" },
       filters: { ...NO_FILTERS, text: "zelda", platformId: 130 },
     };
@@ -216,6 +221,7 @@ describe("withLibraryPreferences", () => {
       parseLibraryView(withLibraryPreferences({ q: "mario" }, "view=grid&sort=title")),
     ).toEqual({
       layout: "grid",
+      columns: null,
       sort: { key: "title", direction: "asc" },
       filters: { ...NO_FILTERS, text: "mario" },
     });
@@ -227,5 +233,32 @@ describe("withLibraryPreferences", () => {
 
   it("leaves the parameters alone with nothing remembered", () => {
     expect(withLibraryPreferences({ q: "x" }, undefined)).toEqual({ q: "x" });
+  });
+});
+
+describe("columns", () => {
+  it("reads a chosen count and the covers layout from the address", () => {
+    expect(parseLibraryView({ view: "covers", cols: "8" })).toMatchObject({
+      layout: "covers",
+      columns: 8,
+    });
+  });
+
+  it("treats a count that is not offered as automatic", () => {
+    expect(parseColumns("2")).toBeNull();
+    expect(parseColumns("11")).toBeNull();
+    expect(parseColumns("six")).toBeNull();
+  });
+
+  it("remembers the count with the layout", () => {
+    expect(libraryPreferences({ ...DEFAULT_VIEW, layout: "covers", columns: 6 })).toBe(
+      "view=covers&cols=6",
+    );
+  });
+
+  it("halves the count on a phone, never below two", () => {
+    expect(narrowColumns(10)).toBe(5);
+    expect(narrowColumns(7)).toBe(4);
+    expect(narrowColumns(3)).toBe(2);
   });
 });

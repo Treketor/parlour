@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, type MotionStyle } from "motion/react";
 import { useEffect, useId, useMemo, useState, type MouseEvent } from "react";
 import { useLayoutTransition, useShouldReduceMotion } from "@/components/Providers";
 import { PageHeader } from "@/components/shell/PageHeader";
@@ -18,6 +18,7 @@ import { TextField } from "@/components/ui/TextField";
 import { CloseIcon, FilterIcon, SearchIcon } from "@/components/ui/icons";
 import { showsProgress } from "@/lib/data/edit-entry";
 import type { EntryTag, LibraryItem } from "@/lib/data/library";
+import { cx } from "@/lib/cx";
 import { formatCount } from "@/lib/format";
 import {
   LIBRARY_SORTS,
@@ -27,6 +28,9 @@ import {
   hasFilters,
   libraryPreferences,
   libraryViewParams,
+  COLUMN_CHOICES,
+  narrowColumns,
+  parseColumns,
   parseLibrarySort,
   parseLibraryView,
   progressCounts,
@@ -39,6 +43,7 @@ import { OWNERSHIP_STATES, ownershipLabel } from "@/lib/ownership";
 import { setPreferenceCookie } from "@/lib/preference-cookie";
 import { progressLabel, type Progress } from "@/lib/progress";
 import { naturalDirection, nextSort, sortEntries } from "@/lib/sort";
+import { CoverTile } from "./CoverTile";
 import { EntryEditor } from "./EntryEditor";
 import { LibraryEmpty } from "./LibraryEmpty";
 import styles from "./library.module.css";
@@ -46,9 +51,15 @@ import styles from "./library.module.css";
 const LAYOUTS = [
   { value: "list", label: "List" },
   { value: "grid", label: "Grid" },
+  { value: "covers", label: "Covers" },
 ] as const satisfies ReadonlyArray<{ value: LibraryLayout; label: string }>;
 
 const TEXT_FILTER_ID = "library-filter";
+
+const columnOptions: Array<MenuOption<string>> = [
+  { value: "auto", label: "Fit to screen" },
+  ...COLUMN_CHOICES.map((count) => ({ value: String(count), label: `${count} per row` })),
+];
 
 /** Matches the breakpoint in library.module.css where the filters sit inline. */
 const WIDE_TOOLBAR = "(min-width: 48rem)";
@@ -260,6 +271,21 @@ export function LibraryBrowser({
     );
   }
 
+  /** Covers per row, for the layouts made of covers. */
+  function columnsSelect(inline: boolean) {
+    if (layout === "list") return null;
+    return (
+      <Select
+        label="Covers per row"
+        hideLabel={inline}
+        options={columnOptions}
+        value={view.columns === null ? "auto" : String(view.columns)}
+        onChange={(next) => update({ ...view, columns: parseColumns(next) })}
+        className={inline ? styles.columns : undefined}
+      />
+    );
+  }
+
   function progressChips() {
     if (progress.length < 2) return null;
     return (
@@ -307,7 +333,8 @@ export function LibraryBrowser({
    */
   const animateLayout = !reduceMotion && visible.length <= LAYOUT_ANIMATION_ITEM_LIMIT;
   const viewKey = libraryViewParams({ ...view, layout: "list" }).toString();
-  const orderKey = `${sort.key}-${sort.direction}`;
+  // A new column count crossfades like a new order: every cover would otherwise travel.
+  const orderKey = `${sort.key}-${sort.direction}-${view.columns ?? "auto"}`;
   const status = filtered
     ? `Showing ${visible.length} of ${formatCount(items.length, "game")}`
     : "";
@@ -379,7 +406,10 @@ export function LibraryBrowser({
               Filters
               {activeFilters > 0 && <span className={styles.filterCount}>{activeFilters}</span>}
             </Button>
-            <div className={styles.wideOnly}>{sortSelect(true)}</div>
+            <div className={styles.wideOnly}>
+              {columnsSelect(true)}
+              {sortSelect(true)}
+            </div>
             <SegmentedControl
               label="Layout"
               options={LAYOUTS}
@@ -401,6 +431,7 @@ export function LibraryBrowser({
             </div>
             {progressChips()}
             {filterSelects(false)}
+            {columnsSelect(false)}
             {sortSelect(false)}
             <div className={styles.sheetActions}>
               <Button variant="primary" onClick={() => setSheetOpen(false)}>
@@ -500,7 +531,20 @@ export function LibraryBrowser({
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.ul
                     key={animateLayout ? orderKey : viewKey}
-                    className={styles.grid}
+                    className={cx(
+                      styles.grid,
+                      layout === "covers" && styles.coverGrid,
+                      view.columns !== null && styles.fixedColumns,
+                    )}
+                    style={
+                      // Custom properties for .fixedColumns; empty when the grid fits itself.
+                      (view.columns === null
+                        ? {}
+                        : {
+                            "--columns": view.columns,
+                            "--columns-narrow": narrowColumns(view.columns),
+                          }) as MotionStyle
+                    }
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1, transition: transition.enter }}
                     exit={{ opacity: 0, transition: transition.exit }}
@@ -515,11 +559,19 @@ export function LibraryBrowser({
                           exit={{ opacity: 0, transition: transition.exit }}
                           transition={{ layout: move }}
                         >
-                          <GameCard
-                            game={item}
-                            href={entryHref(item.id)}
-                            onClick={(event) => openEntry(event, item.id)}
-                          />
+                          {layout === "covers" ? (
+                            <CoverTile
+                              item={item}
+                              href={entryHref(item.id)}
+                              onClick={(event) => openEntry(event, item.id)}
+                            />
+                          ) : (
+                            <GameCard
+                              game={item}
+                              href={entryHref(item.id)}
+                              onClick={(event) => openEntry(event, item.id)}
+                            />
+                          )}
                         </motion.li>
                       ))}
                     </AnimatePresence>

@@ -8,7 +8,13 @@ import { naturalDirection, type SortDirection, type SortKey, type SortableEntry 
  * view, and the server can render it without a flash of the default.
  */
 
-export type LibraryLayout = "list" | "grid";
+/** Rows, cards with their facts, or the covers alone. */
+export type LibraryLayout = "list" | "grid" | "covers";
+
+const LAYOUTS: readonly LibraryLayout[] = ["list", "grid", "covers"];
+
+/** Covers per row that can be chosen for the grid and cover layouts; null fits as many as suit the screen. */
+export const COLUMN_CHOICES = [3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export type LibraryFilters = {
   /** Empty means every progress state. */
@@ -21,6 +27,8 @@ export type LibraryFilters = {
 
 export type LibraryViewState = {
   layout: LibraryLayout;
+  /** Covers per row on a wide screen, for grid and covers; null to fit automatically. */
+  columns: number | null;
   sort: { key: SortKey; direction: SortDirection };
   filters: LibraryFilters;
 };
@@ -50,6 +58,7 @@ export const NO_FILTERS: LibraryFilters = {
 
 export const DEFAULT_VIEW: LibraryViewState = {
   layout: "list",
+  columns: null,
   sort: { key: "added", direction: "desc" },
   filters: NO_FILTERS,
 };
@@ -62,6 +71,21 @@ function first(value: string | string[] | undefined): string {
 
 function oneOf<T extends string>(allowed: readonly T[], value: string): T | null {
   return allowed.find((candidate) => candidate === value) ?? null;
+}
+
+/** A column count from the address; anything not offered means automatic. */
+export function parseColumns(value: string): number | null {
+  const count = Number(value);
+  return COLUMN_CHOICES.find((choice) => choice === count) ?? null;
+}
+
+/**
+ * Covers per row on a phone for a chosen count: about half, but never fewer
+ * than two, so ten across a desktop becomes five across a phone, not ten
+ * postage stamps.
+ */
+export function narrowColumns(columns: number): number {
+  return Math.max(2, Math.round(columns / 2));
 }
 
 /** A sort from a select or the address; anything unknown is the default order. */
@@ -81,7 +105,8 @@ export function parseLibraryView(params: Params): LibraryViewState {
   );
 
   return {
-    layout: first(params.view) === "grid" ? "grid" : "list",
+    layout: LAYOUTS.find((layout) => layout === first(params.view)) ?? "list",
+    columns: parseColumns(first(params.cols)),
     sort: { key: sortKey, direction: direction ?? naturalDirection(sortKey) },
     filters: {
       progress,
@@ -99,6 +124,7 @@ export function libraryViewParams(view: LibraryViewState): URLSearchParams {
   const { layout, sort, filters } = view;
 
   if (layout !== DEFAULT_VIEW.layout) params.set("view", layout);
+  if (view.columns !== null) params.set("cols", String(view.columns));
   if (sort.key !== DEFAULT_VIEW.sort.key) params.set("sort", sort.key);
   if (sort.direction !== naturalDirection(sort.key)) params.set("dir", sort.direction);
   // Written in the canonical order so the same filter always makes the same link.
@@ -164,7 +190,7 @@ export function progressCounts(
 /** Remembers layout and order between visits; filters are for the moment and are not kept. */
 export const LIBRARY_PREFERENCES_COOKIE = "parlour-library";
 
-const PREFERENCE_KEYS = ["view", "sort", "dir"] as const;
+const PREFERENCE_KEYS = ["view", "cols", "sort", "dir"] as const;
 
 /** The layout and order of a view, in the cookie's form. */
 export function libraryPreferences(view: LibraryViewState): string {

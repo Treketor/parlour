@@ -275,3 +275,75 @@
     display: none;
   }
 }
+
+/* Covers alone: tighter, so a shelf of art reads as one surface. */
+.coverGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (min-width: 40rem) {
+  .coverGrid {
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+/* A chosen count: about half of it on phones (narrowColumns), all of it from 40rem. */
+.fixedColumns {
+  grid-template-columns: repeat(var(--columns-narrow), minmax(0, 1fr));
+}
+
+@media (min-width: 40rem) {
+  .fixedColumns {
+    grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  }
+}
+
+.columns {
+  width: 10rem;
+}
+
+.coverTile {
+  display: block;
+  color: inherit;
+  touch-action: manipulation;
+  transition: transform var(--duration-press) var(--ease-out);
+}
+
+/* The same light as a card's cover on hover, and the same small press. */
+.coverTile .tileCover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--color-text);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .coverTile:hover .tileCover::before {
+    opacity: 0.06;
+  }
+}
+
+.coverTile:active {
+  transform: scale(calc(1 - 0.02 * var(--motion-distance)));
+  transition-duration: 0s;
+}
+
+.coverTile:active .tileCover::before {
+  opacity: 0.1;
+  transition-duration: 0s;
+}
+
+.coverTile:focus-visible {
+  outline: none;
+}
+
+.coverTile:focus-visible .tileCover {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+}
