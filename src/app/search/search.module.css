@@ -24,8 +24,19 @@
   line-height: var(--leading-reading);
 }
 
+.resultsBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--control-height-md);
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-6);
+  border-bottom: var(--hairline);
+}
+
 .resultsHeading {
-  margin-bottom: var(--space-4);
   color: var(--color-text-faint);
   font-family: var(--font-ui);
   font-size: var(--text-sm);
@@ -33,153 +44,129 @@
   letter-spacing: 0;
 }
 
-.results {
+.sort {
+  width: 10rem;
+}
+
+/* Cover-art grid: two across on phones, as many as fit from there up. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8) var(--space-4);
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: var(--hairline);
-}
-
-/* One game: cover beside the text; platforms run under the text, not the cover. */
-.result {
-  display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1fr);
-  column-gap: var(--space-4);
-  padding-block: var(--space-5);
-  border-bottom: var(--hairline);
 }
 
 @media (min-width: 40rem) {
-  .result {
-    grid-template-columns: 4.5rem minmax(0, 1fr);
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
     column-gap: var(--space-5);
   }
 }
 
-.resultCover {
+/* Text sits in fixed-height slots so controls line up across a row of cards. */
+.card {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: var(--space-3);
+  height: 100%;
+}
+
+.cardCover {
   display: block;
-  align-self: start;
+  width: 100%;
   aspect-ratio: 3 / 4;
 }
 
-.resultBody {
-  display: grid;
-  align-content: start;
-  gap: var(--space-3);
-  min-width: 0;
-}
-
-.resultHead {
+.cardText {
   display: grid;
   gap: var(--space-1);
+  align-content: start;
 }
 
-.resultTitle {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: var(--display-weight);
-  letter-spacing: var(--display-tracking);
+.cardTitle {
+  min-height: calc(2 * var(--leading-heading) * 1em);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--ui-strong-weight);
+  letter-spacing: var(--tracking-tight);
   line-height: var(--leading-heading);
   overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.resultMeta {
+.cardMeta {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-4);
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
   color: var(--color-text-faint);
   font-size: var(--text-xs);
 }
 
-.metaItem strong {
-  color: var(--color-text-muted);
+.release {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score {
+  flex: none;
+  cursor: help;
+}
+
+.score strong {
+  color: var(--color-text);
   font-weight: var(--ui-strong-weight);
 }
 
-.count {
+.scoreCount {
   color: var(--color-text-faint);
 }
 
-/* Long platform lists flow into two columns on wide screens, keeping each game compact. */
-.platforms {
+.cardControls {
   display: grid;
-  column-gap: var(--space-8);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: var(--hairline);
+  align-content: end;
+  gap: var(--space-2);
 }
 
-@media (min-width: 64rem) {
-  .platforms {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.platformRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "name action"
-    "message message";
-  align-items: center;
-  column-gap: var(--space-3);
-  min-height: 2.5rem;
-  padding-block: var(--space-1);
-  border-bottom: var(--hairline);
-}
-
-.platformName {
-  grid-area: name;
-  min-width: 0;
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-}
-
-.platformAction {
-  grid-area: action;
+.singlePlatform {
   display: flex;
-  justify-content: flex-end;
-}
-
-/* The in-library state fades in where the Add control was; nothing shifts. */
-.inLibrary {
-  display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
-  min-height: var(--control-height-md);
-  outline-offset: 2px;
-  animation: settle var(--duration-base) var(--ease-out);
-}
-
-/* Unconfirmed optimistic state: readable, but visibly not yet final. */
-.inLibrary[data-pending] {
-  opacity: 0.7;
-}
-
-.ownership {
-  color: var(--color-text-faint);
+  height: var(--control-height-sm);
+  color: var(--color-text-muted);
   font-size: var(--text-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.rowMessage {
-  grid-area: message;
+/* Already in the library: the trigger names the current choice, marked in the accent. */
+.addedMenu button {
+  border-color: var(--color-accent-line);
+}
+
+.addedTick {
+  flex: none;
+  color: var(--color-accent);
+}
+
+.alsoOn {
+  color: var(--color-text-faint);
+  font-size: var(--text-2xs);
+  line-height: var(--leading-ui);
+}
+
+.cardError {
   color: var(--color-danger);
   font-size: var(--text-xs);
 }
 
-.rowMessage:empty {
+.cardError:empty {
   display: none;
-}
-
-.noPlatforms {
-  color: var(--color-text-faint);
-  font-size: var(--text-sm);
-}
-
-@keyframes settle {
-  from {
-    opacity: 0;
-    transform: translateX(calc(4px * var(--motion-distance)));
-  }
 }
