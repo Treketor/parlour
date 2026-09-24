@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { SignInPrompt } from "@/components/shell/SignInPrompt";
 import { listLibrary, listTags } from "@/lib/data/library";
+import { queuePositions } from "@/lib/data/queue";
 import {
   LIBRARY_PREFERENCES_COOKIE,
   parseLibraryView,
@@ -31,9 +32,10 @@ export default async function LibraryPage({ searchParams }: PageProps<"/">) {
     );
   }
 
-  const [items, tags, params] = await Promise.all([
+  const [items, tags, queue, params] = await Promise.all([
     listLibrary(supabase),
     listTags(supabase),
+    queuePositions(supabase),
     searchParams,
   ]);
   const entry = firstParam(params.entry);
@@ -43,6 +45,7 @@ export default async function LibraryPage({ searchParams }: PageProps<"/">) {
     <LibraryBrowser
       items={items}
       tags={tags}
+      queue={queue}
       initialView={parseLibraryView(withLibraryPreferences(params, remembered))}
       initialEntryId={items.some((item) => item.id === entry) ? entry : null}
     />

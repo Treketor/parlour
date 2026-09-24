@@ -9,6 +9,7 @@ import { GameCover } from "@/components/ui/GameCover";
 import { CloseIcon, PlusIcon } from "@/components/ui/icons";
 import { ProgressGlyph } from "@/components/ui/ProgressGlyph";
 import { RatingInput } from "@/components/ui/RatingInput";
+import { MenuSelect, type MenuOption } from "@/components/ui/MenuSelect";
 import { Select } from "@/components/ui/Select";
 import { Tag } from "@/components/ui/Tag";
 import { TextArea } from "@/components/ui/TextArea";
@@ -28,6 +29,7 @@ import {
 } from "@/lib/data/edit-entry";
 import type { EntryTag, LibraryItem } from "@/lib/data/library";
 import { transition } from "@/lib/motion";
+import type { QueuePlace } from "@/lib/queue-order";
 import { OWNERSHIP_STATES, ownershipLabel } from "@/lib/ownership";
 import { PROGRESS_STATES, progressDescription, progressLabel } from "@/lib/progress";
 import { addTag, deleteTag, removeEntry, removeTag, updateEntry } from "./actions";
@@ -74,6 +76,14 @@ type EntryEditorProps = {
   onTagDeleted: (tagId: string) => void;
   onRemoved: (id: string) => void;
   onClose: () => void;
+  /** This entry's place in the queue, counting from 1, or null when not queued. */
+  queuePosition: number | null;
+  /** Why the last queue change was refused, if it was. */
+  queueError: string | null;
+  onQueue: (place: QueuePlace) => void;
+  onUnqueue: () => void;
+  /** The server took it off the queue itself, because it was finished or given up. */
+  onUnqueued: () => void;
 };
 
 /**
@@ -91,6 +101,11 @@ export function EntryEditor({
   onTagDeleted,
   onRemoved,
   onClose,
+  queuePosition,
+  queueError,
+  onQueue,
+  onUnqueue,
+  onUnqueued,
 }: EntryEditorProps) {
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [saving, startSaving] = useTransition();
@@ -112,6 +127,7 @@ export function EntryEditor({
       const result = await updateEntry({ entryId: item.id, patch });
       if (result.status === "saved") {
         setSaved(true);
+        if (result.unqueued) onUnqueued();
         return;
       }
       // Put back only the fields nothing newer has changed since.
@@ -199,6 +215,17 @@ export function EntryEditor({
               <p className={styles.passed}>Passed on, so there is no progress to track.</p>
             )}
           </div>
+          <QueueControl
+            title={item.title}
+            position={queuePosition}
+            onQueue={onQueue}
+            onUnqueue={onUnqueue}
+          />
+          {queueError && (
+            <p className={styles.error} role="alert">
+              {queueError}
+            </p>
+          )}
           {/* Offered right under progress, which is what makes a date mean something. */}
           {dates?.started && !showDates && (
             <Button
@@ -271,6 +298,48 @@ export function EntryEditor({
 
       <RemoveEntry item={item} onRemoved={onRemoved} />
     </article>
+  );
+}
+
+type QueueControlProps = {
+  title: string;
+  position: number | null;
+  onQueue: (place: QueuePlace) => void;
+  onUnqueue: () => void;
+};
+
+const queueOptions: ReadonlyArray<MenuOption<QueuePlace>> = [
+  { value: "next", label: "Play next", description: "First in line" },
+  { value: "last", label: "At the end", description: "After everything already queued" },
+];
+
+/** Whether this game is lined up to play, and where; or a way to line it up. */
+function QueueControl({ title, position, onQueue, onUnqueue }: QueueControlProps) {
+  if (position === null) {
+    return (
+      <MenuSelect
+        action
+        size="sm"
+        label={`Add ${title} to your queue`}
+        placeholder="Add to queue"
+        options={queueOptions}
+        value={null}
+        onChange={onQueue}
+        className={styles.queueAdd}
+      />
+    );
+  }
+  return (
+    <div className={styles.queued}>
+      <p>
+        <Link href="/queue" className={styles.gameLink}>
+          Number {position} in your queue
+        </Link>
+      </p>
+      <Button size="sm" onClick={onUnqueue}>
+        Take off queue
+      </Button>
+    </div>
   );
 }
 

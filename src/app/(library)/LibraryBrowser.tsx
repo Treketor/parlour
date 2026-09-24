@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, type MotionStyle } from "motion/react";
-import { useEffect, useId, useMemo, useState, type MouseEvent } from "react";
+import { useEffect, useId, useMemo, useState, useTransition, type MouseEvent } from "react";
 import { useLayoutTransition, useShouldReduceMotion } from "@/components/Providers";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { Button, IconButton } from "@/components/ui/Button";
@@ -40,10 +40,12 @@ import {
 } from "@/lib/library-view";
 import { LAYOUT_ANIMATION_ITEM_LIMIT, transition } from "@/lib/motion";
 import { OWNERSHIP_STATES, ownershipLabel } from "@/lib/ownership";
+import { withQueued, withoutQueued, type QueuePlace, type QueuePositions } from "@/lib/queue-order";
 import { setPreferenceCookie } from "@/lib/preference-cookie";
 import { progressLabel, type Progress } from "@/lib/progress";
 import { naturalDirection, nextSort, sortEntries } from "@/lib/sort";
 import { CoverTile } from "./CoverTile";
+import { queueEntry, unqueueEntry } from "../queue/actions";
 import { EntryEditor } from "./EntryEditor";
 import { LibraryEmpty } from "./LibraryEmpty";
 import styles from "./library.module.css";
@@ -78,6 +80,8 @@ type LibraryBrowserProps = {
   initialView: LibraryViewState;
   /** An entry named in the address, opened in the panel on arrival. */
   initialEntryId: string | null;
+  /** Each queued entry's place in line. */
+  queue: QueuePositions;
 };
 
 /** Marks history entries this page pushed, so closing the panel can step back over them. */
@@ -88,7 +92,11 @@ export function LibraryBrowser({
   tags: initialTags,
   initialView,
   initialEntryId,
+  queue: initialQueue,
 }: LibraryBrowserProps) {
+  const [queue, setQueue] = useState(initialQueue);
+  const [queueError, setQueueError] = useState<string | null>(null);
+  const [, startQueueing] = useTransition();
   const [items, setItems] = useState(initialItems);
   const [allTags, setAllTags] = useState(initialTags);
   const [view, setView] = useState(initialView);
@@ -216,7 +224,22 @@ export function LibraryBrowser({
     );
   }
 
+  /** Queues or unqueues an entry: shown at once, put back with a reason if refused. */
+  function changeQueue(entryId: string, place: QueuePlace | null) {
+    const previous = queue;
+    setQueue(place ? withQueued(queue, entryId, place) : withoutQueued(queue, entryId));
+    setQueueError(null);
+    startQueueing(async () => {
+      const result = place ? await queueEntry({ entryId, place }) : await unqueueEntry({ entryId });
+      if (result.status !== "saved") {
+        setQueue(previous);
+        setQueueError(result.message);
+      }
+    });
+  }
+
   function removeItem(id: string) {
+    setQueue((current) => withoutQueued(current, id));
     closeEntry();
     setItems((current) => current.filter((item) => item.id !== id));
   }
@@ -373,6 +396,11 @@ export function LibraryBrowser({
               onTagDeleted={forgetTag}
               onRemoved={removeItem}
               onClose={closeEntry}
+              queuePosition={queue[openItem.id] ?? null}
+              queueError={queueError}
+              onQueue={(place) => changeQueue(openItem.id, place)}
+              onUnqueue={() => changeQueue(openItem.id, null)}
+              onUnqueued={() => setQueue((current) => withoutQueued(current, openItem.id))}
             />
           )}
         </Modal>
