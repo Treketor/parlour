@@ -433,3 +433,7 @@ Choices made at the outset:
 - **Accounts are for ages 13 and up,** stated in the terms and privacy pages.
 - **Safety ships with the first feature that lets people post** (stage 13), not after: reporting, blocking, moderator tools and spam protection.
 - **Email on a domain comes first** (stage 12). Other people cannot sign in while Supabase's built-in sender reaches only the project team.
+
+## 054. Vercel Web Analytics and Speed Insights
+
+Page views and real visitors' Core Web Vitals, both included in Vercel's free plan. Both are cookieless, so there is no consent banner to show and nothing that follows a visitor across sites. Before anything is sent, URLs keep only the query parameters that describe how a page was viewed (search terms, layout, sort, covers per row). Sign-in codes, tokens and library entry ids are removed. The privacy page says what is collected.

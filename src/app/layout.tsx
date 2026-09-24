@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Providers } from "@/components/Providers";
 import { SiteFooter } from "@/components/shell/SiteFooter";
 import { SiteHeader } from "@/components/shell/SiteHeader";
+import { VercelInsights } from "@/components/VercelInsights";
 import { getUserId } from "@/lib/supabase/server";
 import { schibstedGrotesk } from "./fonts";
 import styles from "./layout.module.css";
@@ -34,6 +35,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </main>
           <SiteFooter />
         </Providers>
+        <VercelInsights />
       </body>
     </html>
   );

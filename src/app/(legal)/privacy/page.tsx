@@ -37,10 +37,17 @@ export default function PrivacyPage() {
         <section>
           <h2>Cookies and tracking</h2>
           <p>
-            Parlour runs no analytics, advertising or tracking scripts. Signing in sets cookies that
-            hold your session, and signing out removes them. A few small cookies remember choices on
-            this device, whether or not you sign in: the library&rsquo;s layout and order, your last
-            search, and the region prices are shown for. They hold nothing that identifies you.
+            Parlour runs no advertising or tracking scripts. It counts page views and measures how
+            fast pages load with Vercel Web Analytics and Speed Insights. Both work without cookies
+            and cannot follow you across sites or from one day to the next. What they receive is the
+            page address, with anything personal removed first (such as sign-in codes and which
+            library entry is open), plus your browser, device type and country.
+          </p>
+          <p>
+            Signing in sets cookies that hold your session, and signing out removes them. A few
+            small cookies remember choices on this device, whether or not you sign in: the
+            library&rsquo;s layout and order, your last search, and the region prices are shown for.
+            They hold nothing that identifies you.
           </p>
         </section>
 
@@ -48,12 +55,11 @@ export default function PrivacyPage() {
           <h2>Other services</h2>
           <p>
             Accounts and libraries are stored with Supabase, in its Tokyo region, and sign-in emails
-            are sent through it. Pages are served by the hosting provider, which keeps short-lived
-            request logs (such as IP addresses) to run and protect the service. Game images will
-            load from IGDB, and trailers will play through YouTube&rsquo;s privacy-enhanced mode,
-            which avoids tracking cookies until you press play. Links to shops go through
-            IsThereAnyDeal, which may add its affiliate tags; the shop can see that you came from
-            there.
+            are sent through it. Pages are served by Vercel, which keeps short-lived request logs
+            (such as IP addresses) to run and protect the service. Game images load from IGDB, and
+            trailers play through YouTube&rsquo;s privacy-enhanced mode, which avoids tracking
+            cookies until you press play. Links to shops go through IsThereAnyDeal, which may add
+            its affiliate tags; the shop can see that you came from there.
           </p>
           <p>
             When you search, Parlour sends the words you typed to IGDB from its own server. Nothing
