@@ -6,6 +6,7 @@ import { useLayoutTransition, useShouldReduceMotion } from "@/components/Provide
 import { Button } from "@/components/ui/Button";
 import { GameCard } from "@/components/ui/GameCard";
 import { CatalogueList, ListHeader, ListRow } from "@/components/ui/ListRow";
+import type { MenuOption } from "@/components/ui/MenuSelect";
 import { Notice } from "@/components/ui/Notice";
 import { ProgressGlyph } from "@/components/ui/ProgressGlyph";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
@@ -40,6 +41,14 @@ const LAYOUTS = [
 
 const TEXT_FILTER_ID = "library-filter";
 
+/** The "no filter" choice in each menu. Not a valid ownership, platform id or tag name. */
+const ANY = "";
+
+const ownershipOptions: Array<MenuOption<string>> = [
+  { value: ANY, label: "Any ownership" },
+  ...OWNERSHIP_STATES.map((state) => ({ value: state, label: ownershipLabel[state] })),
+];
+
 type LibraryBrowserProps = {
   items: LibraryItem[];
   initialView: LibraryViewState;
@@ -57,7 +66,7 @@ export function LibraryBrowser({ items, initialView }: LibraryBrowserProps) {
   );
   const progress = useMemo(() => progressCounts(items), [items]);
   const platforms = useMemo(() => platformOptions(items), [items]);
-  const tags = useMemo(() => [...new Set(items.flatMap((item) => item.tags))].sort(), [items]);
+  const tags = useMemo(() => tagOptions(items), [items]);
   const filtered = hasFilters(filters);
 
   function update(next: LibraryViewState) {
@@ -65,7 +74,8 @@ export function LibraryBrowser({ items, initialView }: LibraryBrowserProps) {
     // Kept in the address so a reload or the back button shows the same view,
     // without a server round trip: the whole library is already here.
     const url = new URL(window.location.href);
-    url.search = libraryViewParams(next).toString();
+    // Commas are legal in a query string; "progress=playing,paused" reads better than %2C.
+    url.search = libraryViewParams(next).toString().replaceAll("%2C", ",");
     window.history.replaceState(null, "", url);
   }
 
@@ -120,47 +130,28 @@ export function LibraryBrowser({ items, initialView }: LibraryBrowserProps) {
           <Select
             label="Ownership"
             hideLabel
-            value={filters.ownership ?? ""}
-            onChange={(event) =>
-              filter({
-                ownership: OWNERSHIP_STATES.find((state) => state === event.target.value) ?? null,
-              })
+            options={ownershipOptions}
+            value={filters.ownership ?? ANY}
+            onChange={(next) =>
+              filter({ ownership: OWNERSHIP_STATES.find((state) => state === next) ?? null })
             }
-          >
-            <option value="">Any ownership</option>
-            {OWNERSHIP_STATES.map((state) => (
-              <option key={state} value={state}>
-                {ownershipLabel[state]}
-              </option>
-            ))}
-          </Select>
+          />
           <Select
             label="Platform"
             hideLabel
-            value={filters.platformId ?? ""}
-            onChange={(event) => filter({ platformId: Number(event.target.value) || null })}
-          >
-            <option value="">All platforms</option>
-            {platforms.map((platform) => (
-              <option key={platform.id} value={platform.id}>
-                {platform.name}
-              </option>
-            ))}
-          </Select>
-          {tags.length > 0 && (
+            options={platforms}
+            value={filters.platformId === null ? ANY : String(filters.platformId)}
+            onChange={(next) => filter({ platformId: Number(next) || null })}
+          />
+          {/* The first option is "Any tag"; the filter appears once there is a real one. */}
+          {tags.length > 1 && (
             <Select
               label="Tag"
               hideLabel
-              value={filters.tag ?? ""}
-              onChange={(event) => filter({ tag: event.target.value || null })}
-            >
-              <option value="">Any tag</option>
-              {tags.map((tag) => (
-                <option key={tag} value={tag}>
-                  {tag}
-                </option>
-              ))}
-            </Select>
+              options={tags}
+              value={filters.tag ?? ANY}
+              onChange={(next) => filter({ tag: next === ANY ? null : next })}
+            />
           )}
         </div>
 
@@ -168,19 +159,14 @@ export function LibraryBrowser({ items, initialView }: LibraryBrowserProps) {
           <Select
             label="Sort by"
             hideLabel
+            options={LIBRARY_SORTS}
             value={sort.key}
-            onChange={(event) => {
-              const key = parseLibrarySort(event.target.value);
+            onChange={(next) => {
+              const key = parseLibrarySort(next);
               update({ ...view, sort: { key, direction: naturalDirection(key) } });
             }}
             className={styles.sort}
-          >
-            {LIBRARY_SORTS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
+          />
           <SegmentedControl
             label="Layout"
             options={LAYOUTS}
@@ -312,7 +298,16 @@ export function LibraryBrowser({ items, initialView }: LibraryBrowserProps) {
 }
 
 /** The platforms this library actually has, A to Z, for the platform filter. */
-function platformOptions(items: readonly LibraryItem[]): Array<{ id: number; name: string }> {
+function platformOptions(items: readonly LibraryItem[]): Array<MenuOption<string>> {
   const byId = new Map(items.map((item) => [item.platformId, item.platform]));
-  return [...byId].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  const platforms = [...byId]
+    .map(([id, name]) => ({ value: String(id), label: name }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  return [{ value: ANY, label: "All platforms" }, ...platforms];
+}
+
+/** The tags in use, A to Z, for the tag filter. */
+function tagOptions(items: readonly LibraryItem[]): Array<MenuOption<string>> {
+  const tags = [...new Set(items.flatMap((item) => item.tags))].sort((a, b) => a.localeCompare(b));
+  return [{ value: ANY, label: "Any tag" }, ...tags.map((tag) => ({ value: tag, label: tag }))];
 }

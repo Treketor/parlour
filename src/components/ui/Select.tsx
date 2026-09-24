@@ -1,59 +1,60 @@
 "use client";
 
-import { useId, type SelectHTMLAttributes } from "react";
+import { useId } from "react";
 import { cx } from "@/lib/cx";
-import { ChevronDownIcon } from "./icons";
+import { MenuSelect, type MenuOption } from "./MenuSelect";
 import styles from "./Field.module.css";
 
-type SelectProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, "size"> & {
+type SelectProps<T extends string> = {
   label: string;
   hideLabel?: boolean;
   hint?: string;
   error?: string | undefined;
   size?: "sm" | "md";
+  options: ReadonlyArray<MenuOption<T>>;
+  value: T | null;
+  onChange: (value: T) => void;
+  placeholder?: string;
+  /** Submits the value with a surrounding form. */
+  name?: string;
+  disabled?: boolean;
+  className?: string | undefined;
 };
 
-/*
- * A styled native select: the platform picker is the right control on touch
- * devices and comes with keyboard and screen reader behaviour for free.
+/**
+ * A labelled choice from a list, drawn as a form field. The list is the
+ * app's own animated menu rather than the system popup (DECISIONS.md 035).
  */
-export function Select({
+export function Select<T extends string>({
   label,
   hideLabel = false,
   hint,
   error,
   size = "md",
-  id,
   className,
-  children,
-  ...rest
-}: SelectProps) {
-  const generatedId = useId();
-  const selectId = id ?? generatedId;
-  const messageId = `${selectId}-message`;
+  ...menu
+}: SelectProps<T>) {
+  const id = useId();
+  const messageId = `${id}-message`;
   const message = error ?? hint;
 
   return (
     <div className={cx(styles.field, className)}>
-      <label htmlFor={selectId} className={cx(styles.label, hideLabel && "visually-hidden")}>
+      <label htmlFor={id} className={cx(styles.label, hideLabel && "visually-hidden")}>
         {label}
       </label>
-      <div
-        className={cx(styles.control, styles.selectControl, size === "sm" && styles.small)}
-        data-invalid={error ? true : undefined}
-      >
-        <select
-          id={selectId}
-          className={styles.input}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={message ? messageId : undefined}
-          {...rest}
-        >
-          {children}
-        </select>
-        <ChevronDownIcon className={styles.chevron} />
-      </div>
+      <MenuSelect
+        {...menu}
+        id={id}
+        label={label}
+        size={size}
+        field
+        fullWidth
+        invalid={error !== undefined}
+        aria-describedby={message ? messageId : undefined}
+      />
       {message && (
+        // Keyed so an error replacing a hint (or a new error) plays its entrance again.
         <p
           key={error ? `error:${error}` : "hint"}
           id={messageId}

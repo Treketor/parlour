@@ -1,6 +1,8 @@
 .root {
   position: relative;
   display: inline-block;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .trigger {
@@ -14,6 +16,7 @@
   border: 1px solid var(--color-control-line);
   border-radius: var(--radius-control);
   background: transparent;
+  max-width: 100%;
   font-size: var(--text-sm);
   white-space: nowrap;
   touch-action: manipulation;
@@ -37,6 +40,45 @@
   height: var(--control-height-sm);
   padding-inline: var(--space-2) var(--space-1-5);
   font-size: var(--text-xs);
+}
+
+/*
+ * Field look: the same box, ground, hover edge and focus ring as a text
+ * field, so a row of filters reads as one set of inputs.
+ */
+.field {
+  padding-inline: var(--space-3) var(--space-2);
+  background: var(--color-canvas);
+  font-size: var(--text-base);
+}
+
+.field::before {
+  display: none;
+}
+
+@media (hover: hover) {
+  .field:hover:not(:disabled) {
+    border-color: var(--color-text-faint);
+  }
+}
+
+.field:focus-visible,
+.field[data-open] {
+  border-color: var(--color-accent);
+  outline: 1px solid var(--color-accent);
+  outline-offset: 0;
+}
+
+.field[data-invalid] {
+  border-color: var(--color-danger);
+}
+
+.field.small {
+  padding-inline: var(--space-2) var(--space-1-5);
+  font-size: var(--text-xs);
+}
+
+.strong {
   font-weight: var(--ui-strong-weight);
 }
 
@@ -71,8 +113,11 @@
   cursor: not-allowed;
 }
 
+/* A long choice ("Super Nintendo Entertainment System") ends in an ellipsis; the menu shows it whole. */
 .triggerLabel {
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .placeholder {
@@ -80,6 +125,7 @@
 }
 
 .chevron {
+  flex: none;
   color: var(--color-text-muted);
   transition: transform var(--duration-base) var(--ease-out);
 }
@@ -97,11 +143,22 @@
   top: calc(100% + var(--space-1));
   z-index: 20;
   display: grid;
+  align-content: start;
   min-width: max(100%, 15rem);
+  max-width: calc(100vw - 2 * var(--space-2));
+  /* Long lists (every platform a game is on) scroll inside the menu, not the page. */
+  max-height: min(22rem, 60vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--space-1);
   border: 1px solid var(--color-control-line);
   border-radius: var(--radius-control);
   background: var(--color-surface);
+}
+
+.menu[data-side="top"] {
+  top: auto;
+  bottom: calc(100% + var(--space-1));
 }
 
 .menu[data-align="start"] {

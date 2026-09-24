@@ -109,6 +109,7 @@ export function ControlsSection() {
   const [query, setQuery] = useState("obra dinn");
   const [notes, setNotes] = useState("");
   const [platform, setPlatform] = useState("pc");
+  const [region, setRegion] = useState<string | null>(null);
   const [view, setView] = useState<"list" | "grid">("list");
   const [progress, setProgress] = useState<Progress | null>("playing");
   const [emptyProgress, setEmptyProgress] = useState<Progress | null>(null);
@@ -172,21 +173,26 @@ export function ControlsSection() {
           />
           <Select
             label="Platform"
+            options={[
+              { value: "pc", label: "PC" },
+              { value: "ps5", label: "PlayStation 5" },
+              { value: "switch", label: "Nintendo Switch" },
+              { value: "xsx", label: "Xbox Series X|S" },
+            ]}
             value={platform}
-            onChange={(event) => setPlatform(event.target.value)}
-          >
-            <option value="pc">PC</option>
-            <option value="ps5">PlayStation 5</option>
-            <option value="switch">Nintendo Switch</option>
-            <option value="xsx">Xbox Series X|S</option>
-          </Select>
-          <Select label="Region" defaultValue="" error="Choose a region to see prices.">
-            <option value="" disabled>
-              Choose a region
-            </option>
-            <option value="gb">United Kingdom</option>
-            <option value="us">United States</option>
-          </Select>
+            onChange={setPlatform}
+          />
+          <Select
+            label="Region"
+            placeholder="Choose a region"
+            options={[
+              { value: "gb", label: "United Kingdom" },
+              { value: "us", label: "United States" },
+            ]}
+            value={region}
+            onChange={setRegion}
+            error={region ? undefined : "Choose a region to see prices."}
+          />
           <TextField
             label="Notes"
             placeholder="What stuck with you?"

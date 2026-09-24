@@ -1,7 +1,15 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import { cx } from "@/lib/cx";
 import { transition } from "@/lib/motion";
 import { CheckIcon, ChevronDownIcon } from "./icons";
@@ -20,7 +28,7 @@ type MenuSelectProps<T extends string> = {
   value: T | null;
   onChange: (value: T) => void;
   placeholder?: string;
-  /** Which edge of the trigger the menu lines up with. */
+  /** Which edge of the trigger the menu prefers to line up with; it flips if it would leave the screen. */
   align?: "start" | "end";
   disabled?: boolean;
   /**
@@ -31,15 +39,36 @@ type MenuSelectProps<T extends string> = {
   size?: "sm" | "md";
   /** Stretch the trigger to its container, e.g. across a card. */
   fullWidth?: boolean;
+  /** Set the trigger label in the strong weight, for controls that act rather than describe. */
+  strong?: boolean;
+  /** Draw the trigger as a form field, to sit in a row of text fields. */
+  field?: boolean;
   /** Shown before the trigger label, e.g. a tick for something already chosen. */
   icon?: ReactNode;
+  /** For a visible <label htmlFor>. */
+  id?: string;
+  /** Submits the value with a surrounding form, like a native select would. */
+  name?: string;
+  "aria-describedby"?: string | undefined;
+  /** Draws the error edge; the message itself is linked through aria-describedby. */
+  invalid?: boolean | undefined;
   className?: string | undefined;
 };
+
+type Placement = { side: "bottom" | "top"; align: "start" | "end" };
+
+/** Space kept between a menu and the edge of the screen. */
+const VIEWPORT_MARGIN = 8;
+
+/** How long typed letters keep adding to one search, as in a native select. */
+const TYPEAHEAD_RESET_MS = 500;
 
 /**
  * A button that opens a short list of choices. The menu grows out of its
  * trigger (transform-origin on the trigger's edge) so it is clear where it
- * came from, and closes back into it.
+ * came from, and closes back into it. Every dropdown in the app is one of
+ * these: a native select's popup is drawn by the system and cannot move
+ * with the rest of the interface (DECISIONS.md 035).
  */
 export function MenuSelect<T extends string>({
   label,
@@ -52,14 +81,23 @@ export function MenuSelect<T extends string>({
   action = false,
   size = "md",
   fullWidth = false,
+  strong = action,
+  field = false,
   icon,
+  id,
+  name,
+  "aria-describedby": describedBy,
+  invalid,
   className,
 }: MenuSelectProps<T>) {
   const [open, setOpen] = useState(false);
+  const [placement, setPlacement] = useState<Placement>({ side: "bottom", align });
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const typeahead = useRef({ text: "", at: 0 });
   const selected = action ? undefined : options.find((option) => option.value === value);
 
   function close({ restoreFocus }: { restoreFocus: boolean }) {
@@ -73,12 +111,35 @@ export function MenuSelect<T extends string>({
     onChange(next);
   }
 
+  // Measured before paint, so a menu that would run off the screen opens on
+  // the other side instead of appearing there and jumping.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const trigger = triggerRef.current?.getBoundingClientRect();
+    const menu = menuRef.current;
+    if (!trigger || !menu) return;
+
+    const width = menu.offsetWidth;
+    const height = menu.offsetHeight;
+    const below = window.innerHeight - trigger.bottom - VIEWPORT_MARGIN;
+    const above = trigger.top - VIEWPORT_MARGIN;
+    const fitsStart = trigger.left + width <= window.innerWidth - VIEWPORT_MARGIN;
+    const fitsEnd = trigger.right - width >= VIEWPORT_MARGIN;
+
+    setPlacement({
+      side: height > below && above > below ? "top" : "bottom",
+      align:
+        align === "start" ? (fitsStart || !fitsEnd ? "start" : "end") : fitsEnd ? "end" : "start",
+    });
+  }, [open, align]);
+
   useEffect(() => {
     if (!open) return;
     const selectedIndex = Math.max(
       0,
       options.findIndex((option) => option.value === value),
     );
+    // Focusing also scrolls a long list to the current choice.
     itemRefs.current[selectedIndex]?.focus();
 
     function onPointerDown(event: PointerEvent) {
@@ -95,6 +156,23 @@ export function MenuSelect<T extends string>({
       event.preventDefault();
       setOpen(true);
     }
+  }
+
+  /** Moves to the next item starting with what was typed, as a native select does. */
+  function jumpTo(items: HTMLButtonElement[], index: number, key: string): number | undefined {
+    const now = Date.now();
+    const state = typeahead.current;
+    state.text = now - state.at > TYPEAHEAD_RESET_MS ? key : state.text + key;
+    state.at = now;
+    const search = state.text.toLowerCase();
+    // A repeated single letter cycles through the items starting with it.
+    const start = search.length === 1 ? index + 1 : Math.max(index, 0);
+    for (let step = 0; step < items.length; step++) {
+      const candidate = (start + step) % items.length;
+      const text = options[candidate]?.label.toLowerCase() ?? "";
+      if (text.startsWith(search)) return candidate;
+    }
+    return undefined;
   }
 
   function onMenuKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -124,22 +202,39 @@ export function MenuSelect<T extends string>({
         close({ restoreFocus: false });
         return;
       default:
+        if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+          next = jumpTo(items, index, event.key);
+          if (next === undefined) return;
+          break;
+        }
         return;
     }
     event.preventDefault();
     items[next]?.focus();
   }
 
+  const fromTop = placement.side === "bottom";
+  const origin = `${fromTop ? "top" : "bottom"} ${placement.align === "start" ? "left" : "right"}`;
+
   return (
     <div ref={rootRef} className={cx(styles.root, fullWidth && styles.fullWidth, className)}>
+      {name && <input type="hidden" name={name} value={value ?? ""} />}
       <button
         ref={triggerRef}
+        id={id}
         type="button"
-        className={cx(styles.trigger, size === "sm" && styles.small)}
+        className={cx(
+          styles.trigger,
+          field && styles.field,
+          size === "sm" && styles.small,
+          strong && styles.strong,
+        )}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         aria-label={action ? label : `${label}: ${selected?.label ?? placeholder}`}
+        aria-describedby={describedBy}
+        data-invalid={invalid || undefined}
         disabled={disabled}
         data-open={open || undefined}
         onClick={() => setOpen((current) => !current)}
@@ -155,15 +250,17 @@ export function MenuSelect<T extends string>({
       <AnimatePresence>
         {open && (
           <motion.div
+            ref={menuRef}
             id={menuId}
             role="menu"
             aria-label={label}
             className={styles.menu}
-            data-align={align}
-            style={{ transformOrigin: align === "start" ? "top left" : "top right" }}
-            initial={{ opacity: 0, scale: 0.96, y: -4 }}
+            data-side={placement.side}
+            data-align={placement.align}
+            style={{ transformOrigin: origin }}
+            initial={{ opacity: 0, scale: 0.96, y: fromTop ? -4 : 4 }}
             animate={{ opacity: 1, scale: 1, y: 0, transition: transition.enter }}
-            exit={{ opacity: 0, scale: 0.98, y: -2, transition: transition.exit }}
+            exit={{ opacity: 0, scale: 0.98, y: fromTop ? -2 : 2, transition: transition.exit }}
             onKeyDown={onMenuKeyDown}
           >
             {options.map((option, index) => {
