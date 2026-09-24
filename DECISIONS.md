@@ -417,3 +417,19 @@ Supabase returns an emailed link to the address the app asked for only when that
 ## 052. Saying which sign-in limit was hit
 
 Supabase answers 429 for two different limits: a minute between links to one address, and a cap on the emails the whole project may send, which is 2 an hour on the built-in sender. Both used to read "wait a minute", which is wrong for the second. The project-wide cap, `over_email_send_rate_limit`, now says so. The cap can only be raised with custom SMTP, which is the next step once there is a domain.
+
+## 053. The social phase
+
+Parlour grows from a personal catalogue into a place to talk about games, in five stages after 11: accounts, reviews, forums, the club, and following. What should set it apart is that the social features read from the library, not beside it:
+
+- **Club discussion is gated by progress.** The monthly game has checkpoints, and you see talk only up to where your library says you are.
+- **Reviews carry the record of play** from your library: platform, progress and dates.
+- **Your profile is your library,** shown as far as your privacy settings allow.
+
+Choices made at the outset:
+
+- **Sign-up is invite-only.** Spam and moderation stay manageable while the features are young. Open sign-up is for later.
+- **There is one official club.** Clubs anyone can create come once the format has been shaped by running one.
+- **Accounts are for ages 13 and up,** stated in the terms and privacy pages.
+- **Safety ships with the first feature that lets people post** (stage 13), not after: reporting, blocking, moderator tools and spam protection.
+- **Email on a domain comes first** (stage 12). Other people cannot sign in while Supabase's built-in sender reaches only the project team.

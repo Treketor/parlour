@@ -14,6 +14,14 @@
 10. Play queue (done)
 11. Accessibility, performance and reduced-motion pass; README screenshots; deploy (done)
 
+Social phase (DECISIONS.md 053):
+
+12. Domain, email (Resend) and accounts: invite-only sign-up, usernames, avatars, bio, privacy settings, public profiles
+13. Reviews and public ratings, with the "played on" record from your library; reporting and moderation tools
+14. Game forums: a board per game and general boards, threads, replies, reactions, spoiler tags
+15. The official Parlour club: a monthly game, voting, discussion gated by progress checkpoints, a schedule
+16. Following, an activity feed and notifications
+
 ## Done
 
 - Scaffold: Next.js 16, strict TypeScript, ESLint, Prettier, Vitest.
@@ -63,7 +71,8 @@
 
 - Search filters: released games only, a release-year range, platform. Suggested at stage 5 review; the library filters in stage 6 come first.
 - OpenCritic as a further critic source (its API is sold through RapidAPI). Considered at stage 8 review.
-- Written reviews: a few lines alongside the 1 to 10 rating, to explain it. Suggested at stage 7 review.
+- Written reviews: now stage 13.
+- Open sign-up and clubs anyone can create, once invite-only and the official club have proven out.
 
 ## Known issues
 
