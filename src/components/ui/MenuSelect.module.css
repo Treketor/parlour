@@ -247,3 +247,21 @@
   grid-column: 3;
   color: var(--color-accent);
 }
+
+/*
+ * Action mode is a command ("Add to library") that happens to ask one
+ * question: drawn as a filled button, centred, with no chevron.
+ */
+.actionTrigger {
+  justify-content: center;
+  border-color: var(--color-line-strong);
+  background: var(--color-surface-raised);
+}
+
+.actionTrigger::before {
+  background: var(--color-surface-pressed);
+}
+
+.fullWidth .actionTrigger .triggerLabel {
+  flex: none;
+}

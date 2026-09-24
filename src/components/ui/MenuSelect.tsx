@@ -13,7 +13,7 @@ import {
 import { useShouldReduceMotion } from "@/components/Providers";
 import { cx } from "@/lib/cx";
 import { transition } from "@/lib/motion";
-import { CheckIcon, ChevronDownIcon } from "./icons";
+import { CheckIcon, ChevronDownIcon, PlusIcon } from "./icons";
 import styles from "./MenuSelect.module.css";
 
 export type MenuOption<T extends string> = {
@@ -232,6 +232,7 @@ export function MenuSelect<T extends string>({
         type="button"
         className={cx(
           styles.trigger,
+          action && styles.actionTrigger,
           field && styles.field,
           size === "sm" && styles.small,
           strong && styles.strong,
@@ -247,11 +248,12 @@ export function MenuSelect<T extends string>({
         onClick={() => setOpen((current) => !current)}
         onKeyDown={onTriggerKeyDown}
       >
-        {icon ?? selected?.leading}
+        {icon ?? selected?.leading ?? (action && <PlusIcon width={12} height={12} />)}
         <span className={cx(styles.triggerLabel, !selected && !action && styles.placeholder)}>
           {selected?.label ?? placeholder}
         </span>
-        <ChevronDownIcon className={styles.chevron} width={14} height={14} />
+        {/* An action reads as a button: what it does, not a value to change. */}
+        {!action && <ChevronDownIcon className={styles.chevron} width={14} height={14} />}
       </button>
 
       <AnimatePresence>
