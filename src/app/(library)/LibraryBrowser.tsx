@@ -4,8 +4,9 @@ import { AnimatePresence, motion, type MotionStyle } from "motion/react";
 import { useEffect, useId, useMemo, useState, useTransition, type MouseEvent } from "react";
 import { useLayoutTransition, useShouldReduceMotion } from "@/components/Providers";
 import { PageHeader } from "@/components/shell/PageHeader";
-import { Button, IconButton } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { Popover } from "@/components/ui/Popover";
 import { GameCard } from "@/components/ui/GameCard";
 import { CatalogueList, ListHeader, ListRow } from "@/components/ui/ListRow";
 import type { MenuOption } from "@/components/ui/MenuSelect";
@@ -15,7 +16,7 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Select } from "@/components/ui/Select";
 import { Tag } from "@/components/ui/Tag";
 import { TextField } from "@/components/ui/TextField";
-import { CloseIcon, FilterIcon, SearchIcon } from "@/components/ui/icons";
+import { FilterIcon, SearchIcon } from "@/components/ui/icons";
 import { showsProgress } from "@/lib/data/edit-entry";
 import type { EntryTag, LibraryItem } from "@/lib/data/library";
 import { cx } from "@/lib/cx";
@@ -29,6 +30,7 @@ import {
   libraryPreferences,
   libraryViewParams,
   COLUMN_CHOICES,
+  groupByPlatform,
   narrowColumns,
   parseColumns,
   parseLibrarySort,
@@ -62,9 +64,6 @@ const columnOptions: Array<MenuOption<string>> = [
   { value: "auto", label: "Fit to screen" },
   ...COLUMN_CHOICES.map((count) => ({ value: String(count), label: `${count} per row` })),
 ];
-
-/** Matches the breakpoint in library.module.css where the filters sit inline. */
-const WIDE_TOOLBAR = "(min-width: 48rem)";
 
 /** The "no filter" choice in each menu. Not a valid ownership, platform id or tag name. */
 const ANY = "";
@@ -103,19 +102,6 @@ export function LibraryBrowser({
   const [openId, setOpenId] = useState(initialEntryId);
   const openItem = items.find((item) => item.id === openId);
   const panelHeadingId = useId();
-  const sheetHeadingId = useId();
-  const [sheetOpen, setSheetOpen] = useState(false);
-
-  // Widening past the phone layout puts every filter back in the toolbar, so the sheet goes.
-  useEffect(() => {
-    if (!sheetOpen) return;
-    const wide = window.matchMedia(WIDE_TOOLBAR);
-    const close = () => {
-      if (wide.matches) setSheetOpen(false);
-    };
-    wide.addEventListener("change", close);
-    return () => wide.removeEventListener("change", close);
-  }, [sheetOpen]);
   const { layout, sort, filters } = view;
   const reduceMotion = useShouldReduceMotion();
   const move = useLayoutTransition("move");
@@ -244,13 +230,12 @@ export function LibraryBrowser({
     setItems((current) => current.filter((item) => item.id !== id));
   }
 
-  /** The ownership, platform and tag filters: inline in the toolbar, labelled in the sheet. */
-  function filterSelects(inline: boolean) {
+  /** The ownership, platform and tag filters, labelled, in the Filters menu. */
+  function filterSelects() {
     return (
       <>
         <Select
           label="Ownership"
-          hideLabel={inline}
           options={ownershipOptions}
           value={filters.ownership ?? ANY}
           onChange={(next) =>
@@ -259,7 +244,6 @@ export function LibraryBrowser({
         />
         <Select
           label="Platform"
-          hideLabel={inline}
           options={platforms}
           value={filters.platformId === null ? ANY : String(filters.platformId)}
           onChange={(next) => filter({ platformId: Number(next) || null })}
@@ -268,7 +252,6 @@ export function LibraryBrowser({
         {tags.length > 1 && (
           <Select
             label="Tag"
-            hideLabel={inline}
             options={tags}
             value={filters.tag ?? ANY}
             onChange={(next) => filter({ tag: next === ANY ? null : next })}
@@ -278,7 +261,8 @@ export function LibraryBrowser({
     );
   }
 
-  function sortSelect(inline: boolean) {
+  /** In the row its label is hidden, as the field says what it is; in the menu it shows. */
+  function sortSelect(inline = false) {
     return (
       <Select
         label="Sort by"
@@ -295,7 +279,7 @@ export function LibraryBrowser({
   }
 
   /** Covers per row, for the layouts made of covers. */
-  function columnsSelect(inline: boolean) {
+  function columnsSelect(inline = false) {
     if (layout === "list") return null;
     return (
       <Select
@@ -356,6 +340,9 @@ export function LibraryBrowser({
    */
   const animateLayout = !reduceMotion && visible.length <= LAYOUT_ANIMATION_ITEM_LIMIT;
   const viewKey = libraryViewParams({ ...view, layout: "list" }).toString();
+  // Sorted by platform, each platform gets its own heading; otherwise one untitled run.
+  const groups: Array<{ platform: string | null; items: typeof visible }> =
+    sort.key === "platform" ? groupByPlatform(visible) : [{ platform: null, items: visible }];
   // A new column count crossfades like a new order: every cover would otherwise travel.
   const orderKey = `${sort.key}-${sort.direction}-${view.columns ?? "auto"}`;
   const status = filtered
@@ -405,39 +392,66 @@ export function LibraryBrowser({
           )}
         </Modal>
 
+        {/*
+          One row, always. The title filter stretches; the filters live in their
+          own menu; sort, covers per row and the layout switch sit in the row
+          while they fit and fold into that menu when they do not
+          (DECISIONS.md 048).
+        */}
         <div className={styles.toolbar}>
-          <div className={styles.filters}>
-            <TextField
-              id={TEXT_FILTER_ID}
-              label="Filter by title"
-              hideLabel
-              placeholder="Filter by title"
-              type="search"
-              autoComplete="off"
-              leading={<SearchIcon width={16} height={16} />}
-              value={filters.text}
-              onChange={(event) => filter({ text: event.target.value })}
-              onClear={() => filter({ text: "" })}
-              className={styles.textFilter}
-            />
-            <div className={styles.wideOnly}>{filterSelects(true)}</div>
-          </div>
-
-          <div className={styles.arrange}>
-            {/* On phones the selects and chips fold into one button and a sheet. */}
-            <Button
-              className={styles.narrowOnly}
-              icon={<FilterIcon width={16} height={16} />}
-              aria-haspopup="dialog"
-              onClick={() => setSheetOpen(true)}
-            >
-              Filters
-              {activeFilters > 0 && <span className={styles.filterCount}>{activeFilters}</span>}
-            </Button>
-            <div className={styles.wideOnly}>
-              {columnsSelect(true)}
-              {sortSelect(true)}
+          <TextField
+            id={TEXT_FILTER_ID}
+            label="Filter by title"
+            hideLabel
+            placeholder="Filter by title"
+            type="search"
+            autoComplete="off"
+            leading={<SearchIcon width={16} height={16} />}
+            value={filters.text}
+            onChange={(event) => filter({ text: event.target.value })}
+            onClear={() => filter({ text: "" })}
+            className={styles.textFilter}
+          />
+          <Popover
+            label="Filters"
+            trigger={
+              <>
+                <FilterIcon width={16} height={16} />
+                Filters
+                {activeFilters > 0 && (
+                  <span className={styles.filterCount}>
+                    {activeFilters}
+                    <span className="visually-hidden"> active</span>
+                  </span>
+                )}
+              </>
+            }
+          >
+            {progressChips()}
+            {filterSelects()}
+            <div className={styles.foldBelowWide}>
+              {columnsSelect()}
+              {sortSelect()}
             </div>
+            <div className={styles.foldBelowMedium}>
+              <SegmentedControl
+                label="Layout"
+                options={LAYOUTS}
+                value={layout}
+                onChange={(next) => update({ ...view, layout: next })}
+              />
+            </div>
+            {filtered && (
+              <Button size="sm" variant="quiet" onClick={clearFilters} className={styles.clearAll}>
+                Clear filters
+              </Button>
+            )}
+          </Popover>
+          <div className={styles.inlineWide}>
+            {columnsSelect(true)}
+            {sortSelect(true)}
+          </div>
+          <div className={styles.inlineMedium}>
             <SegmentedControl
               label="Layout"
               options={LAYOUTS}
@@ -447,43 +461,13 @@ export function LibraryBrowser({
           </div>
         </div>
 
-        <Modal open={sheetOpen} onClose={() => setSheetOpen(false)} labelledBy={sheetHeadingId}>
-          <div className={styles.sheet}>
-            <div className={styles.sheetHead}>
-              <h2 id={sheetHeadingId} className={styles.sheetTitle}>
-                Filter and sort
-              </h2>
-              <IconButton label="Close" variant="quiet" onClick={() => setSheetOpen(false)}>
-                <CloseIcon />
-              </IconButton>
-            </div>
-            {progressChips()}
-            {filterSelects(false)}
-            {columnsSelect(false)}
-            {sortSelect(false)}
-            <div className={styles.sheetActions}>
-              <Button variant="primary" onClick={() => setSheetOpen(false)}>
-                {visible.length === items.length
-                  ? `Show all ${formatCount(items.length, "game")}`
-                  : `Show ${formatCount(visible.length, "game")}`}
-              </Button>
-              {filtered && (
-                <Button variant="quiet" onClick={clearFilters}>
-                  Clear filters
-                </Button>
-              )}
-            </div>
-          </div>
-        </Modal>
-
         {/* Always in the page, so screen readers hear the count change as filters apply. */}
         <p className="visually-hidden" role="status">
           {status}
         </p>
 
-        {(progress.length > 1 || (filtered && visible.length > 0)) && (
+        {filtered && visible.length > 0 && (
           <div className={styles.refine}>
-            <div className={styles.wideOnly}>{progressChips()}</div>
             {/* With nothing left, the notice below says so and offers the same way out. */}
             {filtered && visible.length > 0 && (
               <div className={styles.result}>
@@ -523,94 +507,119 @@ export function LibraryBrowser({
                     sort={sort}
                     onSort={(key) => update({ ...view, sort: nextSort(sort, key) })}
                   />
-                  <motion.ul
-                    key={animateLayout ? "rows" : viewKey}
-                    className={styles.rows}
-                    initial={animateLayout ? false : { opacity: 0 }}
-                    animate={{ opacity: 1, transition: transition.enter }}
-                  >
-                    <AnimatePresence initial={false} mode="popLayout">
-                      {visible.map((item) => (
-                        <motion.li
-                          key={item.id}
-                          layout={animateLayout ? "position" : false}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1, transition: transition.enter }}
-                          exit={{ opacity: 0, transition: transition.exit }}
-                          transition={{ layout: move }}
-                        >
-                          <ListRow
-                            game={{ ...item, coverUrl: item.thumbUrl }}
-                            href={entryHref(item.id)}
-                            onClick={(event) => openEntry(event, item.id)}
-                            selected={item.id === openId}
-                          />
-                        </motion.li>
-                      ))}
-                    </AnimatePresence>
-                  </motion.ul>
+                  {groups.map((group) => (
+                    <section key={group.platform ?? "all"} aria-label={group.platform ?? undefined}>
+                      {group.platform && <GroupHeading group={group} />}
+                      <motion.ul
+                        key={animateLayout ? "rows" : viewKey}
+                        className={styles.rows}
+                        initial={animateLayout ? false : { opacity: 0 }}
+                        animate={{ opacity: 1, transition: transition.enter }}
+                      >
+                        <AnimatePresence initial={false} mode="popLayout">
+                          {group.items.map((item) => (
+                            <motion.li
+                              key={item.id}
+                              layout={animateLayout ? "position" : false}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1, transition: transition.enter }}
+                              exit={{ opacity: 0, transition: transition.exit }}
+                              transition={{ layout: move }}
+                            >
+                              <ListRow
+                                game={{ ...item, coverUrl: item.thumbUrl }}
+                                href={entryHref(item.id)}
+                                onClick={(event) => openEntry(event, item.id)}
+                                selected={item.id === openId}
+                              />
+                            </motion.li>
+                          ))}
+                        </AnimatePresence>
+                      </motion.ul>
+                    </section>
+                  ))}
                 </CatalogueList>
               ) : (
-                /*
-                 * A new order crossfades the grid: cards crossing a wide grid
-                 * read as a blur, not a move (DECISIONS.md 033). Filtering only
-                 * closes gaps, short moves that stay legible, so those travel.
-                 */
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.ul
-                    key={animateLayout ? orderKey : viewKey}
-                    className={cx(
-                      styles.grid,
-                      layout === "covers" && styles.coverGrid,
-                      view.columns !== null && styles.fixedColumns,
-                    )}
-                    style={
-                      // Custom properties for .fixedColumns; empty when the grid fits itself.
-                      (view.columns === null
-                        ? {}
-                        : {
-                            "--columns": view.columns,
-                            "--columns-narrow": narrowColumns(view.columns),
-                          }) as MotionStyle
-                    }
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1, transition: transition.enter }}
-                    exit={{ opacity: 0, transition: transition.exit }}
-                  >
-                    <AnimatePresence initial={false} mode="popLayout">
-                      {visible.map((item) => (
-                        <motion.li
-                          key={item.id}
-                          layout={animateLayout ? "position" : false}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1, transition: transition.enter }}
-                          exit={{ opacity: 0, transition: transition.exit }}
-                          transition={{ layout: move }}
-                        >
-                          {layout === "covers" ? (
-                            <CoverTile
-                              item={item}
-                              href={entryHref(item.id)}
-                              onClick={(event) => openEntry(event, item.id)}
-                            />
-                          ) : (
-                            <GameCard
-                              game={item}
-                              href={entryHref(item.id)}
-                              onClick={(event) => openEntry(event, item.id)}
-                            />
-                          )}
-                        </motion.li>
-                      ))}
+                groups.map((group) => (
+                  <section key={group.platform ?? "all"} aria-label={group.platform ?? undefined}>
+                    {group.platform && <GroupHeading group={group} />}
+                    {/*
+                     * A new order crossfades the grid: cards crossing a wide grid
+                     * read as a blur, not a move (DECISIONS.md 033). Filtering only
+                     * closes gaps, short moves that stay legible, so those travel.
+                     */}
+                    <AnimatePresence mode="wait" initial={false}>
+                      <motion.ul
+                        key={animateLayout ? orderKey : viewKey}
+                        className={cx(
+                          styles.grid,
+                          layout === "covers" && styles.coverGrid,
+                          view.columns !== null && styles.fixedColumns,
+                          group.platform !== null && styles.groupedGrid,
+                        )}
+                        style={
+                          // Custom properties for .fixedColumns; empty when the grid fits itself.
+                          (view.columns === null
+                            ? {}
+                            : {
+                                "--columns": view.columns,
+                                "--columns-narrow": narrowColumns(view.columns),
+                              }) as MotionStyle
+                        }
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1, transition: transition.enter }}
+                        exit={{ opacity: 0, transition: transition.exit }}
+                      >
+                        <AnimatePresence initial={false} mode="popLayout">
+                          {group.items.map((item) => (
+                            <motion.li
+                              key={item.id}
+                              layout={animateLayout ? "position" : false}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1, transition: transition.enter }}
+                              exit={{ opacity: 0, transition: transition.exit }}
+                              transition={{ layout: move }}
+                            >
+                              {layout === "covers" ? (
+                                <CoverTile
+                                  item={item}
+                                  href={entryHref(item.id)}
+                                  onClick={(event) => openEntry(event, item.id)}
+                                />
+                              ) : (
+                                <GameCard
+                                  game={item}
+                                  href={entryHref(item.id)}
+                                  onClick={(event) => openEntry(event, item.id)}
+                                />
+                              )}
+                            </motion.li>
+                          ))}
+                        </AnimatePresence>
+                      </motion.ul>
                     </AnimatePresence>
-                  </motion.ul>
-                </AnimatePresence>
+                  </section>
+                ))
               )}
             </motion.div>
           </AnimatePresence>
         )}
       </div>
     </>
+  );
+}
+
+/** A platform's name over its games, with how many there are. */
+function GroupHeading({
+  group,
+}: {
+  group: { platform: string | null; items: readonly unknown[] };
+}) {
+  return (
+    <h2 className={styles.groupHeading}>
+      {group.platform}
+      <span className={styles.groupCount}>{group.items.length}</span>
+    </h2>
   );
 }
 

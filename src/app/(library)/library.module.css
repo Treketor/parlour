@@ -76,8 +76,9 @@
 }
 
 /*
- * Browsing. The toolbar narrows the library (left) and arranges it (right);
- * the row beneath holds the progress filters and what they left.
+ * Browsing. One toolbar row that never wraps: the title filter gives way
+ * first; the Filters menu holds everything else that does not fit
+ * (DECISIONS.md 048).
  */
 .browser {
   position: relative;
@@ -86,60 +87,64 @@
 }
 
 .toolbar {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.filters {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  align-items: center;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 .textFilter {
-  grid-column: 1 / -1;
+  flex: 1 1 12rem;
+  min-width: 0;
 }
 
-.arrange {
-  display: flex;
+/* In the row from 40rem (layout) and 64rem (per row and sort); folded into the menu below. */
+.inlineMedium,
+.inlineWide {
+  display: none;
+  flex: none;
+  align-items: center;
   gap: var(--space-2);
 }
 
-/*
- * Wider: filters and arrangement share a line while they fit. When they do
- * not, the arrangement wraps under, still flush right, instead of stretching.
- */
-@media (min-width: 48rem) {
-  .toolbar {
+.foldBelowMedium,
+.foldBelowWide {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 40rem) {
+  .inlineMedium {
     display: flex;
-    flex-wrap: wrap;
-    align-items: start;
-    column-gap: var(--space-6);
   }
 
-  .filters {
-    display: flex;
-    flex: 1 1 auto;
-    flex-wrap: wrap;
+  .foldBelowMedium {
+    display: none;
   }
+}
 
+@media (min-width: 64rem) {
   .textFilter {
-    flex: 1 1 12rem;
-    max-width: 18rem;
+    flex-basis: 16rem;
+    max-width: 22rem;
   }
 
-  .filters > .wideOnly > * {
-    flex: 0 1 10.5rem;
-  }
-
-  .arrange {
+  .inlineWide {
     display: flex;
     margin-left: auto;
+  }
+
+  .foldBelowWide {
+    display: none;
   }
 
   .sort {
     width: 10.5rem;
   }
+}
+
+.clearAll {
+  justify-self: start;
 }
 
 .refine {
@@ -201,32 +206,13 @@
   height: var(--control-height-md);
 }
 
-/* The List and Grid segments at their rendered width. */
+/* The layout switch and Filters button at their rendered widths. */
 .layoutSkeleton {
-  width: 6.65rem;
+  width: 11.5rem;
 }
 
-/*
- * Phones: the title filter, then one row with the Filters button and the
- * layout switch. Everything else lives in the sheet. From 48rem the selects
- * and chips come back inline and the button goes.
- */
-.wideOnly {
-  display: none;
-}
-
-.narrowOnly {
-  flex: 1;
-}
-
-@media (min-width: 48rem) {
-  .wideOnly {
-    display: contents;
-  }
-
-  .narrowOnly {
-    display: none;
-  }
+.filtersSkeleton {
+  width: 6.5rem;
 }
 
 .filterCount {
@@ -241,39 +227,6 @@
   color: var(--color-on-accent);
   font-size: var(--text-2xs);
   font-variant-numeric: tabular-nums;
-}
-
-.sheet {
-  display: grid;
-  gap: var(--space-5);
-  padding: var(--space-5);
-}
-
-.sheetHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.sheetTitle {
-  font-family: var(--font-ui);
-  font-size: var(--text-lg);
-  font-weight: var(--ui-strong-weight);
-  letter-spacing: var(--tracking-tight);
-}
-
-.sheetActions {
-  display: grid;
-  gap: var(--space-2);
-  padding-top: var(--space-2);
-}
-
-/* On phones the chips are in the sheet; the row stays only to show what the filters left. */
-@media not (min-width: 48rem) {
-  .refine:not(:has(.result)) {
-    display: none;
-  }
 }
 
 /* Covers alone: tighter, so a shelf of art reads as one surface. */
@@ -301,7 +254,7 @@
 }
 
 .columns {
-  width: 10rem;
+  width: 9.5rem;
 }
 
 .coverTile {
@@ -346,4 +299,32 @@
 .coverTile:focus-visible .tileCover {
   outline: var(--focus-outline);
   outline-offset: var(--focus-offset);
+}
+
+/* A platform's run of games, sorted by platform: its name, then its count. */
+.groupHeading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding-block: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--ui-strong-weight);
+  letter-spacing: 0;
+}
+
+section:first-of-type > .groupHeading {
+  margin-top: var(--space-2);
+}
+
+.groupCount {
+  color: var(--color-text-faint);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.groupedGrid {
+  border-top: 0;
+  padding-top: var(--space-2);
 }

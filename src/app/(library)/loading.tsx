@@ -14,28 +14,18 @@ export default function LibraryLoading() {
       <PageHeader title="Library" meta={<Skeleton variant="text" width="5rem" />} />
       <div className={styles.browser}>
         <div className={styles.toolbar} aria-hidden="true">
-          <div className={styles.filters}>
-            <div className={`${styles.textFilter} ${styles.controlSkeleton}`}>
+          <div className={`${styles.textFilter} ${styles.controlSkeleton}`}>
+            <Skeleton />
+          </div>
+          <div className={`${styles.filtersSkeleton} ${styles.controlSkeleton}`}>
+            <Skeleton />
+          </div>
+          <div className={styles.inlineWide}>
+            <div className={`${styles.sort} ${styles.controlSkeleton}`}>
               <Skeleton />
-            </div>
-            <div className={styles.wideOnly}>
-              <div className={styles.controlSkeleton}>
-                <Skeleton />
-              </div>
-              <div className={styles.controlSkeleton}>
-                <Skeleton />
-              </div>
             </div>
           </div>
-          <div className={styles.arrange}>
-            <div className={`${styles.narrowOnly} ${styles.controlSkeleton}`}>
-              <Skeleton />
-            </div>
-            <div className={styles.wideOnly}>
-              <div className={`${styles.sort} ${styles.controlSkeleton}`}>
-                <Skeleton />
-              </div>
-            </div>
+          <div className={styles.inlineMedium}>
             <div className={`${styles.layoutSkeleton} ${styles.controlSkeleton}`}>
               <Skeleton />
             </div>
