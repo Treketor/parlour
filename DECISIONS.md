@@ -391,3 +391,10 @@ Revises 040 after review: one source, IGDB, was not credible enough on its own, 
 - **Queueing is one press:** "Add to queue" adds to the end. A queued entry shows a button-style "Number 3 in your queue" linking to the queue, and "Remove from queue". Order is arranged on the queue page.
 - **Queue rows drag from anywhere** except the title, which stays a link, and the remove button. A mouse needs 4px of travel, so a click is still a click. A finger needs to rest for 200ms, so swiping still scrolls. The keyboard still works through the handle.
 - **Grid cards stay inside their column.** A card's single track is capped at the column width: a long facts line had widened one card on phones and stretched its cover past its neighbours.
+
+## 049. The search list is a catalogue table
+
+- **From 64rem, search results in list layout line up in columns** (revises 036 and 038): cover, title, released, score, then platform and the add control, under a row of headings. Covers are 4rem. The headings are hidden from screen readers, which already hear each value in its row.
+- **Tablets keep date and score under the title,** with the controls beside it, so a long title is not squeezed into three lines.
+- **Phones give the two controls the row's full width beneath** the cover and title. Before, they shared a narrow column and cut "Nintendo Switch" short.
+- The headings fade with their rows when the layout or sort changes, as one piece.

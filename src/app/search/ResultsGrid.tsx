@@ -97,29 +97,40 @@ export function ResultsGrid({
         (DECISIONS.md 033), and a card and a row share no shape to morph.
       */}
       <AnimatePresence mode="wait" initial={false}>
-        <motion.ul
+        {/* The headings fade with their rows, so they stay one piece. */}
+        <motion.div
           key={`${layout}-${sort}`}
-          className={layout === "grid" ? styles.grid : styles.rows}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: transition.enter }}
           exit={{ opacity: 0, transition: transition.exit }}
         >
-          {sorted.map((game) => {
-            const props = {
-              game,
-              session,
-              habits,
-              signedIn,
-              returnTo,
-              metascore: metascores[game.id] ?? null,
-            };
-            return (
-              <li key={game.id}>
-                {layout === "grid" ? <SearchCard {...props} /> : <SearchRow {...props} />}
-              </li>
-            );
-          })}
-        </motion.ul>
+          {layout === "list" && (
+            // The row cells say what they are to assistive tech; these headings are for the eye.
+            <div className={styles.listHead} aria-hidden="true">
+              <span className={styles.listHeadTitle}>Title</span>
+              <span>Released</span>
+              <span className={styles.listHeadScore}>Score</span>
+              <span>Platform</span>
+            </div>
+          )}
+          <ul className={layout === "grid" ? styles.grid : styles.rows}>
+            {sorted.map((game) => {
+              const props = {
+                game,
+                session,
+                habits,
+                signedIn,
+                returnTo,
+                metascore: metascores[game.id] ?? null,
+              };
+              return (
+                <li key={game.id}>
+                  {layout === "grid" ? <SearchCard {...props} /> : <SearchRow {...props} />}
+                </li>
+              );
+            })}
+          </ul>
+        </motion.div>
       </AnimatePresence>
     </section>
   );
