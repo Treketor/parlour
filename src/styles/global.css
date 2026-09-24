@@ -10,6 +10,8 @@
 
 html {
   color-scheme: dark;
+  /* The scrollbar's space is always kept, so hiding it under a modal moves nothing. */
+  scrollbar-gutter: stable;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
