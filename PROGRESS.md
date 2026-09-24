@@ -7,7 +7,7 @@
 3. Database schema, row-level security, auth (done)
 4. IGDB integration: proxy, token and rate handling, catalogue cache (done)
 5. Search and add to library (done)
-6. Library browsing: list and grid, filter and sort
+6. Library browsing: list and grid, filter and sort (awaiting review)
 7. Library entry editing: progress, ownership, rating, tags, notes
 8. Game detail page: media, release info, scores, trailers, walkthrough links
 9. Prices: IsThereAnyDeal matching, current prices, history chart
@@ -29,9 +29,11 @@
 
 - Stage 5: search in a cover grid, with a platform picker, compact score and add or ownership change on each card; ranking over up to 200 IGDB candidates so official games lead; five sort orders; signed-out, empty, too-short and IGDB-failure states; results skeleton. After review: smarter default platform, score colour bands, aligned card controls, sort crossfade. 175 unit tests, 4 live tests.
 
+- Stage 6: library browsing in a list or cover grid; filter by title (accent- and order-insensitive), progress, ownership, platform and tag; five sorts plus sortable list columns; the whole view kept in the address; animated reordering with crossfades for new orders, layout switches and reduced motion; a filtered-empty state and a loading skeleton that matches the toolbar and list.
+
 ## Next
 
-- Stage 6: library browsing (list and grid, filter and sort).
+- Stage 7: library entry editing (progress, ownership, rating, tags, notes).
 
 ## Later
 
