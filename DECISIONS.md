@@ -366,3 +366,10 @@ Revises 040 after review: one source, IGDB, was not credible enough on its own, 
 - **History** is fetched from 13 months back and drawn for the last 12. The first month only establishes each shop's price, so the line does not open on a false spike from the one shop that happened to report first.
 - **Affiliate links pass through untouched,** as ITAD's terms require, and the page says so beside a link to IsThereAnyDeal. A key shop's listing notes the key it sells ("Steam key").
 - **Privacy:** the pages now say that preference cookies exist for visitors who are not signed in, and that shop links go through IsThereAnyDeal.
+
+## 046. Metacritic first in search, a covers layout, one hover for pictures
+
+- **Search leads with Metacritic when it is known,** marked "MC" so it never passes for IGDB's figure; otherwise the IGDB figure shows as before. Asking RAWG for forty results on every search would be slow and would spend the free quota (20,000 requests a month) quickly, so after a search has been sent, the first twelve results never checked are looked up in the background with `after()`, one at a time. Their metascores are there from the next search. This reads "IMDB" in the review request as Metacritic: IMDb has no game API.
+- **A third library layout, Covers:** the art alone, each cover still named for screen readers and in a tooltip. Grid and Covers take a covers-per-row setting: "Fit to screen", or 3 to 10. A chosen count applies from 40rem; phones show about half of it and never fewer than two (`narrowColumns`), so ten across a desktop is five across a phone. The count is kept in the address (`cols`) and remembered with the layout. Changing it crossfades, as a new sort does.
+- **Pictures on the game page hover like covers in the library:** a faint light over the image and a small press, instead of zooming in.
+- **The footer credits every source in use:** IGDB, Metacritic via RAWG, Steam and IsThereAnyDeal.
