@@ -27,7 +27,7 @@
 
 - Stage 4: IGDB client (shared stored token, rate limiter, retries, validated responses), catalogue tables for summaries, scores with counts, genres, per-platform release dates, media, trailers and store ids, atomic batch writes, search cache, and `searchCatalogue` / `ensure` for stage 5. 12 more pgTAP access tests, 4 live end-to-end tests, 125 unit tests. No UI yet: search is wired up in stage 5.
 
-- Stage 5: search results from IGDB with covers, one block per game and one row per platform, re-ranked for exact titles and popularity, scores only with enough ratings behind them; optimistic add with Owned / Want to own / Not interested; signed-out, empty, too-short and IGDB-failure states; results skeleton.
+- Stage 5: search in a cover grid, with a platform picker, compact score and add or ownership change on each card; ranking over up to 200 IGDB candidates so official games lead; five sort orders with animated reordering; signed-out, empty, too-short and IGDB-failure states; results skeleton. 163 unit tests, 4 live tests.
 
 ## Next
 

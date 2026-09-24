@@ -216,3 +216,25 @@ Offline tests use real IGDB responses saved as fixtures (Outer Wilds search, an 
 - **The server checks everything the browser sends.** The request is validated, the game is made sure of through the catalogue (fetched from IGDB only if missing or stale), the platform must be one the game is actually on, and the insert runs under the person's own session, so row-level security applies.
 - **Signed out, search still works.** The catalogue is public; the Add control becomes "Sign in to add", which returns to the same search afterwards.
 - **Loading keeps the form.** Results sit in a Suspense boundary keyed by the query, so a new search shows a skeleton of the results while the form stays put.
+
+## 031. Search ranks a wide candidate set, not IGDB's first page
+
+Found at stage 5 review: searching "pokemon" showed fan games and ROM hacks first. IGDB orders search results by name similarity only, and its first 20 for "pokemon" were almost all unrated fan projects. Pokémon Red, with 604 ratings, was at position 30 and never reached Parlour.
+
+Search now works in three steps:
+
+1. Ask IGDB for up to 200 matches, with only the fields ranking needs: name, total rating count, and hypes (follows before release).
+2. Rank locally by `log10(1 + ratings + hypes)`, plus a boost for how well the title matches (exact +1, prefix +0.5, in powers of ten). A well-rated game always beats an unrated one, and an exact title only decides between games with similar followings.
+3. Fetch full details for the best 40 in a single request, skipping any already stored and fresh.
+
+The ranked list is cached for a day, so repeat searches cost nothing. For "pokemon" the first twelve are now all mainline games, led by Emerald, Red and FireRed. The ranking is tested against the real 161-result IGDB response.
+
+## 032. Search results are a cover grid; ownership is editable in place
+
+Revises 030 after review.
+
+- **Cover grid.** Each card has the cover, title, full release date (or "Release date TBA"), a compact score, a platform picker and the action. Text sits in fixed-height slots, so controls line up across a row. Phones get two columns.
+- **One compact score.** The player and critic averages are combined, each weighted by how many ratings it rests on, and shown as "86 (634)". It appears only with at least 10 ratings behind it; the full wording is in the tooltip and read out by screen readers.
+- **Platform picker, not a row per platform.** One card per game with a platform select keeps the grid tidy. Platforms already in the library are marked in the picker, and "Also in your library on ..." notes other platforms. The picker starts on a platform already in the library, if any.
+- **Ownership is editable after adding.** The Add control turns into an ownership picker ("✓ Owned") in the accent colour. Changing it is optimistic and reverts with a message if the server refuses. Progress ("Want to play") is no longer shown in search; that belongs to the library.
+- **Sort.** Best match (the ranking above, default), Most rated, Newest, Oldest, Title. Undated games go last in both date orders. The choice is kept in the address without a server round trip, and cards travel to their new places; under reduced motion the grid fades into the new order instead.
