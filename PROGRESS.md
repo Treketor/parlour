@@ -9,7 +9,7 @@
 5. Search and add to library (done)
 6. Library browsing: list and grid, filter and sort (done)
 7. Library entry editing: progress, ownership, rating, tags, notes (done)
-8. Game detail page: media, release info, scores, trailers, walkthrough links
+8. Game detail page: media, release info, scores, trailers, walkthrough links (awaiting review)
 9. Prices: IsThereAnyDeal matching, current prices, history chart
 10. Play queue
 11. Accessibility, performance and reduced-motion pass; README screenshots; deploy
@@ -39,9 +39,11 @@
 
 - Stage 7: an entry panel over the library, opened from any row or card and kept in the address; progress, ownership, rating, start and finish dates, tags and notes, each saved as it changes and rolled back with a reason if refused; start and finish dates filled in from progress when empty; removing an entry with an in-place confirmation.
 
+- Stage 8: a public game page at /games/[slug]: cover, genres, separate player and critic scores with counts, summary, releases per platform (all regional dates on request), an image grid with a wide stepping viewer, trailers that load YouTube only when played, guide searches and a Steam link, and your entries plus the add controls. Reached from search titles and covers and the entry editor.
+
 ## Next
 
-- Stage 8: game detail page (media, release info, scores, trailers, walkthrough links).
+- Stage 9: prices (IsThereAnyDeal), per region and currency.
 
 ## Later
 
