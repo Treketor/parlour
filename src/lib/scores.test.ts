@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { combinedScore, compactCount } from "./scores";
+import { combinedScore, compactCount, scoreTier } from "./scores";
 
 describe("combinedScore", () => {
   it("weights each average by how many ratings it rests on", () => {
@@ -36,5 +36,17 @@ describe("compactCount", () => {
     [12_450, "12k"],
   ])("%d reads as %s", (count, text) => {
     expect(compactCount(count)).toBe(text);
+  });
+});
+
+describe("scoreTier", () => {
+  it.each([
+    [94, "high"],
+    [85, "high"],
+    [84, "mid"],
+    [70, "mid"],
+    [69, "low"],
+  ] as const)("%d is %s", (value, tier) => {
+    expect(scoreTier(value)).toBe(tier);
   });
 });

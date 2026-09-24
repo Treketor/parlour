@@ -19,6 +19,11 @@
   --color-text-faint: #9c968b;
   --color-on-accent: #1a1917;
   --color-danger: #df8f7e;
+  /* Third-party scores: accent for the best, plain for the middle, a muted clay
+     below 70. Clay, not the error coral: a low score is information, not a fault. */
+  --color-score-high: var(--color-accent);
+  --color-score-mid: var(--color-text);
+  --color-score-low: #c4a17f;
 
   /* Cool steel against the warm ground: the one colour in the interface. */
   --color-accent: #9db7d5;

@@ -34,3 +34,12 @@ export function compactCount(count: number): string {
   const thousands = count / 1000;
   return `${thousands < 10 ? Math.floor(thousands * 10) / 10 : Math.floor(thousands)}k`;
 }
+
+export type ScoreTier = "high" | "mid" | "low";
+
+/** Colour band for a score: 85 and up, 70 to 84, below 70. */
+export function scoreTier(value: number): ScoreTier {
+  if (value >= 85) return "high";
+  if (value >= 70) return "mid";
+  return "low";
+}
