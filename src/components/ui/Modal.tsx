@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { useShouldReduceMotion } from "@/components/Providers";
+import { cx } from "@/lib/cx";
 import { transition } from "@/lib/motion";
 import styles from "./Modal.module.css";
 
@@ -11,6 +12,8 @@ type ModalProps = {
   onClose: () => void;
   /** Id of the heading that names the modal. */
   labelledBy: string;
+  /** "wide" for pictures, which want the room more than a form does. */
+  size?: "default" | "wide";
   children: ReactNode;
 };
 
@@ -20,11 +23,11 @@ type ModalProps = {
  * removed only after its exit animation, and focus then returns to whatever
  * opened it.
  */
-export function Modal({ open, onClose, labelledBy, children }: ModalProps) {
+export function Modal({ open, onClose, labelledBy, size = "default", children }: ModalProps) {
   return (
     <AnimatePresence>
       {open && (
-        <ModalDialog onClose={onClose} labelledBy={labelledBy}>
+        <ModalDialog onClose={onClose} labelledBy={labelledBy} size={size}>
           {children}
         </ModalDialog>
       )}
@@ -32,7 +35,7 @@ export function Modal({ open, onClose, labelledBy, children }: ModalProps) {
   );
 }
 
-function ModalDialog({ onClose, labelledBy, children }: Omit<ModalProps, "open">) {
+function ModalDialog({ onClose, labelledBy, size, children }: Omit<ModalProps, "open">) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const reduceMotion = useShouldReduceMotion();
 
@@ -70,7 +73,7 @@ function ModalDialog({ onClose, labelledBy, children }: Omit<ModalProps, "open">
         exit={{ opacity: 0, transition: transition.exit }}
       />
       <motion.div
-        className={styles.box}
+        className={cx(styles.box, size === "wide" && styles.wide)}
         initial={hidden}
         animate={{ opacity: 1, scale: 1, y: 0, transition: transition.enter }}
         exit={{ ...hidden, transition: transition.exit }}

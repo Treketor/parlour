@@ -85,3 +85,37 @@ export function FilterIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** Leaves Parlour: a box with a stroke out of its corner. */
+export function ExternalIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M9.5 3.5h3v3M12.5 3.5 7.5 8.5M11 9.5v3h-7.5v-7.5h3" />
+    </Icon>
+  );
+}
+
+/** Play: a plain triangle, drawn in outline like everything else. */
+export function PlayIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5 3.5v9l7.5-4.5z" />
+    </Icon>
+  );
+}
+
+export function ChevronLeftIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M9.5 4 5.5 8l4 4" />
+    </Icon>
+  );
+}
+
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="m6.5 4 4 4-4 4" />
+    </Icon>
+  );
+}

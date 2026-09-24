@@ -43,6 +43,10 @@
   overscroll-behavior: contain;
 }
 
+.wide {
+  width: min(72rem, 100%);
+}
+
 /* The page behind stays where it was instead of scrolling under the box. */
 :global(html:has(dialog[open])) {
   overflow: hidden;
