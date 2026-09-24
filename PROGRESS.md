@@ -10,7 +10,7 @@
 6. Library browsing: list and grid, filter and sort (done)
 7. Library entry editing: progress, ownership, rating, tags, notes (done)
 8. Game detail page: media, release info, scores, trailers, walkthrough links (done)
-9. Prices: IsThereAnyDeal matching, current prices, history chart
+9. Prices: IsThereAnyDeal matching, current prices, history chart (awaiting review)
 10. Play queue
 11. Accessibility, performance and reduced-motion pass; README screenshots; deploy
 
@@ -45,9 +45,11 @@
 
 - Stage 8: a public game page at /games/[slug]: cover, genres, separate player and critic scores with counts, summary, releases per platform (all regional dates on request), an image grid with a wide stepping viewer, trailers that load YouTube only when played, guide searches and a Steam link, and your entries plus the add controls. Reached from search titles and covers and the entry editor.
 
+- Stage 9: prices from IsThereAnyDeal on the game page: best price now, lowest ever and this year, a year of price history, every shop; per region with a picker (saved on your profile, or on the device); cached six hours, served stale if ITAD is down.
+
 ## Next
 
-- Stage 9: prices (IsThereAnyDeal), per region and currency.
+- Stage 10: the play queue.
 
 ## Later
 

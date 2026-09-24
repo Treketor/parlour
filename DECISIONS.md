@@ -351,3 +351,18 @@ Revises 040 after review: one source, IGDB, was not credible enough on its own, 
 - "Remove dates" and "Manage tags" are outlined buttons like the rest.
 - RAWG names a game "Ocarina of Time (1998)" to tell it from a later namesake. Matching now drops a trailing bracketed year, and treats a slug shared with IGDB as the same title. Both still have to fall within a year of IGDB's date.
 - Metacritic's user score is not offered: RAWG carries only the metascore, and nothing else offers it legitimately. Players stay led by Steam.
+
+## 045. Prices from IsThereAnyDeal, per region
+
+- **One section on the game page:**
+  - the best price now, large, with its shop, the percentage off and the usual price;
+  - the lowest ever and lowest this year;
+  - a year of the cheapest price as a step line;
+  - every shop, cheapest first: five shown, the rest on "Show all".
+    It streams in after the rest of the page, and is left out entirely without an ITAD key.
+- **Region and currency.** The region comes from your profile when signed in (so it follows you between devices), then this device's choice (a cookie), then a guess from the browser's languages, then the United States. The picker beside the prices changes it. Prices are shown only in the region's own currency: IsThereAnyDeal lists some US shops in dollars even for the UK, and one list must never mix currencies. Dollars always say whose (US$, CA$, A$).
+- **Finding the game.** By its Steam app first, then by title. A lookup only counts when ITAD calls it a game and the title matches: a title lookup for Breath of the Wild answers with a DLC entry. A game on no PC platform (Windows, Mac, Linux) and with no Steam app is not looked up at all, and the page says IsThereAnyDeal follows PC shops.
+- **Asking as little as possible,** as ITAD's terms ask. The ITAD match is kept for a month, or a week when nothing was found. Prices are cached for six hours, and history for a day, per game and region. When ITAD cannot be reached, the last prices are shown with how old they are ("Checked 3 hours ago"); with nothing cached, the page says so. The key goes in a header, never in an address.
+- **History** is fetched from 13 months back and drawn for the last 12. The first month only establishes each shop's price, so the line does not open on a false spike from the one shop that happened to report first.
+- **Affiliate links pass through untouched,** as ITAD's terms require, and the page says so beside a link to IsThereAnyDeal. A key shop's listing notes the key it sells ("Steam key").
+- **Privacy:** the pages now say that preference cookies exist for visitors who are not signed in, and that shop links go through IsThereAnyDeal.
