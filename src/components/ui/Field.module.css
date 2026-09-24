@@ -134,3 +134,21 @@
     opacity: 0;
   }
 }
+
+.multiline {
+  height: auto;
+  align-items: stretch;
+}
+
+/*
+ * Grows with its text where the browser can size fields to content, from
+ * about four lines to about sixteen; elsewhere it is a fixed box that scrolls.
+ */
+.textarea {
+  min-height: 6.5rem;
+  max-height: 24rem;
+  padding-block: var(--space-2);
+  field-sizing: content;
+  line-height: var(--leading-reading);
+  resize: vertical;
+}

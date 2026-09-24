@@ -18,6 +18,8 @@
   --color-text-muted: #bcb6a9;
   --color-text-faint: #9c968b;
   --color-on-accent: #1a1917;
+  /* Behind a panel: the canvas, mostly opaque, so the page recedes but still shows where you were. */
+  --color-scrim: rgb(26 25 23 / 0.72);
   --color-danger: #df8f7e;
   /* Third-party scores: accent for the best, plain for the middle, a muted clay
      below 70. Clay, not the error coral: a low score is information, not a fault. */

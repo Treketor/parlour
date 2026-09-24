@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { cx } from "@/lib/cx";
 import { formatDate } from "@/lib/format";
 import { progressLabel, type Progress } from "@/lib/progress";
@@ -41,10 +41,12 @@ type ListRowProps = {
   game: ListRowData;
   /** Without one the row is plain text, with no hover or press state promising a link. */
   href?: string | undefined;
+  /** Lets the page open the entry in place; the href still works for new tabs. */
+  onClick?: ((event: MouseEvent<HTMLAnchorElement>) => void) | undefined;
   selected?: boolean;
 };
 
-export function ListRow({ game, href, selected = false }: ListRowProps) {
+export function ListRow({ game, href, onClick, selected = false }: ListRowProps) {
   const content = (
     <>
       <span className={styles.thumb}>
@@ -83,7 +85,12 @@ export function ListRow({ game, href, selected = false }: ListRowProps) {
 
   if (href === undefined) return <div className={cx(styles.row, styles.static)}>{content}</div>;
   return (
-    <Link href={href} className={styles.row} aria-current={selected ? "true" : undefined}>
+    <Link
+      href={href}
+      {...(onClick && { onClick })}
+      className={styles.row}
+      aria-current={selected ? "true" : undefined}
+    >
       {content}
     </Link>
   );

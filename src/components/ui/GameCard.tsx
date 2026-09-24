@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { MouseEvent } from "react";
 import { cx } from "@/lib/cx";
 import { progressLabel, type Progress } from "@/lib/progress";
 import type { Rating } from "@/lib/rating";
@@ -20,10 +21,12 @@ type GameCardProps = {
   game: GameCardData;
   /** Without one the card is plain, with no hover or press state promising a link. */
   href?: string | undefined;
+  /** Lets the page open the entry in place; the href still works for new tabs. */
+  onClick?: ((event: MouseEvent<HTMLAnchorElement>) => void) | undefined;
   className?: string | undefined;
 };
 
-export function GameCard({ game, href, className }: GameCardProps) {
+export function GameCard({ game, href, onClick, className }: GameCardProps) {
   const content = (
     <>
       <GameCover title={game.title} src={game.coverUrl} className={styles.cover} />
@@ -54,7 +57,7 @@ export function GameCard({ game, href, className }: GameCardProps) {
     return <div className={cx(styles.card, styles.static, className)}>{content}</div>;
   }
   return (
-    <Link href={href} className={cx(styles.card, className)}>
+    <Link href={href} {...(onClick && { onClick })} className={cx(styles.card, className)}>
       {content}
     </Link>
   );
