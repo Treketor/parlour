@@ -382,3 +382,12 @@ Revises 040 after review: one source, IGDB, was not credible enough on its own, 
 - **Order is a fractional-index key** (the `fractional-indexing` library, CC0): a move writes one row, keyed between its new neighbours. The server reads the neighbours' keys itself, and refuses a move whose neighbours are no longer in that order, since the queue changed in another tab. The page then reloads rather than guessing. Two adds at once that pick the same key are settled by the unique index and a second try.
 - **Finishing, completing or abandoning a game takes it off the queue,** in the same action that saves the progress. The editor updates its queue state from the result.
 - Removing a row fades it out before it leaves, and the server is told at once.
+
+## 048. One-row library toolbar, platform groups, a sectioned editor, simpler queueing
+
+- **The library toolbar is always one row** (revises 039). The title filter stretches and gives way first. **Filters** is a small panel that unfolds beneath its button, like the dropdowns, holding the progress chips and the ownership, platform and tag filters. From 64rem, covers per row and sort sit in the row; below that they fold into the Filters panel. From 40rem the layout switch sits in the row; below that it folds in too. Nothing ever wraps or overlaps. The panel is not modal: pressing outside, Escape, or the button closes it, and menus inside it count as inside.
+- **Sorting by platform heads each platform's run** with its name and count, in every layout.
+- **The entry editor is five labelled sections:** Status (ownership, progress, dates), Queue, Your rating, Tags, Notes. Each is ruled off the same way. Tags lost their sub-headings. Your other tags appear only while you are adding one, and "Manage" sits in the Tags heading.
+- **Queueing is one press:** "Add to queue" adds to the end. A queued entry shows a button-style "Number 3 in your queue" linking to the queue, and "Remove from queue". Order is arranged on the queue page.
+- **Queue rows drag from anywhere** except the title, which stays a link, and the remove button. A mouse needs 4px of travel, so a click is still a click. A finger needs to rest for 200ms, so swiping still scrolls. The keyboard still works through the handle.
+- **Grid cards stay inside their column.** A card's single track is capped at the column width: a long facts line had widened one card on phones and stretched its cover past its neighbours.
