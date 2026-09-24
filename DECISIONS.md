@@ -325,3 +325,22 @@ The card and the row share one hook and one set of controls, so adding works ide
 - **Genres are boxed labels,** so they never read as part of the release date.
 - **Missing critic scores say why.** IGDB's critic data is thin for older games: Ocarina of Time has none, A Link to the Past has one review. Parlour does not invent or borrow a number. It says "No reviews on IGDB" or "Only 1 review on IGDB" and links a Metacritic search. A second score source could fill this properly later; it would need its own licence and API key.
 - **Your library on the game page shows what you recorded:** rating, progress and ownership, dates, tags and the first few lines of your notes, with "Edit in your library".
+
+## 042. Scores from several sources, the most credible first
+
+Revises 040 after review: one source, IGDB, was not credible enough on its own, and it has no critic data at all for many older games.
+
+- **Critics lead with Metacritic.** Metacritic has no public API, and scraping it would break its terms. RAWG's API carries the official metascore and a link to the Metacritic page, and is free for personal projects that link to RAWG wherever its data appears. IGDB's critic aggregate is listed beneath. OpenCritic was considered; its API is sold through RapidAPI, which can require a card, so it stays in the backlog.
+- **Players lead with Steam** for games sold there: the share of positive reviews, in Steam's own words ("Very Positive"), from the largest pool of verified owners. It comes from the store's public review summary, which needs no key and leaves out off-topic review bombs. IGDB's player rating and RAWG's stars (shown out of 5, coloured on the same scale) are listed beneath.
+- **Every score says what it rests on,** and user scores with fewer than 10 reviews are left out. A column with nothing shows "No critic score yet" (with a Metacritic search) or "Not out yet" for an unreleased game.
+- **Matching is strict.** RAWG is searched by exact name, and a result is used only when the title is the same once punctuation and accents are set aside, and it came out within a year of IGDB's date. A shared slug settles ties. No score is better than a namesake's. IGDB can list several Steam apps for one game (a VR edition, a soundtrack); the one with the most reviews is the game.
+- **Cached for a week, and never erased by an outage.** Scores live in `game_scores`, written in one transaction by `store_game_scores`, with a weekly `game_score_checks` row that also records "found nothing". A source that fails keeps its last good scores and leaves the game due for another look. The scores stream in after the rest of the page, so a slow source never holds it up.
+- **RAWG is optional.** Without `RAWG_API_KEY`, Metacritic and RAWG are simply not asked, and Steam and IGDB still show.
+- **Search keeps its single IGDB figure** (033): asking three sources for forty results on every search is not worth the wait.
+
+## 043. Smaller review fixes
+
+- "Not interested" is no longer offered under "Add to library": adding is for games you have or want. It remains a choice for an entry already in the library.
+- "Remove dates" keeps its own padding, so its hover fill lines up with the fields.
+- Unreleased games say so: "Coming 19 Nov 2026", "Coming Q3 2027" or "Release date not announced", as exactly as the date is known, in the accent colour.
+- Images and trailers each have "Show all" and "Show fewer".

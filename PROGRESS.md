@@ -9,7 +9,7 @@
 5. Search and add to library (done)
 6. Library browsing: list and grid, filter and sort (done)
 7. Library entry editing: progress, ownership, rating, tags, notes (done)
-8. Game detail page: media, release info, scores, trailers, walkthrough links (awaiting review)
+8. Game detail page: media, release info, scores, trailers, walkthrough links (done)
 9. Prices: IsThereAnyDeal matching, current prices, history chart
 10. Play queue
 11. Accessibility, performance and reduced-motion pass; README screenshots; deploy
@@ -39,6 +39,8 @@
 
 - Stage 7: an entry panel over the library, opened from any row or card and kept in the address; progress, ownership, rating, start and finish dates, tags and notes, each saved as it changes and rolled back with a reason if refused; start and finish dates filled in from progress when empty; removing an entry with an in-place confirmation.
 
+- Stage 8 second review: scores from Metacritic (via RAWG, needs RAWG_API_KEY), Steam and IGDB, most credible first, cached weekly; unreleased games say so; Show all and Show fewer for images and trailers; "Not interested" removed from Add to library.
+
 - Stage 8 review: dates can be cleared or removed; "Add to library" drawn as a button; pictures fit the screen in the viewer; trailers open large; boxed genres; missing critic scores explained with a Metacritic search; your entry's rating, dates, tags and notes on the game page.
 
 - Stage 8: a public game page at /games/[slug]: cover, genres, separate player and critic scores with counts, summary, releases per platform (all regional dates on request), an image grid with a wide stepping viewer, trailers that load YouTube only when played, guide searches and a Steam link, and your entries plus the add controls. Reached from search titles and covers and the entry editor.
@@ -50,7 +52,7 @@
 ## Later
 
 - Search filters: released games only, a release-year range, platform. Suggested at stage 5 review; the library filters in stage 6 come first.
-- A second critic score source for older games IGDB covers thinly (e.g. OpenCritic, which needs its own API key and terms). Found at stage 8 review.
+- OpenCritic as a further critic source (its API is sold through RapidAPI). Considered at stage 8 review.
 - Written reviews: a few lines alongside the 1 to 10 rating, to explain it. Suggested at stage 7 review.
 
 ## Known issues
