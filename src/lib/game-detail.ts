@@ -160,3 +160,32 @@ export function criticSearchLink(name: string): OutboundLink {
     href: `https://www.metacritic.com/search/${encodeURIComponent(name)}/`,
   };
 }
+
+export type ReleaseState =
+  | { status: "released"; label: string }
+  | { status: "upcoming"; label: string }
+  | { status: "unannounced"; label: string };
+
+/**
+ * Whether a game is out yet, in words. An upcoming date is shown only as
+ * exactly as it is known: IGDB stores "sometime in 2027" as 31 Dec 2027, and
+ * "Coming 31 Dec 2027" would be a promise nobody made.
+ */
+export function releaseState(
+  firstReleaseDate: string | null,
+  releases: readonly ReleaseRow[],
+  today: string,
+): ReleaseState {
+  if (firstReleaseDate && firstReleaseDate <= today) {
+    return { status: "released", label: formatDate(new Date(`${firstReleaseDate}T00:00:00Z`)) };
+  }
+  const dated = releases
+    .filter((row) => row.releasedOn !== null && row.precision !== "tbd")
+    .sort((a, b) => (a.releasedOn ?? "").localeCompare(b.releasedOn ?? ""));
+  const next = dated[0];
+  if (next) return { status: "upcoming", label: `Coming ${formatRelease(next)}` };
+  if (firstReleaseDate) {
+    return { status: "upcoming", label: `Coming ${firstReleaseDate.slice(0, 4)}` };
+  }
+  return { status: "unannounced", label: "Release date not announced" };
+}

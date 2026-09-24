@@ -6,6 +6,7 @@ import {
   formatRelease,
   guideLinks,
   regionLabel,
+  releaseState,
   releaseLines,
   storeLinks,
   type ReleaseRow,
@@ -122,5 +123,35 @@ describe("criticSearchLink", () => {
     expect(criticSearchLink("The Legend of Zelda: Ocarina of Time").href).toBe(
       "https://www.metacritic.com/search/The%20Legend%20of%20Zelda%3A%20Ocarina%20of%20Time/",
     );
+  });
+});
+
+describe("releaseState", () => {
+  const today = "2026-09-24";
+
+  it("gives a released game its date", () => {
+    expect(releaseState("2017-03-03", [release({})], today)).toEqual({
+      status: "released",
+      label: "3 Mar 2017",
+    });
+  });
+
+  it("gives an upcoming game its date only as exactly as it is known", () => {
+    const yearOnly = release({ releasedOn: "2027-12-31", precision: "year" });
+    expect(releaseState("2027-12-31", [yearOnly], today)).toEqual({
+      status: "upcoming",
+      label: "Coming 2027",
+    });
+    const quarter = release({ releasedOn: "2026-12-31", precision: "quarter", label: "Q4 2026" });
+    expect(releaseState("2026-12-31", [quarter], today).label).toBe("Coming Q4 2026");
+    const day = release({ releasedOn: "2026-11-05" });
+    expect(releaseState("2026-11-05", [day], today).label).toBe("Coming 5 Nov 2026");
+  });
+
+  it("says when no date has been announced", () => {
+    expect(releaseState(null, [release({ releasedOn: null, precision: "tbd" })], today)).toEqual({
+      status: "unannounced",
+      label: "Release date not announced",
+    });
   });
 });

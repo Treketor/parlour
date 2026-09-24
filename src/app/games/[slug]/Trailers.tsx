@@ -74,9 +74,13 @@ export function Trailers({ title, videos, posters }: TrailersProps) {
           );
         })}
       </ul>
-      {!all && videos.length > PREVIEW && (
-        <Button size="sm" onClick={() => setAll(true)} className={styles.moreButton}>
-          {`Show all ${videos.length} trailers`}
+      {videos.length > PREVIEW && (
+        <Button
+          size="sm"
+          onClick={() => setAll((current) => !current)}
+          className={styles.moreButton}
+        >
+          {all ? "Show fewer" : `Show all ${videos.length} trailers`}
         </Button>
       )}
 

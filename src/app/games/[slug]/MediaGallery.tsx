@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useId, useState, type KeyboardEvent } from "react";
-import { IconButton } from "@/components/ui/Button";
+import { Button, IconButton } from "@/components/ui/Button";
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "@/components/ui/icons";
 import { Modal } from "@/components/ui/Modal";
 import type { MediaImage } from "@/lib/game-detail";
@@ -12,7 +12,7 @@ import styles from "./game.module.css";
 
 type MediaGalleryProps = { title: string; images: readonly MediaImage[] };
 
-/** Frames shown on the page; the last one stands for the rest, which open in the viewer. */
+/** Frames shown before "Show all". */
 const PREVIEW = 6;
 
 /**
@@ -21,6 +21,7 @@ const PREVIEW = 6;
  */
 export function MediaGallery({ title, images }: MediaGalleryProps) {
   const [open, setOpen] = useState<number | null>(null);
+  const [all, setAll] = useState(false);
   const headingId = useId();
   const current = open === null ? undefined : images[open];
 
@@ -36,37 +37,39 @@ export function MediaGallery({ title, images }: MediaGalleryProps) {
   return (
     <>
       <ul className={styles.gallery}>
-        {images.slice(0, PREVIEW).map((image, index) => {
-          const hidden = index === PREVIEW - 1 ? images.length - PREVIEW : 0;
-          return (
-            <li key={image.imageId}>
-              <button
-                type="button"
-                className={styles.thumb}
-                aria-label={
-                  hidden > 0
-                    ? `Open image ${index + 1} of ${images.length}, then step through the other ${hidden}`
-                    : `Open image ${index + 1} of ${images.length}`
-                }
-                onClick={() => setOpen(index)}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element -- IGDB serves pre-sized images; next/image would re-encode them for no gain. */}
-                <img
-                  src={igdbImageUrl(image.imageId, "screenshot_med")}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                />
-                {hidden > 0 && (
-                  <span className={styles.more} aria-hidden="true">
-                    +{hidden + 1}
-                  </span>
-                )}
-              </button>
-            </li>
-          );
-        })}
+        {(all ? images : images.slice(0, PREVIEW)).map((image, index) => (
+          <motion.li
+            key={image.imageId}
+            // Only frames revealed by "Show all" fade in; the first six are simply there.
+            initial={index < PREVIEW ? false : { opacity: 0 }}
+            animate={{ opacity: 1, transition: transition.enter }}
+          >
+            <button
+              type="button"
+              className={styles.thumb}
+              aria-label={`Open image ${index + 1} of ${images.length}`}
+              onClick={() => setOpen(index)}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- IGDB serves pre-sized images; next/image would re-encode them for no gain. */}
+              <img
+                src={igdbImageUrl(image.imageId, "screenshot_med")}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+          </motion.li>
+        ))}
       </ul>
+      {images.length > PREVIEW && (
+        <Button
+          size="sm"
+          onClick={() => setAll((current) => !current)}
+          className={styles.moreButton}
+        >
+          {all ? "Show fewer" : `Show all ${images.length} images`}
+        </Button>
+      )}
 
       <Modal
         open={current !== undefined}
