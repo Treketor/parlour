@@ -8,7 +8,11 @@ import {
   parseEntryUpdate,
   progressChange,
   sameTagName,
+  datesFor,
+  ownershipFits,
+  showsProgress,
   todayIso,
+  tracksProgress,
 } from "./edit-entry";
 
 const entryId = "7d0c9a3e-2f5b-4c1d-9a8e-3b6f1e2d4c5a";
@@ -142,5 +146,37 @@ describe("sameTagName", () => {
   it("ignores case", () => {
     expect(sameTagName("Co-op", "co-op")).toBe(true);
     expect(sameTagName("Co-op", "Coop")).toBe(false);
+  });
+});
+
+describe("progress and ownership", () => {
+  it("tracks progress only for games you own", () => {
+    expect(tracksProgress("owned")).toBe(true);
+    expect(tracksProgress("want_to_own")).toBe(false);
+    expect(tracksProgress("not_interested")).toBe(false);
+  });
+
+  it("refuses ownership that contradicts progress", () => {
+    expect(ownershipFits("owned", "playing")).toBe(true);
+    expect(ownershipFits("want_to_own", "want_to_play")).toBe(true);
+    expect(ownershipFits("want_to_own", "playing")).toBe(false);
+    expect(ownershipFits("not_interested", "finished")).toBe(false);
+  });
+
+  it("hides progress for a game passed on", () => {
+    expect(showsProgress("not_interested")).toBe(false);
+    expect(showsProgress("want_to_own")).toBe(true);
+  });
+});
+
+describe("datesFor", () => {
+  it("shows no dates before a game is started", () => {
+    expect(datesFor("want_to_play")).toEqual({ started: false, finished: false });
+  });
+
+  it("shows a start date once begun and a finish date once done", () => {
+    expect(datesFor("playing")).toEqual({ started: true, finished: false });
+    expect(datesFor("abandoned")).toEqual({ started: true, finished: false });
+    expect(datesFor("completed")).toEqual({ started: true, finished: true });
   });
 });

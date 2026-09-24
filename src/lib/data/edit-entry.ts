@@ -130,3 +130,31 @@ export function normaliseTagName(name: unknown): string | null {
 export function sameTagName(a: string, b: string): boolean {
   return a.toLowerCase() === b.toLowerCase();
 }
+
+/*
+ * Which progress goes with which ownership (DECISIONS.md 038). Progress is
+ * what you have done with a copy you have: a game you only want to own, or
+ * passed on, has not been started, so "Playing" with "Not interested" is
+ * refused here and by a check constraint in the database.
+ */
+
+/** Only a game you own on this platform has progress beyond "Want to play". */
+export function tracksProgress(ownership: Ownership): boolean {
+  return ownership === "owned";
+}
+
+/** Whether an entry can move to this ownership without contradicting its progress. */
+export function ownershipFits(ownership: Ownership, progress: Progress): boolean {
+  return ownership === "owned" || progress === "want_to_play";
+}
+
+/** Whether progress means anything for this ownership at all: a game passed on has none. */
+export function showsProgress(ownership: Ownership): boolean {
+  return ownership !== "not_interested";
+}
+
+/** The dates that mean something for a progress: a start once begun, a finish once done. */
+export function datesFor(progress: Progress): { started: boolean; finished: boolean } {
+  const finished = progress === "finished" || progress === "completed";
+  return { started: progress !== "want_to_play", finished };
+}
