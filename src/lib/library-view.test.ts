@@ -5,7 +5,9 @@ import {
   NO_FILTERS,
   filterEntries,
   hasFilters,
+  libraryPreferences,
   libraryViewParams,
+  withLibraryPreferences,
   parseLibraryView,
   progressCounts,
   type FilterableEntry,
@@ -193,5 +195,37 @@ describe("progressCounts", () => {
       { progress: "playing", count: 1 },
       { progress: "finished", count: 2 },
     ]);
+  });
+});
+
+describe("libraryPreferences", () => {
+  it("keeps the layout and order but not the filters", () => {
+    const view: LibraryViewState = {
+      layout: "grid",
+      sort: { key: "title", direction: "desc" },
+      filters: { ...NO_FILTERS, text: "zelda", platformId: 130 },
+    };
+    expect(libraryPreferences(view)).toBe("view=grid&sort=title&dir=desc");
+    expect(libraryPreferences(DEFAULT_VIEW)).toBe("");
+  });
+});
+
+describe("withLibraryPreferences", () => {
+  it("fills in the remembered layout and order", () => {
+    expect(
+      parseLibraryView(withLibraryPreferences({ q: "mario" }, "view=grid&sort=title")),
+    ).toEqual({
+      layout: "grid",
+      sort: { key: "title", direction: "asc" },
+      filters: { ...NO_FILTERS, text: "mario" },
+    });
+  });
+
+  it("lets an address that chooses a layout or order win", () => {
+    expect(withLibraryPreferences({ sort: "rating" }, "view=grid")).toEqual({ sort: "rating" });
+  });
+
+  it("leaves the parameters alone with nothing remembered", () => {
+    expect(withLibraryPreferences({ q: "x" }, undefined)).toEqual({ q: "x" });
   });
 });

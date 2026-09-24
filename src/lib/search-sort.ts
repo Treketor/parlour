@@ -79,3 +79,23 @@ export function sortResults(games: readonly CatalogueGame[], sort: SearchSort): 
   }
   return indexed.map(({ game }) => game);
 }
+
+/** The last search, so coming back to Search picks up where it was left. */
+export const LAST_SEARCH_COOKIE = "parlour-search";
+
+/**
+ * Where to send a bare visit to Search: the remembered search, if it is
+ * one. Anything that does not hold a real query is ignored, so a bad cookie
+ * can never cause a redirect loop.
+ */
+export function rememberedSearch(cookie: string | undefined): string | null {
+  if (!cookie) return null;
+  const saved = new URLSearchParams(cookie);
+  const query = saved.get("q")?.trim() ?? "";
+  if (query === "") return null;
+  return searchParamsFor({
+    query,
+    sort: parseSearchSort(saved.get("sort")),
+    layout: parseSearchLayout(saved.get("view")),
+  }).toString();
+}

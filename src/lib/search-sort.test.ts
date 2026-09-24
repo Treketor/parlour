@@ -1,7 +1,13 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import type { CatalogueGame } from "./catalogue";
-import { parseSearchSort, sortResults, parseSearchLayout, searchParamsFor } from "./search-sort";
+import {
+  parseSearchSort,
+  sortResults,
+  parseSearchLayout,
+  rememberedSearch,
+  searchParamsFor,
+} from "./search-sort";
 
 function game(id: number, name: string, date: string | null, ratings = 0): CatalogueGame {
   return {
@@ -79,5 +85,21 @@ describe("searchParamsFor", () => {
     expect(
       searchParamsFor({ query: "mario kart", sort: "newest", layout: "list" }).toString(),
     ).toBe("q=mario+kart&sort=newest&view=list");
+  });
+});
+
+describe("rememberedSearch", () => {
+  it("rebuilds a remembered search", () => {
+    expect(rememberedSearch("q=zelda&view=list&sort=newest")).toBe("q=zelda&sort=newest&view=list");
+  });
+
+  it("ignores a cookie without a real query", () => {
+    expect(rememberedSearch(undefined)).toBeNull();
+    expect(rememberedSearch("q=%20%20")).toBeNull();
+    expect(rememberedSearch("view=list")).toBeNull();
+  });
+
+  it("drops values it does not know", () => {
+    expect(rememberedSearch("q=zelda&sort=price&view=table")).toBe("q=zelda");
   });
 });

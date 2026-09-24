@@ -74,6 +74,13 @@ export async function changeOwnership(input: unknown): Promise<ChangeOwnershipRe
     .eq("id", request.entryId)
     .select("id");
 
+  // 23514: progress needs ownership (DECISIONS.md 038).
+  if (error?.code === "23514") {
+    return {
+      status: "failed",
+      message: "You have started this game, so it stays owned. Change its progress first.",
+    };
+  }
   if (error || data.length === 0) {
     if (error) console.error("Changing ownership failed", error);
     return { status: "failed", message: "It could not be changed. Try again." };

@@ -9,6 +9,7 @@ import type { CatalogueGame } from "@/lib/catalogue";
 import { cx } from "@/lib/cx";
 import { formatDate } from "@/lib/format";
 import { igdbImageUrl } from "@/lib/igdb-images";
+import { ownershipFits } from "@/lib/data/edit-entry";
 import { OWNERSHIP_STATES, ownershipLabel } from "@/lib/ownership";
 import { combinedScore, compactCount, scoreTier } from "@/lib/scores";
 import {
@@ -70,8 +71,7 @@ export function SearchRow(props: SearchResultProps) {
     <article className={styles.row} aria-labelledby={`game-${game.id}`}>
       <GameCover
         title={game.name}
-        size="thumb"
-        src={game.coverImageId ? igdbImageUrl(game.coverImageId, "cover_small", true) : undefined}
+        src={game.coverImageId ? igdbImageUrl(game.coverImageId, "cover_big") : undefined}
         className={styles.rowCover}
       />
       <div className={styles.rowText}>
@@ -159,7 +159,11 @@ function SearchControls({ game, signedIn, returnTo, state, className }: SearchCo
             align="end"
             label={`Ownership of ${game.name} on ${platform.name}`}
             icon={<CheckIcon width={12} height={12} className={styles.addedTick} />}
-            options={ownershipOptions}
+            options={ownershipOptions.map((option) =>
+              ownershipFits(option.value, entry.progress)
+                ? option
+                : { ...option, disabled: true, description: "You have started it" },
+            )}
             value={entry.ownership}
             onChange={state.change}
             disabled={entry.entryId === PENDING}

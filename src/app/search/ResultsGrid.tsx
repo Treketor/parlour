@@ -1,14 +1,16 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Select } from "@/components/ui/Select";
 import type { CatalogueGame } from "@/lib/catalogue";
 import type { EntryStatus } from "@/lib/data/library";
 import { formatCount } from "@/lib/format";
 import { transition } from "@/lib/motion";
+import { setPreferenceCookie } from "@/lib/preference-cookie";
 import {
+  LAST_SEARCH_COOKIE,
   SEARCH_LAYOUTS,
   SEARCH_SORTS,
   parseSearchSort,
@@ -45,6 +47,10 @@ export function ResultsGrid({
   const session = useSearchSession(statuses);
   const sorted = useMemo(() => sortResults(games, sort), [games, sort]);
   const returnTo = `/search?${searchParamsFor({ query, sort, layout })}`;
+
+  useEffect(() => {
+    setPreferenceCookie(LAST_SEARCH_COOKIE, searchParamsFor({ query, sort, layout }).toString());
+  }, [query, sort, layout]);
 
   function show(next: { sort: SearchSort; layout: SearchLayout }) {
     setSort(next.sort);

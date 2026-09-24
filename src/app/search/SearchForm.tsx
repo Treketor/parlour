@@ -6,7 +6,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { SearchIcon } from "@/components/ui/icons";
 import { TextField } from "@/components/ui/TextField";
-import { parseSearchLayout } from "@/lib/search-sort";
+import { setPreferenceCookie } from "@/lib/preference-cookie";
+import { LAST_SEARCH_COOKIE, parseSearchLayout } from "@/lib/search-sort";
 import styles from "./search.module.css";
 
 /**
@@ -20,7 +21,15 @@ export function SearchForm({ initialQuery }: { initialQuery: string }) {
   const layout = parseSearchLayout(useSearchParams().get("view"));
 
   return (
-    <Form action="/search" role="search" className={styles.form}>
+    <Form
+      action="/search"
+      role="search"
+      className={styles.form}
+      onSubmit={() => {
+        // Searching for nothing is how a search is put away for good.
+        if (query.trim() === "") setPreferenceCookie(LAST_SEARCH_COOKIE, "");
+      }}
+    >
       <TextField
         label="Search games"
         hideLabel

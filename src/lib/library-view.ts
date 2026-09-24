@@ -160,3 +160,35 @@ export function progressCounts(
     count: entries.filter((entry) => entry.progress === progress).length,
   })).filter((row) => row.count > 0);
 }
+
+/** Remembers layout and order between visits; filters are for the moment and are not kept. */
+export const LIBRARY_PREFERENCES_COOKIE = "parlour-library";
+
+const PREFERENCE_KEYS = ["view", "sort", "dir"] as const;
+
+/** The layout and order of a view, in the cookie's form. */
+export function libraryPreferences(view: LibraryViewState): string {
+  const all = libraryViewParams(view);
+  const kept = new URLSearchParams();
+  for (const key of PREFERENCE_KEYS) {
+    const value = all.get(key);
+    if (value) kept.set(key, value);
+  }
+  return kept.toString();
+}
+
+/**
+ * Query parameters with the remembered layout and order filled in. An
+ * address that sets any of them wins outright, so a shared link always shows
+ * what its sender saw.
+ */
+export function withLibraryPreferences(params: Params, remembered: string | undefined): Params {
+  if (!remembered || PREFERENCE_KEYS.some((key) => params[key] !== undefined)) return params;
+  const saved = new URLSearchParams(remembered);
+  const merged: Params = { ...params };
+  for (const key of PREFERENCE_KEYS) {
+    const value = saved.get(key);
+    if (value) merged[key] = value;
+  }
+  return merged;
+}
