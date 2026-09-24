@@ -119,3 +119,12 @@ export function ChevronRightIcon(props: IconProps) {
     </Icon>
   );
 }
+
+/** A drag handle: two columns of short rules, the grip of a thing that moves. */
+export function GripIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M5.5 4h1M9.5 4h1M5.5 8h1M9.5 8h1M5.5 12h1M9.5 12h1" />
+    </Icon>
+  );
+}

@@ -1,0 +1,143 @@
+.queue {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+/* A numbered list: the order is the content, so the numbers carry meaning. */
+.list {
+  margin: 0;
+  padding: 0;
+  border-top: var(--hairline);
+  list-style: none;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.75rem auto 2.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 4.25rem;
+  padding: var(--space-2) var(--space-2) var(--space-2) 0;
+  border-bottom: var(--hairline);
+  background: var(--color-canvas);
+  transition: opacity var(--duration-fast) var(--ease-in);
+}
+
+/* Lifted while dragged: a lighter ground and the accent edge, no shadow. */
+.row[data-dragging] {
+  z-index: 2;
+  background: var(--color-surface-raised);
+  outline: 1px solid var(--color-accent-line);
+}
+
+.row[data-leaving] {
+  opacity: 0;
+}
+
+.position {
+  color: var(--color-text-faint);
+  font-size: var(--text-lg);
+  font-weight: var(--display-weight);
+  font-variant-numeric: tabular-nums lining-nums;
+  text-align: right;
+}
+
+.row:first-child .position {
+  color: var(--color-accent);
+}
+
+.handle {
+  display: inline-grid;
+  place-items: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-md);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-text-faint);
+  cursor: grab;
+  touch-action: none;
+}
+
+@media (hover: hover) {
+  .handle:hover {
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+  }
+}
+
+.row[data-dragging] .handle {
+  cursor: grabbing;
+  color: var(--color-accent);
+}
+
+.thumb {
+  display: block;
+  width: 2.5rem;
+}
+
+.thumb > * {
+  width: 100%;
+}
+
+.text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/* Two lines before it trims: "The Legend of Zelda:" alone says nothing on a phone. */
+.title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: inherit;
+  font-weight: var(--ui-strong-weight);
+  line-height: var(--leading-heading);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .title:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+}
+
+.upNext {
+  padding: 0 var(--space-1-5);
+  border: 1px solid var(--color-accent-line);
+  border-radius: var(--radius-control);
+  background: var(--color-accent-wash);
+  color: var(--color-accent);
+  font-size: var(--text-2xs);
+  font-weight: var(--ui-strong-weight);
+}
+
+.progress {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+.remove {
+  color: var(--color-text-faint);
+}
