@@ -1,6 +1,13 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { gamesByIdQuery, normaliseSearch, quote, searchCandidatesQuery } from "./query";
+import {
+  gamesByIdQuery,
+  normaliseSearch,
+  quote,
+  searchCandidatesQuery,
+  gameBySlugQuery,
+  isGameSlug,
+} from "./query";
 
 describe("quote", () => {
   it("wraps plain text in double quotes", () => {
@@ -50,5 +57,23 @@ describe("gamesByIdQuery", () => {
   it("refuses an empty or invalid id list", () => {
     expect(() => gamesByIdQuery([])).toThrow();
     expect(() => gamesByIdQuery([-1, 1.5, Number.NaN])).toThrow();
+  });
+});
+
+describe("gameBySlugQuery", () => {
+  it("asks for one game by slug with every stored field", () => {
+    const query = gameBySlugQuery("outer-wilds");
+    expect(query).toContain('where slug = "outer-wilds";');
+    expect(query).toContain("limit 1;");
+    expect(query).toContain("release_dates.release_region");
+  });
+
+  it("refuses anything that is not a slug", () => {
+    expect(isGameSlug("prey--1")).toBe(true);
+    expect(isGameSlug("-zelda")).toBe(false);
+    expect(isGameSlug('zelda"; fields *')).toBe(false);
+    expect(isGameSlug("Zelda")).toBe(false);
+    expect(isGameSlug("zelda-2")).toBe(true);
+    expect(() => gameBySlugQuery("bad slug")).toThrow();
   });
 });

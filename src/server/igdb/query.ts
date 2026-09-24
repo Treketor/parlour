@@ -89,3 +89,17 @@ export function gamesByIdQuery(ids: readonly number[]): string {
   if (clean.length > MAX_LIMIT) throw new Error(`gamesByIdQuery takes at most ${MAX_LIMIT} ids`);
   return `fields ${GAME_FIELDS}; where id = (${clean.join(",")}); limit ${clean.length};`;
 }
+
+/**
+ * IGDB slugs are lower-case words joined by hyphens, doubled for a repeated
+ * title ("prey--1"); anything else is not worth a request.
+ */
+export function isGameSlug(value: string): boolean {
+  return /^[a-z0-9]+(?:-+[a-z0-9]+)*$/.test(value) && value.length <= 200;
+}
+
+/** One game by its slug, for a game page reached before the game was ever stored. */
+export function gameBySlugQuery(slug: string): string {
+  if (!isGameSlug(slug)) throw new Error("gameBySlugQuery needs a valid slug");
+  return `fields ${GAME_FIELDS}; where slug = ${quote(slug)}; limit 1;`;
+}

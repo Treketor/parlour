@@ -56,6 +56,23 @@ function memoryStore() {
         return stored ? [stored.game] : [];
       }),
     ),
+    idForSlug: vi.fn(
+      async (slug: string) =>
+        [...games.values()].find((stored) => stored.game.slug === slug)?.game.id ?? null,
+    ),
+    readDetail: vi.fn(async (id: number) => {
+      const stored = games.get(id);
+      if (!stored) return null;
+      return {
+        ...stored.game,
+        genres: [],
+        releases: [],
+        screenshots: [],
+        artworks: [],
+        videos: [],
+        externalIds: [],
+      };
+    }),
   };
   return store;
 }
@@ -68,8 +85,13 @@ function igdbReturning(data: unknown[]): IgdbClient & { query: ReturnType<typeof
   return {
     query: vi.fn(
       async (_endpoint: string, body: string, schema: { parse(value: unknown): unknown }) => {
-        const ids = /where id = (([d,]+))/.exec(body)?.[1]?.split(",").map(Number);
-        const rows = ids ? data.filter((row) => ids.includes((row as { id: number }).id)) : data;
+        const ids = /where id = \(([\d,]+)\)/.exec(body)?.[1]?.split(",").map(Number);
+        const slug = /where slug = "([^"]+)"/.exec(body)?.[1];
+        const rows = ids
+          ? data.filter((row) => ids.includes((row as { id: number }).id))
+          : slug
+            ? data.filter((row) => (row as { slug: string }).slug === slug)
+            : data;
         return schema.parse(rows);
       },
     ),
@@ -215,5 +237,50 @@ describe("catalogue.ensure", () => {
 
     await expect(offline.ensure([11737])).resolves.toHaveLength(1);
     await expect(offline.ensure([11737, 999])).rejects.toBeInstanceOf(IgdbError);
+  });
+});
+
+describe("detail", () => {
+  it("reads a stored game without asking IGDB", async () => {
+    const store = memoryStore();
+    const igdb = igdbReturning(searchOuterWilds);
+    const catalogue = createCatalogue({ store, igdb, now: () => NOW });
+    await catalogue.ensure([11737]);
+    igdb.query.mockClear();
+
+    const game = await catalogue.detail("outer-wilds");
+    expect(game?.name).toBe("Outer Wilds");
+    expect(igdb.query).not.toHaveBeenCalled();
+  });
+
+  it("fetches a game by slug when it was never stored", async () => {
+    const store = memoryStore();
+    const igdb = igdbReturning(searchOuterWilds);
+    const catalogue = createCatalogue({ store, igdb, now: () => NOW });
+
+    const game = await catalogue.detail("outer-wilds");
+    expect(game?.id).toBe(11737);
+    expect(igdb.query).toHaveBeenCalledWith(
+      "games",
+      expect.stringContaining('where slug = "outer-wilds"'),
+      expect.anything(),
+    );
+    expect(store.games.has(11737)).toBe(true);
+  });
+
+  it("is null for a slug IGDB does not know", async () => {
+    const catalogue = createCatalogue({
+      store: memoryStore(),
+      igdb: igdbReturning(searchOuterWilds),
+      now: () => NOW,
+    });
+    expect(await catalogue.detail("no-such-game")).toBeNull();
+  });
+
+  it("refuses a malformed slug before any request", async () => {
+    const igdb = igdbReturning(searchOuterWilds);
+    const catalogue = createCatalogue({ store: memoryStore(), igdb, now: () => NOW });
+    expect(await catalogue.detail('x"; fields *;')).toBeNull();
+    expect(igdb.query).not.toHaveBeenCalled();
   });
 });

@@ -1,8 +1,15 @@
 import type { CatalogueGame } from "@/lib/catalogue";
+import type { GameDetail } from "@/lib/game-detail";
 import type { IgdbClient } from "../igdb/client";
 import { IgdbError } from "../igdb/errors";
 import { mapGames, toCandidate, type GameBatch } from "../igdb/map";
-import { gamesByIdQuery, normaliseSearch, searchCandidatesQuery } from "../igdb/query";
+import {
+  gameBySlugQuery,
+  gamesByIdQuery,
+  isGameSlug,
+  normaliseSearch,
+  searchCandidatesQuery,
+} from "../igdb/query";
 import { igdbCandidates, igdbGames } from "../igdb/schema";
 import { rankCandidates } from "./rank";
 
@@ -24,6 +31,10 @@ export type CatalogueStore = {
   /** When each stored game goes stale; games not stored are absent. */
   staleAfter(ids: readonly number[]): Promise<Map<number, Date>>;
   readGames(ids: readonly number[]): Promise<CatalogueGame[]>;
+  /** The stored game with this slug, if any. */
+  idForSlug(slug: string): Promise<number | null>;
+  /** Everything the game page shows, for a stored game. */
+  readDetail(id: number): Promise<GameDetail | null>;
 };
 
 type Dependencies = { store: CatalogueStore; igdb: IgdbClient; now?: () => number };
@@ -84,7 +95,27 @@ export function createCatalogue({ store, igdb, now = Date.now }: Dependencies) {
     }
   }
 
-  return { search, ensure };
+  /**
+   * A game for its own page. A stored game is refreshed if stale; one that
+   * was never stored (a shared link, an old bookmark) is fetched by slug.
+   * Null means IGDB has no such game, which the page shows as not found.
+   */
+  async function detail(slug: string): Promise<GameDetail | null> {
+    if (!isGameSlug(slug)) return null;
+
+    const stored = await store.idForSlug(slug);
+    if (stored !== null) {
+      await ensure([stored]);
+      return store.readDetail(stored);
+    }
+
+    const [game] = await igdb.query("games", gameBySlugQuery(slug), igdbGames);
+    if (!game) return null;
+    await store.storeBatch(mapGames([game]));
+    return store.readDetail(game.id);
+  }
+
+  return { search, ensure, detail };
 }
 
 export type Catalogue = ReturnType<typeof createCatalogue>;
