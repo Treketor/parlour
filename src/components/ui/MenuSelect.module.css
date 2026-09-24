@@ -20,6 +20,19 @@
   transition: transform var(--duration-press) var(--ease-out);
 }
 
+.fullWidth {
+  display: block;
+}
+
+.fullWidth .trigger {
+  width: 100%;
+}
+
+.fullWidth .triggerLabel {
+  flex: 1;
+  text-align: left;
+}
+
 .small {
   height: var(--control-height-sm);
   padding-inline: var(--space-2) var(--space-1-5);

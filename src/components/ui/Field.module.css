@@ -103,6 +103,19 @@
   transition-duration: 0s;
 }
 
+.small {
+  height: var(--control-height-sm);
+}
+
+.small .input {
+  padding-inline: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.selectControl.small .input {
+  padding-right: var(--space-6);
+}
+
 .selectControl .input {
   appearance: none;
   padding-right: var(--space-8);

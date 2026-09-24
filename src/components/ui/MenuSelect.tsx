@@ -29,6 +29,10 @@ type MenuSelectProps<T extends string> = {
    */
   action?: boolean;
   size?: "sm" | "md";
+  /** Stretch the trigger to its container, e.g. across a card. */
+  fullWidth?: boolean;
+  /** Shown before the trigger label, e.g. a tick for something already chosen. */
+  icon?: ReactNode;
   className?: string | undefined;
 };
 
@@ -47,6 +51,8 @@ export function MenuSelect<T extends string>({
   disabled,
   action = false,
   size = "md",
+  fullWidth = false,
+  icon,
   className,
 }: MenuSelectProps<T>) {
   const [open, setOpen] = useState(false);
@@ -125,7 +131,7 @@ export function MenuSelect<T extends string>({
   }
 
   return (
-    <div ref={rootRef} className={cx(styles.root, className)}>
+    <div ref={rootRef} className={cx(styles.root, fullWidth && styles.fullWidth, className)}>
       <button
         ref={triggerRef}
         type="button"
@@ -139,7 +145,7 @@ export function MenuSelect<T extends string>({
         onClick={() => setOpen((current) => !current)}
         onKeyDown={onTriggerKeyDown}
       >
-        {selected?.leading}
+        {icon ?? selected?.leading}
         <span className={cx(styles.triggerLabel, !selected && !action && styles.placeholder)}>
           {selected?.label ?? placeholder}
         </span>

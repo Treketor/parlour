@@ -10,6 +10,7 @@ type SelectProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, "size"> & {
   hideLabel?: boolean;
   hint?: string;
   error?: string | undefined;
+  size?: "sm" | "md";
 };
 
 /*
@@ -21,6 +22,7 @@ export function Select({
   hideLabel = false,
   hint,
   error,
+  size = "md",
   id,
   className,
   children,
@@ -37,7 +39,7 @@ export function Select({
         {label}
       </label>
       <div
-        className={cx(styles.control, styles.selectControl)}
+        className={cx(styles.control, styles.selectControl, size === "sm" && styles.small)}
         data-invalid={error ? true : undefined}
       >
         <select
