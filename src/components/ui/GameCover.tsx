@@ -8,6 +8,11 @@ type GameCoverProps = {
   title: string;
   src?: string | undefined;
   size?: "thumb" | "card";
+  /** Width-described candidates; `sizes` then says how wide the cover is drawn. */
+  srcSet?: string | undefined;
+  sizes?: string | undefined;
+  /** Above the fold, likely the largest paint: fetched at once instead of lazily. */
+  priority?: boolean;
   className?: string | undefined;
 };
 
@@ -15,7 +20,15 @@ type GameCoverProps = {
  * Box art in a fixed 3:4 frame, so the space is reserved before the image
  * arrives. Games without art get a typeset cover instead of a broken image.
  */
-export function GameCover({ title, src, size = "card", className }: GameCoverProps) {
+export function GameCover({
+  title,
+  src,
+  size = "card",
+  srcSet,
+  sizes,
+  priority = false,
+  className,
+}: GameCoverProps) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const showImage = src !== undefined && !failed;
@@ -31,8 +44,11 @@ export function GameCover({ title, src, size = "card", className }: GameCoverPro
           }}
           className={styles.image}
           src={src}
+          srcSet={srcSet}
+          sizes={sizes}
           alt=""
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : undefined}
           decoding="async"
           data-loaded={loaded || undefined}
           onLoad={() => setLoaded(true)}

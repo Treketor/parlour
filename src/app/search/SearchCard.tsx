@@ -11,7 +11,7 @@ import { Select } from "@/components/ui/Select";
 import type { CatalogueGame } from "@/lib/catalogue";
 import { cx } from "@/lib/cx";
 import { formatDate } from "@/lib/format";
-import { igdbImageUrl } from "@/lib/igdb-images";
+import { igdbCoverSrcSet, igdbImageUrl } from "@/lib/igdb-images";
 import { ownershipFits } from "@/lib/data/edit-entry";
 import { OWNERSHIP_STATES, ownershipLabel } from "@/lib/ownership";
 import { combinedScore, compactCount, scoreTier } from "@/lib/scores";
@@ -42,6 +42,8 @@ export type SearchResultProps = {
   returnTo: string;
   /** Metacritic's score when known, which leads over IGDB's (DECISIONS.md 046). */
   metascore?: number | null;
+  /** One of the first results on screen, whose cover should not wait its turn. */
+  priority?: boolean;
 };
 
 /** One game in the results grid: cover, title and facts, then the controls. */
@@ -55,6 +57,10 @@ export function SearchCard(props: SearchResultProps) {
         <GameCover
           title={game.name}
           src={game.coverImageId ? igdbImageUrl(game.coverImageId, "cover_big", true) : undefined}
+          srcSet={game.coverImageId ? igdbCoverSrcSet(game.coverImageId, "cover_big") : undefined}
+          // Two columns on phones; from 40rem, columns of at least 10.5rem.
+          sizes="(min-width: 40rem) 14rem, 50vw"
+          priority={props.priority ?? false}
         />
       </CoverLink>
       <div className={styles.cardText}>
@@ -83,7 +89,10 @@ export function SearchRow(props: SearchResultProps) {
       <CoverLink game={game} className={styles.rowCover}>
         <GameCover
           title={game.name}
-          src={game.coverImageId ? igdbImageUrl(game.coverImageId, "cover_big") : undefined}
+          src={game.coverImageId ? igdbImageUrl(game.coverImageId, "cover_small", true) : undefined}
+          srcSet={game.coverImageId ? igdbCoverSrcSet(game.coverImageId, "cover_small") : undefined}
+          sizes="4rem"
+          priority={props.priority ?? false}
         />
       </CoverLink>
       <div className={styles.rowText}>

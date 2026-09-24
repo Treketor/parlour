@@ -23,6 +23,9 @@ import { SearchCard, SearchRow } from "./SearchCard";
 import { useSearchSession } from "./useSearchEntry";
 import styles from "./search.module.css";
 
+// Roughly the first screen of results, in either layout, on a phone or a desktop.
+const ABOVE_FOLD = 4;
+
 type ResultsGridProps = {
   query: string;
   games: CatalogueGame[];
@@ -114,7 +117,7 @@ export function ResultsGrid({
             </div>
           )}
           <ul className={layout === "grid" ? styles.grid : styles.rows}>
-            {sorted.map((game) => {
+            {sorted.map((game, index) => {
               const props = {
                 game,
                 session,
@@ -122,6 +125,7 @@ export function ResultsGrid({
                 signedIn,
                 returnTo,
                 metascore: metascores[game.id] ?? null,
+                priority: index < ABOVE_FOLD,
               };
               return (
                 <li key={game.id}>

@@ -398,3 +398,14 @@ Revises 040 after review: one source, IGDB, was not credible enough on its own, 
 - **Tablets keep date and score under the title,** with the controls beside it, so a long title is not squeezed into three lines.
 - **Phones give the two controls the row's full width beneath** the cover and title. Before, they shared a narrow column and cut "Nintendo Switch" short.
 - The headings fade with their rows when the layout or sort changes, as one piece.
+
+## 050. Accessibility and performance pass
+
+- **Audited with axe on every page,** signed in and out, and with the filters panel, menus, the entry editor and the trailer viewer open. Lighthouse scores 100 for accessibility and best practices on the public pages.
+- **A busy button keeps its name.** Its label is made transparent under the spinner, not hidden, which would have removed it from the accessibility tree.
+- **Tag suggestions are reachable by Tab.** Focus anywhere in the tag field or its suggestions keeps them open. After a suggestion is applied, focus goes back to the field.
+- **Closing the editor returns focus to the game's card,** including when the page was loaded with the editor open. The hand-back waits a frame, because focus given back while the dialog is still being removed is dropped.
+- **Covers are WebP** (IGDB serves both formats, and WebP is smaller). They come with a width-described `srcset`, so a 4rem list cover downloads a 90px or 180px file rather than a 528px one. The first four search results and the game page cover load eagerly at high priority, since they are the largest paint.
+- **The main column is at least a screen tall,** so the footer starts below the fold and streamed sections do not push it down. On the game page this took layout shift from 0.13 to 0.02.
+- Game pages describe themselves with the first 160 characters of the summary.
+- The disabled rating's faint "/10" is left as it is: WCAG exempts inactive controls from contrast.

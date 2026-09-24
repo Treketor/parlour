@@ -10,7 +10,7 @@ import {
   type EntryStatus,
 } from "@/lib/data/library";
 import { guideLinks, releaseLines, releaseState, storeLinks } from "@/lib/game-detail";
-import { igdbImageUrl } from "@/lib/igdb-images";
+import { igdbCoverSrcSet, igdbImageUrl } from "@/lib/igdb-images";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalogue } from "@/server/catalogue";
 import { LibraryPanel } from "./LibraryPanel";
@@ -26,7 +26,18 @@ const gameFor = cache((slug: string) => getCatalogue().detail(slug));
 
 export async function generateMetadata({ params }: PageProps<"/games/[slug]">): Promise<Metadata> {
   const game = await gameFor((await params).slug);
-  return { title: game?.name ?? "Game not found" };
+  if (!game) return { title: "Game not found" };
+  return {
+    title: game.name,
+    ...(game.summary && { description: descriptionFrom(game.summary) }),
+  };
+}
+
+/** A summary cut to what a search result shows, at a word boundary. */
+function descriptionFrom(summary: string): string {
+  const flat = summary.replace(/\s+/g, " ").trim();
+  if (flat.length <= 160) return flat;
+  return `${flat.slice(0, flat.lastIndexOf(" ", 157))}...`;
 }
 
 export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
@@ -61,6 +72,9 @@ export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
         <GameCover
           title={game.name}
           src={game.coverImageId ? igdbImageUrl(game.coverImageId, "cover_big", true) : undefined}
+          srcSet={game.coverImageId ? igdbCoverSrcSet(game.coverImageId, "cover_big") : undefined}
+          sizes="(min-width: 60rem) 16rem, 7rem"
+          priority
           className={styles.cover}
         />
         <LibraryPanel

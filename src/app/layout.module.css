@@ -6,6 +6,12 @@
 
 .main {
   flex: 1;
+  /*
+   * At least a screen tall, so the footer starts below the fold. Pages stream
+   * their slower sections in; a footer already on screen would be shoved
+   * down by each one, which reads as the page jumping.
+   */
+  min-height: 100dvh;
   width: 100%;
   max-width: var(--content-max);
   margin-inline: auto;
