@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { parseAddEntry, type AddEntryResult } from "@/lib/data/add-entry";
+import { parseAddEntry, parseChangeOwnership, type AddEntryResult } from "@/lib/data/add-entry";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalogue } from "@/server/catalogue";
 import { IgdbError } from "@/server/igdb/errors";
@@ -42,7 +42,15 @@ export async function addToLibrary(input: unknown): Promise<AddEntryResult> {
     .single();
 
   // Unique (user, game, platform): it is already there, perhaps added in another tab.
-  if (error?.code === "23505") return { status: "exists" };
+  if (error?.code === "23505") {
+    const { data: existing } = await supabase
+      .from("library_entries")
+      .select("id")
+      .eq("game_id", request.gameId)
+      .eq("platform_id", request.platformId)
+      .single();
+    if (existing) return { status: "exists", entryId: existing.id };
+  }
   if (error) {
     console.error("Adding to library failed", error);
     return { status: "failed", message: "It could not be added. Try again." };
@@ -50,4 +58,27 @@ export async function addToLibrary(input: unknown): Promise<AddEntryResult> {
 
   revalidatePath("/");
   return { status: "added", entryId: data.id };
+}
+
+export type ChangeOwnershipResult = { status: "changed" } | { status: "failed"; message: string };
+
+/** Changes whether an entry is owned, wanted or passed on. Row-level security limits it to your own. */
+export async function changeOwnership(input: unknown): Promise<ChangeOwnershipResult> {
+  const request = parseChangeOwnership(input);
+  if (!request) return { status: "failed", message: "That request was not understood." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("library_entries")
+    .update({ ownership: request.ownership })
+    .eq("id", request.entryId)
+    .select("id");
+
+  if (error || data.length === 0) {
+    if (error) console.error("Changing ownership failed", error);
+    return { status: "failed", message: "It could not be changed. Try again." };
+  }
+
+  revalidatePath("/");
+  return { status: "changed" };
 }

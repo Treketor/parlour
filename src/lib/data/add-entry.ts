@@ -4,7 +4,7 @@ export type AddEntryRequest = { gameId: number; platformId: number; ownership: O
 
 export type AddEntryResult =
   | { status: "added"; entryId: string }
-  | { status: "exists" }
+  | { status: "exists"; entryId: string }
   | { status: "signed-out" }
   | { status: "failed"; message: string };
 
@@ -29,4 +29,17 @@ export function parseAddEntry(input: unknown): AddEntryRequest | null {
 /** Key for a game on a platform, used to look up library status in search results. */
 export function entryKey(gameId: number, platformId: number): string {
   return `${gameId}:${platformId}`;
+}
+
+export type ChangeOwnershipRequest = { entryId: string; ownership: Ownership };
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Checks a change of ownership from the browser. */
+export function parseChangeOwnership(input: unknown): ChangeOwnershipRequest | null {
+  if (typeof input !== "object" || input === null) return null;
+  const { entryId, ownership } = input as Record<string, unknown>;
+  const owned = OWNERSHIP_STATES.find((state) => state === ownership);
+  if (typeof entryId !== "string" || !UUID.test(entryId) || owned === undefined) return null;
+  return { entryId, ownership: owned };
 }

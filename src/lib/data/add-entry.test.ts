@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { entryKey, parseAddEntry } from "./add-entry";
+import { entryKey, parseAddEntry, parseChangeOwnership } from "./add-entry";
 
 describe("parseAddEntry", () => {
   it("accepts a well-formed request", () => {
@@ -37,5 +37,27 @@ describe("parseAddEntry", () => {
 describe("entryKey", () => {
   it("identifies a game on a platform", () => {
     expect(entryKey(11737, 6)).toBe("11737:6");
+  });
+});
+
+describe("parseChangeOwnership", () => {
+  it("accepts an entry id and a known ownership", () => {
+    expect(
+      parseChangeOwnership({
+        entryId: "345974fc-5850-4658-a275-d1d6f66bf3bc",
+        ownership: "want_to_own",
+      }),
+    ).toEqual({ entryId: "345974fc-5850-4658-a275-d1d6f66bf3bc", ownership: "want_to_own" });
+  });
+
+  it.each([
+    ["an id that is not a uuid", { entryId: "1; drop table", ownership: "owned" }],
+    [
+      "an unknown ownership",
+      { entryId: "345974fc-5850-4658-a275-d1d6f66bf3bc", ownership: "lent" },
+    ],
+    ["nothing", null],
+  ])("refuses %s", (_, input) => {
+    expect(parseChangeOwnership(input)).toBeNull();
   });
 });
