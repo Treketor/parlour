@@ -61,7 +61,18 @@ export function regionLabel(region: string | null): string {
   return region ? (REGION_LABELS[region] ?? region) : "Region not listed";
 }
 
-export type ReleaseLine = { platform: string; date: string; regions: string[] };
+export type ReleaseLine = {
+  platform: string;
+  date: string;
+  regions: string[];
+  /** ISO date the line sorts by; null when the date is not known. */
+  on: string | null;
+};
+
+/** Whether a line is still to come: a future date, or none announced. */
+export function isUpcoming(line: ReleaseLine, today: string): boolean {
+  return line.on === null || line.on > today;
+}
 
 /**
  * The release table: one line per platform and date, with the regions that
@@ -89,9 +100,10 @@ export function releaseLines(rows: readonly ReleaseRow[]): ReleaseLine[] {
       line.regions.add(regionLabel(row.region));
       byDate.set(date, line);
     }
-    return [...byDate.entries()].map(([date, { regions }]) => ({
+    return [...byDate.entries()].map(([date, { sortKey, regions }]) => ({
       platform,
       date,
+      on: sortKey === "9999" ? null : sortKey,
       // Worldwide says it all; anything listed beside it is repetition.
       regions: regions.has("Worldwide") ? ["Worldwide"] : [...regions],
     }));

@@ -47,6 +47,7 @@ export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
   const releases = releaseLines(game.releases);
   const links = [...storeLinks(game.externalIds), ...guideLinks(game.name)];
   const media = [...game.screenshots, ...game.artworks];
+  const today = new Date().toISOString().slice(0, 10);
   const release = releaseState(
     game.firstReleaseDate,
     game.releases,
@@ -101,9 +102,9 @@ export default async function GamePage({ params }: PageProps<"/games/[slug]">) {
         {releases.length > 0 && (
           <section className={styles.section} aria-labelledby="released">
             <h2 id="released" className={styles.sectionTitle}>
-              Released
+              Release dates
             </h2>
-            <ReleaseTable lines={releases} />
+            <ReleaseTable lines={releases} today={today} />
           </section>
         )}
 

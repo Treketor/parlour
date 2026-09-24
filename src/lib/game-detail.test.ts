@@ -4,6 +4,7 @@ import {
   criticSearchLink,
   firstReleases,
   formatRelease,
+  isUpcoming,
   guideLinks,
   regionLabel,
   releaseState,
@@ -54,8 +55,13 @@ describe("releaseLines", () => {
         release({ region: "japan", releasedOn: "2017-03-01" }),
       ]),
     ).toEqual([
-      { platform: "Nintendo Switch", date: "1 Mar 2017", regions: ["Japan"] },
-      { platform: "Nintendo Switch", date: "3 Mar 2017", regions: ["Europe", "North America"] },
+      { platform: "Nintendo Switch", date: "1 Mar 2017", regions: ["Japan"], on: "2017-03-01" },
+      {
+        platform: "Nintendo Switch",
+        date: "3 Mar 2017",
+        regions: ["Europe", "North America"],
+        on: "2017-03-03",
+      },
     ]);
   });
 
@@ -112,8 +118,8 @@ describe("firstReleases", () => {
       release({ platform: "Wii U", region: "worldwide" }),
     ]);
     expect(firstReleases(lines)).toEqual([
-      { platform: "Nintendo Switch", date: "1 Mar 2017", regions: ["Japan"] },
-      { platform: "Wii U", date: "3 Mar 2017", regions: ["Worldwide"] },
+      { platform: "Nintendo Switch", date: "1 Mar 2017", regions: ["Japan"], on: "2017-03-01" },
+      { platform: "Wii U", date: "3 Mar 2017", regions: ["Worldwide"], on: "2017-03-03" },
     ]);
   });
 });
@@ -153,5 +159,17 @@ describe("releaseState", () => {
       status: "unannounced",
       label: "Release date not announced",
     });
+  });
+});
+
+describe("isUpcoming", () => {
+  it("marks future and unannounced dates", () => {
+    const [future, undated] = releaseLines([
+      release({ platform: "PlayStation 5", releasedOn: "2026-11-19" }),
+      release({ platform: "PC", releasedOn: null, precision: "tbd" }),
+    ]);
+    expect(future && isUpcoming(future, "2026-09-24")).toBe(true);
+    expect(undated && isUpcoming(undated, "2026-09-24")).toBe(true);
+    expect(future && isUpcoming(future, "2026-12-01")).toBe(false);
   });
 });
