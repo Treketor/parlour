@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { orderPlatforms } from "./platforms";
+import { orderPlatforms, platformLabel } from "./platforms";
 
 const pc = { id: 6, name: "PC (Microsoft Windows)", generation: null };
 const mac = { id: 14, name: "Mac", generation: null };
@@ -49,5 +49,12 @@ describe("orderPlatforms", () => {
     const list = [mac, pc];
     orderPlatforms(list);
     expect(list).toEqual([mac, pc]);
+  });
+});
+
+describe("platformLabel", () => {
+  it("shortens Windows to PC and leaves other names alone", () => {
+    expect(platformLabel("PC (Microsoft Windows)")).toBe("PC");
+    expect(platformLabel("Xbox Series X|S")).toBe("Xbox Series X|S");
   });
 });

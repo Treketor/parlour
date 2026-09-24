@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { OWNERSHIP_STATES, type Ownership } from "@/lib/ownership";
 import { PROGRESS_STATES, type Progress } from "@/lib/progress";
+import { igdbImageUrl } from "@/lib/igdb-images";
+import { platformLabel } from "@/lib/platforms";
 import { isRating, type Rating } from "@/lib/rating";
 import type { Database, Tables } from "@/lib/supabase/database.types";
 import { entryKey } from "./add-entry";
@@ -108,4 +110,68 @@ export async function platformHabits(client: Client): Promise<Record<number, num
   const counts: Record<number, number> = {};
   for (const row of data) counts[row.platform_id] = (counts[row.platform_id] ?? 0) + 1;
   return counts;
+}
+
+/** One entry as the library page shows it: the game, the platform and my state. */
+export type LibraryItem = {
+  id: string;
+  gameId: number;
+  slug: string;
+  title: string;
+  year: number | null;
+  coverUrl: string | undefined;
+  /** A smaller cover for list rows, where the art is 2rem wide. */
+  thumbUrl: string | undefined;
+  platformId: number;
+  platform: string;
+  ownership: Ownership;
+  progress: Progress;
+  rating: Rating | null;
+  tags: string[];
+  addedAt: Date;
+};
+
+/**
+ * Every entry the signed-in person has, with what browsing needs. The whole
+ * library comes down at once and is filtered and sorted in the browser: a
+ * personal library is hundreds of rows at most, and local filtering answers
+ * on the keystroke instead of after a round trip (DECISIONS.md 034).
+ */
+export async function listLibrary(client: Client): Promise<LibraryItem[]> {
+  const { data, error } = await client
+    .from("library_entries")
+    .select(
+      `id, game_id, platform_id, ownership, progress, rating, created_at,
+       games(slug, name, first_release_date, cover_image_id),
+       platforms(name),
+       entry_tags(tags(name))`,
+    )
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  return data.map((row) => {
+    // Foreign keys make both of these certain; a missing one means drift.
+    if (!row.games) throw new UnexpectedDataError("game", row.game_id);
+    if (!row.platforms) throw new UnexpectedDataError("platform", row.platform_id);
+    const { games: game, platforms: platform } = row;
+
+    return {
+      id: row.id,
+      gameId: row.game_id,
+      slug: game.slug,
+      title: game.name,
+      year: game.first_release_date ? Number(game.first_release_date.slice(0, 4)) : null,
+      coverUrl: game.cover_image_id
+        ? igdbImageUrl(game.cover_image_id, "cover_big", true)
+        : undefined,
+      thumbUrl: game.cover_image_id ? igdbImageUrl(game.cover_image_id, "cover_small") : undefined,
+      platformId: row.platform_id,
+      platform: platformLabel(platform.name),
+      ownership: oneOf(OWNERSHIP_STATES, "ownership", row.ownership),
+      progress: oneOf(PROGRESS_STATES, "progress", row.progress),
+      rating: ratingOrNull(row.rating),
+      tags: row.entry_tags.flatMap((link) => (link.tags ? [link.tags.name] : [])),
+      addedAt: new Date(row.created_at),
+    };
+  });
 }

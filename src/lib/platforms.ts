@@ -58,3 +58,11 @@ export function orderPlatforms<T extends Platform & { generation?: number | null
     (a, b) => habit(b) - habit(a) || tier(a) - tier(b) || a.name.localeCompare(b.name),
   );
 }
+
+/**
+ * A platform name short enough for a list column. IGDB names Windows
+ * "PC (Microsoft Windows)"; everyone else just says PC.
+ */
+export function platformLabel(name: string): string {
+  return name === "PC (Microsoft Windows)" ? "PC" : name;
+}
