@@ -174,9 +174,20 @@
   font-size: var(--text-sm);
 }
 
-/* Sits flush with the fields, not indented by its own padding. */
-.addDates {
+.status {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.addDates,
+.removeDates {
+  justify-self: start;
+}
+
+/* Quiet, and flush with the fields rather than indented by its own padding. */
+.removeDates {
   margin-left: calc(-1 * var(--space-3));
+  color: var(--color-text-muted);
 }
 
 .gameLink {

@@ -170,55 +170,49 @@ export function EntryEditor({
 
       <div className={styles.fields}>
         {/* Ownership first: it decides whether progress applies at all. */}
-        <motion.div className={styles.pair} {...section}>
-          <Select
-            label="Ownership"
-            options={ownershipOptions}
-            value={item.ownership}
-            error={errors.ownership}
-            onChange={(ownership) => {
-              if (ownership !== item.ownership) save("ownership", { ownership });
-            }}
-          />
-          {showsProgress(item.ownership) ? (
+        <motion.div className={styles.status} {...section}>
+          <div className={styles.pair}>
             <Select
-              label="Progress"
-              options={progressOptions}
-              value={item.progress}
-              error={errors.progress}
-              disabled={!tracked}
-              {...(!tracked && { hint: "Mark it as owned to track progress" })}
-              onChange={(progress) => {
-                if (progress !== item.progress) {
-                  save("progress", { progress });
-                }
+              label="Ownership"
+              options={ownershipOptions}
+              value={item.ownership}
+              error={errors.ownership}
+              onChange={(ownership) => {
+                if (ownership !== item.ownership) save("ownership", { ownership });
               }}
             />
-          ) : (
-            <p className={styles.passed}>Passed on, so there is no progress to track.</p>
+            {showsProgress(item.ownership) ? (
+              <Select
+                label="Progress"
+                options={progressOptions}
+                value={item.progress}
+                error={errors.progress}
+                disabled={!tracked}
+                {...(!tracked && { hint: "Mark it as owned to track progress" })}
+                onChange={(progress) => {
+                  if (progress !== item.progress) {
+                    save("progress", { progress });
+                  }
+                }}
+              />
+            ) : (
+              <p className={styles.passed}>Passed on, so there is no progress to track.</p>
+            )}
+          </div>
+          {/* Offered right under progress, which is what makes a date mean something. */}
+          {dates?.started && !showDates && (
+            <Button
+              size="sm"
+              icon={<PlusIcon width={12} height={12} />}
+              onClick={() => setAddingDates(true)}
+              className={styles.addDates}
+            >
+              Add dates
+            </Button>
           )}
         </motion.div>
 
-        <AnimatePresence initial={false} mode="popLayout">
-          {dates?.started && !showDates && (
-            <motion.div
-              key="add-dates"
-              {...section}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: transition.enter }}
-              exit={{ opacity: 0, transition: transition.exit }}
-            >
-              <Button
-                size="sm"
-                variant="quiet"
-                icon={<PlusIcon width={12} height={12} />}
-                onClick={() => setAddingDates(true)}
-                className={styles.addDates}
-              >
-                {dates.finished ? "Add when you started and finished" : "Add when you started"}
-              </Button>
-            </motion.div>
-          )}
+        <AnimatePresence initial={false}>
           {dates && showDates && (
             <motion.div
               key="dates"
@@ -233,6 +227,10 @@ export function EntryEditor({
                 error={errors.dates}
                 onSave={(patch) => save("dates", patch)}
                 onError={(message) => setError("dates", message)}
+                onRemove={() => {
+                  setAddingDates(false);
+                  save("dates", { startedOn: null, finishedOn: null });
+                }}
               />
             </motion.div>
           )}
@@ -282,13 +280,15 @@ type DateFieldsProps = {
   error: string | undefined;
   onSave: (patch: EntryPatch) => void;
   onError: (message: string | undefined) => void;
+  /** Clears both dates and folds the fields away again. */
+  onRemove: () => void;
 };
 
 /**
  * When you started and finished, shown once they mean something. Filled in
  * for you when progress changes, if empty.
  */
-function DateFields({ item, showFinished, error, onSave, onError }: DateFieldsProps) {
+function DateFields({ item, showFinished, error, onSave, onError, onRemove }: DateFieldsProps) {
   function commit(field: "startedOn" | "finishedOn", value: string | null) {
     const next = { startedOn: item.startedOn, finishedOn: item.finishedOn, [field]: value };
     if (!datesInOrder(next.startedOn, next.finishedOn)) {
@@ -332,6 +332,9 @@ function DateFields({ item, showFinished, error, onSave, onError }: DateFieldsPr
           {error}
         </p>
       )}
+      <Button size="sm" variant="quiet" onClick={onRemove} className={styles.removeDates}>
+        Remove dates
+      </Button>
     </fieldset>
   );
 }
@@ -376,6 +379,10 @@ function DateInput({ label, value, onCommit, onIncomplete }: DateInputProps) {
       onBlur={() => {
         if (draft === (value ?? "") || draft === "" || whole(draft)) return;
         onIncomplete(`Enter the whole ${label.toLowerCase()} date: day, month and year.`);
+      }}
+      onClear={() => {
+        setDraft("");
+        onCommit(null);
       }}
     />
   );
