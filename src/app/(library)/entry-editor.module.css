@@ -184,11 +184,6 @@
   justify-self: start;
 }
 
-/* Quiet; its hover fill lines up with the fields above instead of hanging out to the left. */
-.removeDates {
-  color: var(--color-text-muted);
-}
-
 .gameLink {
   color: var(--color-accent);
   text-decoration: underline;

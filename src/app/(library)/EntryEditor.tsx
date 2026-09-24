@@ -332,7 +332,7 @@ function DateFields({ item, showFinished, error, onSave, onError, onRemove }: Da
           {error}
         </p>
       )}
-      <Button size="sm" variant="quiet" onClick={onRemove} className={styles.removeDates}>
+      <Button size="sm" onClick={onRemove} className={styles.removeDates}>
         Remove dates
       </Button>
     </fieldset>
@@ -521,7 +521,7 @@ function TagField({
         <div className={styles.tagGroup}>
           <div className={styles.groupHead}>
             <h3 className={styles.groupLabel}>{managing ? "All your tags" : "Your other tags"}</h3>
-            <Button size="sm" variant="quiet" onClick={() => setManaging((current) => !current)}>
+            <Button size="sm" onClick={() => setManaging((current) => !current)}>
               {managing ? "Done" : "Manage tags"}
             </Button>
           </div>
