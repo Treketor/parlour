@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import type { CatalogueGame } from "./catalogue";
-import { parseSearchSort, sortResults } from "./search-sort";
+import { parseSearchSort, sortResults, parseSearchLayout, searchParamsFor } from "./search-sort";
 
 function game(id: number, name: string, date: string | null, ratings = 0): CatalogueGame {
   return {
@@ -57,5 +57,27 @@ describe("parseSearchSort", () => {
     expect(parseSearchSort("newest")).toBe("newest");
     expect(parseSearchSort("nonsense")).toBe("best");
     expect(parseSearchSort(null)).toBe("best");
+  });
+});
+
+describe("parseSearchLayout", () => {
+  it("defaults to the grid and accepts the list", () => {
+    expect(parseSearchLayout(undefined)).toBe("grid");
+    expect(parseSearchLayout("table")).toBe("grid");
+    expect(parseSearchLayout("list")).toBe("list");
+  });
+});
+
+describe("searchParamsFor", () => {
+  it("leaves the default sort and layout out", () => {
+    expect(searchParamsFor({ query: "zelda", sort: "best", layout: "grid" }).toString()).toBe(
+      "q=zelda",
+    );
+  });
+
+  it("writes a chosen sort and layout", () => {
+    expect(
+      searchParamsFor({ query: "mario kart", sort: "newest", layout: "list" }).toString(),
+    ).toBe("q=mario+kart&sort=newest&view=list");
   });
 });

@@ -3,7 +3,7 @@ import { Notice } from "@/components/ui/Notice";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { CatalogueGame } from "@/lib/catalogue";
 import { libraryStatusFor, platformHabits, type EntryStatus } from "@/lib/data/library";
-import type { SearchSort } from "@/lib/search-sort";
+import type { SearchLayout, SearchSort } from "@/lib/search-sort";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalogue } from "@/server/catalogue";
 import { MIN_QUERY_LENGTH } from "@/server/catalogue/service";
@@ -11,7 +11,9 @@ import { IgdbError } from "@/server/igdb/errors";
 import { ResultsGrid } from "./ResultsGrid";
 import styles from "./search.module.css";
 
-export async function SearchResults({ query, sort }: { query: string; sort: SearchSort }) {
+type SearchResultsProps = { query: string; sort: SearchSort; layout: SearchLayout };
+
+export async function SearchResults({ query, sort, layout }: SearchResultsProps) {
   if (query.length < MIN_QUERY_LENGTH) {
     return <p className={styles.hint}>Type at least {MIN_QUERY_LENGTH} characters to search.</p>;
   }
@@ -64,12 +66,13 @@ export async function SearchResults({ query, sort }: { query: string; sort: Sear
       habits={habits}
       signedIn={signedIn}
       initialSort={sort}
+      initialLayout={layout}
     />
   );
 }
 
-/** The shape of the results grid, so nothing moves when the real results arrive. */
-export function SearchResultsSkeleton() {
+/** The shape of the results, so nothing moves when the real ones arrive. */
+export function SearchResultsSkeleton({ layout }: { layout: SearchLayout }) {
   return (
     <div aria-busy="true" aria-label="Searching">
       <div className={styles.resultsBar}>
@@ -77,22 +80,38 @@ export function SearchResultsSkeleton() {
           <Skeleton variant="text" width="9rem" />
         </p>
       </div>
-      <ul className={styles.grid}>
+      <ul className={layout === "grid" ? styles.grid : styles.rows}>
         {Array.from({ length: 10 }, (_, index) => (
           <li key={index}>
-            <div className={styles.card}>
-              <span className={styles.cardCover}>
-                <Skeleton />
-              </span>
-              <div className={styles.cardText}>
-                <span className={styles.cardTitle}>
-                  <Skeleton variant="text" width="80%" />
+            {layout === "grid" ? (
+              <div className={styles.card}>
+                <span className={styles.cardCover}>
+                  <Skeleton />
                 </span>
-                <span className={styles.cardMeta}>
-                  <Skeleton variant="text" width="55%" />
-                </span>
+                <div className={styles.cardText}>
+                  <span className={styles.cardTitle}>
+                    <Skeleton variant="text" width="80%" />
+                  </span>
+                  <span className={styles.cardMeta}>
+                    <Skeleton variant="text" width="55%" />
+                  </span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className={styles.row}>
+                <span className={styles.rowCover}>
+                  <Skeleton />
+                </span>
+                <div className={styles.rowText}>
+                  <span className={styles.rowTitle}>
+                    <Skeleton variant="text" width="40%" />
+                  </span>
+                  <span className={styles.cardMeta}>
+                    <Skeleton variant="text" width="25%" />
+                  </span>
+                </div>
+              </div>
+            )}
           </li>
         ))}
       </ul>

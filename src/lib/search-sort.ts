@@ -10,6 +10,30 @@ export const SEARCH_SORTS = [
 
 export type SearchSort = (typeof SEARCH_SORTS)[number]["value"];
 
+export const SEARCH_LAYOUTS = [
+  { value: "grid", label: "Grid" },
+  { value: "list", label: "List" },
+] as const;
+
+export type SearchLayout = (typeof SEARCH_LAYOUTS)[number]["value"];
+
+/** Covers first: search is where you recognise a game by its art. */
+export function parseSearchLayout(value: string | null | undefined): SearchLayout {
+  return value === "list" ? "list" : "grid";
+}
+
+/** The address for a search; the default sort and layout are left out. */
+export function searchParamsFor(view: {
+  query: string;
+  sort: SearchSort;
+  layout: SearchLayout;
+}): URLSearchParams {
+  const params = new URLSearchParams({ q: view.query });
+  if (view.sort !== "best") params.set("sort", view.sort);
+  if (view.layout !== "grid") params.set("view", view.layout);
+  return params;
+}
+
 export function parseSearchSort(value: string | null | undefined): SearchSort {
   return SEARCH_SORTS.find((sort) => sort.value === value)?.value ?? "best";
 }
