@@ -33,6 +33,8 @@
 
 - Stage 6 review: every dropdown is now the app's own animated menu (it stays on screen, supports typeahead and truncates long names); search results can be shown as a list.
 
+- Stage 7 review: the entry opens in a centred box; progress, dates and ownership follow each other (with a database check); tags look different on and off a game, show in the library, and can be deleted with a warning; the library and search remember their layout and last search; dropdowns unfold from their box; larger search list covers.
+
 - Stage 7: an entry panel over the library, opened from any row or card and kept in the address; progress, ownership, rating, start and finish dates, tags and notes, each saved as it changes and rolled back with a reason if refused; start and finish dates filled in from progress when empty; removing an entry with an in-place confirmation.
 
 ## Next
