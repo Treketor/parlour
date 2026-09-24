@@ -10,6 +10,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { useShouldReduceMotion } from "@/components/Providers";
 import { cx } from "@/lib/cx";
 import { transition } from "@/lib/motion";
 import { CheckIcon, ChevronDownIcon } from "./icons";
@@ -20,6 +21,8 @@ export type MenuOption<T extends string> = {
   label: string;
   description?: string;
   leading?: ReactNode;
+  /** Shown but not choosable; say why in the description. */
+  disabled?: boolean;
 };
 
 type MenuSelectProps<T extends string> = {
@@ -60,6 +63,9 @@ type Placement = { side: "bottom" | "top"; align: "start" | "end" };
 /** Space kept between a menu and the edge of the screen. */
 const VIEWPORT_MARGIN = 8;
 
+/** The choices wait for the frame to open most of the way before fading in. */
+const ITEM_DELAY_S = 0.06;
+
 /** How long typed letters keep adding to one search, as in a native select. */
 const TYPEAHEAD_RESET_MS = 500;
 
@@ -91,6 +97,7 @@ export function MenuSelect<T extends string>({
   className,
 }: MenuSelectProps<T>) {
   const [open, setOpen] = useState(false);
+  const reduceMotion = useShouldReduceMotion();
   const [placement, setPlacement] = useState<Placement>({ side: "bottom", align });
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -258,25 +265,41 @@ export function MenuSelect<T extends string>({
             data-side={placement.side}
             data-align={placement.align}
             style={{ transformOrigin: origin }}
-            initial={{ opacity: 0, scale: 0.96, y: fromTop ? -4 : 4 }}
-            animate={{ opacity: 1, scale: 1, y: 0, transition: transition.enter }}
-            exit={{ opacity: 0, scale: 0.98, y: fromTop ? -2 : 2, transition: transition.exit }}
+            // Unfolds from the edge of its box: the frame stretches out of the
+            // trigger and the choices fade in once it has room, so the brief
+            // squash never shows on the text. Reduced motion keeps the fade.
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scaleY: 0.4 }}
+            animate={{ opacity: 1, scaleY: 1, transition: transition.enter }}
+            exit={
+              reduceMotion
+                ? { opacity: 0, transition: transition.exit }
+                : { opacity: 0, scaleY: 0.7, transition: transition.exit }
+            }
             onKeyDown={onMenuKeyDown}
           >
             {options.map((option, index) => {
               const checked = option.value === value;
               return (
-                <button
+                <motion.button
                   key={option.value}
-                  ref={(node) => {
+                  ref={(node: HTMLButtonElement | null) => {
                     itemRefs.current[index] = node;
                   }}
                   type="button"
                   role={action ? "menuitem" : "menuitemradio"}
                   aria-checked={action ? undefined : checked}
+                  // Focusable but inert, so the reason in its description can still be read.
+                  aria-disabled={option.disabled || undefined}
                   tabIndex={-1}
                   className={styles.item}
-                  onClick={() => choose(option.value)}
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: 1,
+                    transition: { ...transition.enter, delay: reduceMotion ? 0 : ITEM_DELAY_S },
+                  }}
+                  onClick={() => {
+                    if (!option.disabled) choose(option.value);
+                  }}
                 >
                   {option.leading && <span className={styles.leading}>{option.leading}</span>}
                   <span className={styles.itemText}>
@@ -288,7 +311,7 @@ export function MenuSelect<T extends string>({
                   {checked && !action && (
                     <CheckIcon className={styles.check} width={14} height={14} />
                   )}
-                </button>
+                </motion.button>
               );
             })}
           </motion.div>

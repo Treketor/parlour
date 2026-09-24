@@ -140,7 +140,7 @@
  */
 .menu {
   position: absolute;
-  top: calc(100% + var(--space-1));
+  top: calc(100% + 2px);
   z-index: 20;
   display: grid;
   align-content: start;
@@ -158,7 +158,7 @@
 
 .menu[data-side="top"] {
   top: auto;
-  bottom: calc(100% + var(--space-1));
+  bottom: calc(100% + 2px);
 }
 
 .menu[data-align="start"] {
@@ -199,6 +199,15 @@
   .item:hover::before {
     opacity: 1;
   }
+}
+
+.item[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.item[aria-disabled="true"]::before {
+  display: none;
 }
 
 .item:focus-visible {
