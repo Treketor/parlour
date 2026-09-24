@@ -208,6 +208,32 @@ export type Database = {
           },
         ];
       };
+      game_price_ids: {
+        Row: {
+          checked_at: string;
+          game_id: number;
+          itad_id: string | null;
+        };
+        Insert: {
+          checked_at?: string;
+          game_id: number;
+          itad_id?: string | null;
+        };
+        Update: {
+          checked_at?: string;
+          game_id?: number;
+          itad_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_price_ids_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: true;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       game_score_checks: {
         Row: {
           checked_at: string;
@@ -490,6 +516,38 @@ export type Database = {
           slug?: string;
         };
         Relationships: [];
+      };
+      price_cache: {
+        Row: {
+          country: string;
+          fetched_at: string;
+          game_id: number;
+          kind: string;
+          payload: Json;
+        };
+        Insert: {
+          country: string;
+          fetched_at?: string;
+          game_id: number;
+          kind: string;
+          payload: Json;
+        };
+        Update: {
+          country?: string;
+          fetched_at?: string;
+          game_id?: number;
+          kind?: string;
+          payload?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "price_cache_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       profiles: {
         Row: {
