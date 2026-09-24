@@ -1,5 +1,11 @@
+/*
+ * One column no wider than the grid gives it: an auto track grew to fit a
+ * long facts line ("2017 Nintendo Switch" beside a rating) and stretched
+ * the cover past its neighbours on phones.
+ */
 .card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto auto auto;
   gap: var(--space-2);
   min-width: 0;
@@ -71,6 +77,7 @@
 }
 
 .meta {
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
