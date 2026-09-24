@@ -275,3 +275,14 @@ Found at stage 6 review: every other control moves, but native selects opened th
 Search gets the same List/Grid toggle as the library, kept in the address as `view=list`; a new search keeps it. Grid stays the default, since search is where games are recognised by their covers. A new sort or layout crossfades, as in 033.
 
 The card and the row share one hook and one set of controls, so adding works identically in both. What a search has done so far (games added, platforms picked by hand) now lives above the results. Before, changing the sort remounted every card and forgot a game added a moment earlier.
+
+## 037. Editing an entry
+
+- **A panel over the library, not a separate page.** Clicking a row or card slides a panel in from the right, over the library, which stays where you left it (filters, sort, scroll). The panel is a modal `<dialog>`, so focus stays inside, the page behind is inert and Escape closes it. It animates out before it is removed, and focus returns to the row that opened it. With reduced motion it fades instead of sliding.
+- **The open entry is in the address** (`?entry=<id>`). Opening pushes a history entry, so Back closes the panel the way it would leave a page; a shared or reloaded link opens with the panel up. Rows and cards are real links, so opening one in a new tab also works.
+- **Every field saves on its own, as you change it,** with no Save button. The change shows at once, in the panel and in the list behind, and the server confirms it behind that. If the server refuses, only that field goes back, unless something newer has changed it since, and the field says why. Notes save 0.8s after typing stops, on leaving the field, and when the panel closes.
+- **Progress fills in dates, never over yours.** Moving to Playing sets the start date to today if it is empty; Finished or Completed does the same for the finish date. A date you typed is never overwritten, and a finish date is never put before a start date.
+- **Tags are made by typing,** and matched to your existing tags regardless of case. Your other tags are offered below the field. Taking a tag off a game keeps the tag for use elsewhere.
+- **Removing is the one change that waits.** It asks once, in place, says what goes with the entry, and waits for the server before the entry disappears, because it is the only edit that cannot be undone by changing it back.
+- **No revalidation after edits.** The panel has already shown the change, and the library and search are rendered fresh on every visit. Revalidating also caused a bug: the router refresh it triggers put the old address back after an entry was removed.
+- **The library heading and count moved into the client,** so removing a game updates the count, and the empty state appears when the last one goes.

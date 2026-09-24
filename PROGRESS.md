@@ -7,8 +7,8 @@
 3. Database schema, row-level security, auth (done)
 4. IGDB integration: proxy, token and rate handling, catalogue cache (done)
 5. Search and add to library (done)
-6. Library browsing: list and grid, filter and sort (awaiting review)
-7. Library entry editing: progress, ownership, rating, tags, notes
+6. Library browsing: list and grid, filter and sort (done)
+7. Library entry editing: progress, ownership, rating, tags, notes (awaiting review)
 8. Game detail page: media, release info, scores, trailers, walkthrough links
 9. Prices: IsThereAnyDeal matching, current prices, history chart
 10. Play queue
@@ -31,9 +31,13 @@
 
 - Stage 6: library browsing in a list or cover grid; filter by title (accent- and order-insensitive), progress, ownership, platform and tag; five sorts plus sortable list columns; the whole view kept in the address; animated reordering with crossfades for new orders, layout switches and reduced motion; a filtered-empty state and a loading skeleton that matches the toolbar and list.
 
+- Stage 6 review: every dropdown is now the app's own animated menu (it stays on screen, supports typeahead and truncates long names); search results can be shown as a list.
+
+- Stage 7: an entry panel over the library, opened from any row or card and kept in the address; progress, ownership, rating, start and finish dates, tags and notes, each saved as it changes and rolled back with a reason if refused; start and finish dates filled in from progress when empty; removing an entry with an in-place confirmation.
+
 ## Next
 
-- Stage 7: library entry editing (progress, ownership, rating, tags, notes).
+- Stage 8: game detail page (media, release info, scores, trailers, walkthrough links).
 
 ## Later
 
