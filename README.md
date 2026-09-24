@@ -1,8 +1,39 @@
 # Parlour
 
-A catalogue of the games I own, have played and want to play next, with monthly game clubs planned for later.
+A catalogue of the games I own, have played and want to play next.
 
-Status: early development. See [PROGRESS.md](PROGRESS.md) for where things stand and [DECISIONS.md](DECISIONS.md) for why they are the way they are.
+Parlour keeps one record per game per platform: what you own, how far you got, what you thought of it, and what you want to play next. Game data comes from IGDB, scores from Metacritic (via RAWG) and IGDB, and prices by region from IsThereAnyDeal.
+
+![The library as a wall of covers](docs/screenshots/library-covers.png)
+
+## What it does
+
+- **Library.** List, grid and covers layouts. Filter by progress, ownership, platform, tag or title. Sort by title, platform (grouped under headings), progress, rating or date added. Your choice of layout and sort is remembered.
+- **Editing in place.** A game opens in a box over the library: ownership, progress, dates, rating, tags and notes. Every change saves as you make it and shows at once.
+- **Search and add.** Search all of IGDB, pick the platform, add a game in one press.
+- **Game pages.** Scores from the most credible sources first, the release date on each platform, screenshots and trailers, and current and historical prices in your region.
+- **Play queue.** Line games up and drag them into order. Finishing a game takes it off the queue.
+
+|                                                                                         |                                                                          |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| ![A game page with scores, library details and summary](docs/screenshots/game-page.png) | ![Search results as a catalogue table](docs/screenshots/search-list.png) |
+| ![The library as a list](docs/screenshots/library-list.png)                             | ![The play queue](docs/screenshots/queue.png)                            |
+
+<p>
+  <img src="docs/screenshots/mobile-library.png" alt="The library on a phone" width="260">
+  <img src="docs/screenshots/mobile-game.png" alt="A game page on a phone" width="260">
+</p>
+
+## How it is built
+
+- **Next.js** (App Router, server components and server actions) and **React**, in strict TypeScript.
+- **Supabase** for Postgres and sign-in. Row-level security on every personal table, so the database itself decides what each account sees.
+- **CSS Modules** over a small token system: one typeface (Schibsted Grotesk), one accent colour, square edges, no shadows or gradients.
+- **Motion** for transitions. Every state change animates, presses respond on pointer-down, your own changes show before the server confirms them, and only transform and opacity animate. With reduced motion turned on, things crossfade instead of moving.
+- **dnd-kit** for the queue, with keyboard and screen reader support.
+- External APIs are called only from the server, cached in Postgres, and served stale if the source is down.
+
+[DECISIONS.md](DECISIONS.md) records why things are the way they are. [PROGRESS.md](PROGRESS.md) tracks the build stage by stage.
 
 ## Running locally
 
@@ -17,7 +48,16 @@ Then open http://localhost:3000.
 
 ## Configuration
 
-Copy `.env.example` to `.env.local` and fill in the Supabase project URL and publishable key (Project Settings, API). Both are safe to expose: the database only returns what row-level security allows.
+Copy `.env.example` to `.env.local` and fill it in; each value says where it comes from. The Supabase URL and publishable key are safe to expose, because the database only returns what row-level security allows. Everything else is server-only.
+
+## Checks
+
+```bash
+npm test            # unit and component tests, offline
+npm run lint
+npm run typecheck
+npm run build
+```
 
 ## Database
 
