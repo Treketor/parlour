@@ -260,3 +260,18 @@ Revises 030 after review.
 - **Motion.** List rows travel to their new places on sort and filter. The grid crossfades on a new sort (for the reasons in 033) and lets cards travel only when a filter closes gaps. Switching list and grid crossfades, since a row and a card share no shape to morph between. With reduced motion, or above `LAYOUT_ANIMATION_ITEM_LIMIT` (010), every change is a fade.
 - **Rows and cards are not links yet.** `ListRow` and `GameCard` render as plain blocks without an `href`, with no hover or press state promising somewhere to go. Stage 7 (editing) gives them a destination.
 - **"PC (Microsoft Windows)" is shown as "PC".** The IGDB name is too long for a list column, and nobody says it.
+
+## 035. One animated dropdown everywhere
+
+Found at stage 6 review: every other control moves, but native selects opened the system's own popup, which cannot be animated or styled. `Select` is now a labelled field around `MenuSelect`, the menu that already grows out of its trigger, so filters, sorts and platform pickers all open the same way.
+
+- **What the native select gave for free is rebuilt:** arrow keys, Home and End, Escape, typing letters to jump to an option, and submitting with a form (a hidden input carries the value).
+- **Menus stay on screen.** Before the first paint the menu measures itself, then opens upwards if there is more room above than below, and lines up with the trigger's other edge if it would run off the side. Long lists scroll inside the menu, capped at 22rem or 60% of the screen.
+- **Long names no longer widen the control.** A native select sizes itself to its longest option, which stretched cards for games on the Super Nintendo Entertainment System. The trigger now keeps its container's width and ends a long name with an ellipsis; the menu shows it in full.
+- **Trade-off:** phones no longer get the system's wheel or sheet picker. For lists this short, one consistent menu that shows where it came from is worth more.
+
+## 036. Search results in a list as well as a grid
+
+Search gets the same List/Grid toggle as the library, kept in the address as `view=list`; a new search keeps it. Grid stays the default, since search is where games are recognised by their covers. A new sort or layout crossfades, as in 033.
+
+The card and the row share one hook and one set of controls, so adding works identically in both. What a search has done so far (games added, platforms picked by hand) now lives above the results. Before, changing the sort remounted every card and forgot a game added a moment earlier.
