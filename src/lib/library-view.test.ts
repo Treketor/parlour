@@ -4,6 +4,7 @@ import {
   DEFAULT_VIEW,
   NO_FILTERS,
   filterEntries,
+  groupByPlatform,
   hasFilters,
   libraryPreferences,
   narrowColumns,
@@ -260,5 +261,25 @@ describe("columns", () => {
     expect(narrowColumns(10)).toBe(5);
     expect(narrowColumns(7)).toBe(4);
     expect(narrowColumns(3)).toBe(2);
+  });
+});
+
+describe("groupByPlatform", () => {
+  it("splits sorted entries into runs by platform, keeping the order", () => {
+    const sorted = [
+      { title: "A", platform: "Nintendo Switch" },
+      { title: "B", platform: "Nintendo Switch" },
+      { title: "C", platform: "PC" },
+      { title: "D", platform: "PlayStation 5" },
+    ];
+    expect(groupByPlatform(sorted)).toEqual([
+      { platform: "Nintendo Switch", items: [sorted[0], sorted[1]] },
+      { platform: "PC", items: [sorted[2]] },
+      { platform: "PlayStation 5", items: [sorted[3]] },
+    ]);
+  });
+
+  it("gives nothing for nothing", () => {
+    expect(groupByPlatform([])).toEqual([]);
   });
 });

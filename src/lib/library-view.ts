@@ -218,3 +218,20 @@ export function withLibraryPreferences(params: Params, remembered: string | unde
   }
   return merged;
 }
+
+/**
+ * Sorted entries split into runs by platform, each run headed by its
+ * platform, for the library sorted by platform. The order within and
+ * between runs is the sort's own.
+ */
+export function groupByPlatform<T extends { platform: string }>(
+  sorted: readonly T[],
+): Array<{ platform: string; items: T[] }> {
+  const groups: Array<{ platform: string; items: T[] }> = [];
+  for (const item of sorted) {
+    const last = groups.at(-1);
+    if (last && last.platform === item.platform) last.items.push(item);
+    else groups.push({ platform: item.platform, items: [item] });
+  }
+  return groups;
+}
