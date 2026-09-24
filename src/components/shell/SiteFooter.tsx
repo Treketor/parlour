@@ -11,11 +11,19 @@ export function SiteFooter() {
           <a href="https://www.igdb.com" rel="noopener">
             IGDB
           </a>
+          . Scores from Metacritic via{" "}
+          <a href="https://rawg.io" rel="noopener">
+            RAWG
+          </a>{" "}
+          and from{" "}
+          <a href="https://store.steampowered.com" rel="noopener">
+            Steam
+          </a>
           . Prices from{" "}
           <a href="https://isthereanydeal.com" rel="noopener">
             IsThereAnyDeal
           </a>
-          . Parlour is not affiliated with either.
+          . Parlour is not affiliated with any of them.
         </p>
         <nav aria-label="Footer">
           <ul className={styles.links}>
