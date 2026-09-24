@@ -43,3 +43,11 @@ export function scoreTier(value: number): ScoreTier {
   if (value >= 70) return "mid";
   return "low";
 }
+
+/** Critic aggregates rest on fewer, fuller reviews, so fewer are needed (DECISIONS.md 030). */
+export const MIN_CRITIC_REVIEWS = 3;
+
+/** A single source's score, rounded, or null when too few stand behind it to show. */
+export function sourceScore(value: number | null, count: number, minimum: number): number | null {
+  return value !== null && count >= minimum ? Math.round(value) : null;
+}

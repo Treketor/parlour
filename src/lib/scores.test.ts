@@ -1,6 +1,13 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { combinedScore, compactCount, scoreTier } from "./scores";
+import {
+  MIN_CRITIC_REVIEWS,
+  MIN_RATINGS,
+  combinedScore,
+  compactCount,
+  scoreTier,
+  sourceScore,
+} from "./scores";
 
 describe("combinedScore", () => {
   it("weights each average by how many ratings it rests on", () => {
@@ -48,5 +55,18 @@ describe("scoreTier", () => {
     [69, "low"],
   ] as const)("%d is %s", (value, tier) => {
     expect(scoreTier(value)).toBe(tier);
+  });
+});
+
+describe("sourceScore", () => {
+  it("rounds a score with enough ratings behind it", () => {
+    expect(sourceScore(86.4, 12, MIN_RATINGS)).toBe(86);
+    expect(sourceScore(91.6, 3, MIN_CRITIC_REVIEWS)).toBe(92);
+  });
+
+  it("withholds a score with too few ratings or none at all", () => {
+    expect(sourceScore(90, 9, MIN_RATINGS)).toBeNull();
+    expect(sourceScore(90, 2, MIN_CRITIC_REVIEWS)).toBeNull();
+    expect(sourceScore(null, 40, MIN_RATINGS)).toBeNull();
   });
 });
