@@ -15,6 +15,7 @@ export type GameCardData = {
   coverUrl?: string | undefined;
   progress?: Progress | undefined;
   rating?: Rating | null | undefined;
+  tags?: ReadonlyArray<{ name: string }> | undefined;
 };
 
 type GameCardProps = {
@@ -50,6 +51,15 @@ export function GameCard({ game, href, onClick, className }: GameCardProps) {
           )}
         </span>
       </span>
+      {game.tags && game.tags.length > 0 && (
+        <span className={styles.tags}>
+          {game.tags.map((tag) => (
+            <span key={tag.name} className={styles.tag}>
+              {tag.name}
+            </span>
+          ))}
+        </span>
+      )}
     </>
   );
 

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { MouseEvent, ReactNode } from "react";
 import { cx } from "@/lib/cx";
-import { formatDate } from "@/lib/format";
 import { progressLabel, type Progress } from "@/lib/progress";
 import type { Rating } from "@/lib/rating";
 import type { SortDirection, SortKey } from "@/lib/sort";
@@ -25,6 +24,7 @@ export type ListRowData = {
   progress?: Progress | undefined;
   rating?: Rating | null | undefined;
   addedAt: Date;
+  tags?: ReadonlyArray<{ name: string }> | undefined;
 };
 
 export function CatalogueList({
@@ -57,6 +57,11 @@ export function ListRow({ game, href, onClick, selected = false }: ListRowProps)
         <span className={styles.sub}>
           <span className={styles.number}>{game.year ?? "TBA"}</span>
           <span className={styles.subPlatform}>{game.platform}</span>
+          {game.tags?.map((tag) => (
+            <span key={tag.name} className={styles.tag}>
+              {tag.name}
+            </span>
+          ))}
         </span>
       </span>
       <span className={cx(styles.cell, styles.platform)}>{game.platform}</span>
@@ -76,9 +81,6 @@ export function ListRow({ game, href, onClick, selected = false }: ListRowProps)
         ) : (
           <span aria-label={`Rated ${game.rating} out of 10`}>{game.rating}</span>
         )}
-      </span>
-      <span className={cx(styles.cell, styles.added, styles.number)}>
-        <time dateTime={game.addedAt.toISOString()}>{formatDate(game.addedAt)}</time>
       </span>
     </>
   );
@@ -121,9 +123,6 @@ export function ListRowSkeleton() {
       <span className={cx(styles.cell, styles.rating)}>
         <Skeleton variant="text" width="1.25rem" />
       </span>
-      <span className={cx(styles.cell, styles.added)}>
-        <Skeleton variant="text" width="5.5rem" />
-      </span>
     </div>
   );
 }
@@ -140,7 +139,6 @@ const COLUMNS: Array<{ key: SortKey; label: string; className: string | undefine
   { key: "platform", label: "Platform", className: styles.platform },
   { key: "progress", label: "Progress", className: styles.progress },
   { key: "rating", label: "Rating", className: styles.rating },
-  { key: "added", label: "Added", className: styles.added },
 ];
 
 export function ListHeader({ sort, onSort }: ListHeaderProps) {

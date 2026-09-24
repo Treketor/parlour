@@ -45,11 +45,6 @@
   justify-self: end;
 }
 
-.added {
-  grid-area: added;
-  display: none;
-}
-
 /* Medium: progress gets a column (glyph only), platform stays under the title. */
 @container catalogue (min-width: 30rem) {
   .row {
@@ -69,14 +64,13 @@
 /* Wide: every column, platform moves out from under the title. */
 @container catalogue (min-width: 46rem) {
   .row {
-    grid-template-columns: 2rem minmax(0, 1fr) 8rem 8.5rem 3rem 6.5rem;
-    grid-template-areas: "thumb title platform progress rating added";
+    grid-template-columns: 2rem minmax(0, 1fr) 9rem 8.5rem 3rem;
+    grid-template-areas: "thumb title platform progress rating";
     column-gap: var(--space-4);
     padding-inline: var(--space-3);
   }
 
-  .platform,
-  .added {
+  .platform {
     display: block;
   }
 
@@ -109,6 +103,22 @@
   white-space: nowrap;
 }
 
+/* Tags read as small labels on the line under the title, after the facts. */
+.sub {
+  overflow: hidden;
+}
+
+.tag {
+  flex: none;
+  padding-inline: var(--space-1-5);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-control);
+  color: var(--color-text-muted);
+  font-size: var(--text-2xs);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
 .cell {
   min-width: 0;
   color: var(--color-text-muted);
@@ -126,10 +136,6 @@
 .rating {
   color: var(--color-text);
   font-weight: var(--ui-strong-weight);
-  text-align: right;
-}
-
-.added {
   text-align: right;
 }
 
@@ -191,14 +197,12 @@
   padding-block: 0;
 }
 
-.header .platform,
-.header .added {
+.header .platform {
   display: none;
 }
 
 @container catalogue (min-width: 46rem) {
-  .header .platform,
-  .header .added {
+  .header .platform {
     display: flex;
   }
 }
@@ -233,8 +237,7 @@
   text-align: left;
 }
 
-.sortButton.rating,
-.sortButton.added {
+.sortButton.rating {
   justify-content: flex-end;
 }
 

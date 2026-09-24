@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { cx } from "@/lib/cx";
-import { CloseIcon } from "./icons";
+import { CloseIcon, PlusIcon } from "./icons";
 import styles from "./Tag.module.css";
 
 type TagProps = {
@@ -13,6 +13,11 @@ type TagProps = {
   /** Accessible name for the remove control when children is not plain text. */
   removeLabel?: string;
   disabled?: boolean;
+  /**
+   * "applied": on this game, in the accent. "suggestion": one you could add,
+   * dashed with a plus, so the two never read as the same thing.
+   */
+  tone?: "applied" | "suggestion";
   className?: string | undefined;
 };
 
@@ -23,17 +28,20 @@ export function Tag({
   onRemove,
   removeLabel,
   disabled,
+  tone,
   className,
 }: TagProps) {
+  const toneClass = tone && styles[tone];
   if (onToggle) {
     return (
       <button
         type="button"
-        className={cx(styles.tag, styles.toggle, className)}
+        className={cx(styles.tag, styles.toggle, toneClass, className)}
         aria-pressed={selected}
         disabled={disabled}
         onClick={onToggle}
       >
+        {tone === "suggestion" && <PlusIcon width={12} height={12} className={styles.plus} />}
         {children}
       </button>
     );
@@ -41,7 +49,7 @@ export function Tag({
 
   return (
     <span
-      className={cx(styles.tag, onRemove && styles.removable, className)}
+      className={cx(styles.tag, onRemove && styles.removable, toneClass, className)}
       data-disabled={disabled || undefined}
     >
       {children}
