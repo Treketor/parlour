@@ -112,6 +112,8 @@ export async function platformHabits(client: Client): Promise<Record<number, num
   return counts;
 }
 
+export type EntryTag = { id: string; name: string };
+
 /** One entry as the library page shows it: the game, the platform and my state. */
 export type LibraryItem = {
   id: string;
@@ -127,7 +129,11 @@ export type LibraryItem = {
   ownership: Ownership;
   progress: Progress;
   rating: Rating | null;
-  tags: string[];
+  notes: string;
+  /** ISO dates, or null. */
+  startedOn: string | null;
+  finishedOn: string | null;
+  tags: EntryTag[];
   addedAt: Date;
 };
 
@@ -141,10 +147,10 @@ export async function listLibrary(client: Client): Promise<LibraryItem[]> {
   const { data, error } = await client
     .from("library_entries")
     .select(
-      `id, game_id, platform_id, ownership, progress, rating, created_at,
+      `id, game_id, platform_id, ownership, progress, rating, notes, started_on, finished_on, created_at,
        games(slug, name, first_release_date, cover_image_id),
        platforms(name),
-       entry_tags(tags(name))`,
+       entry_tags(tags(id, name))`,
     )
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -170,8 +176,20 @@ export async function listLibrary(client: Client): Promise<LibraryItem[]> {
       ownership: oneOf(OWNERSHIP_STATES, "ownership", row.ownership),
       progress: oneOf(PROGRESS_STATES, "progress", row.progress),
       rating: ratingOrNull(row.rating),
-      tags: row.entry_tags.flatMap((link) => (link.tags ? [link.tags.name] : [])),
+      notes: row.notes,
+      startedOn: row.started_on,
+      finishedOn: row.finished_on,
+      tags: row.entry_tags
+        .flatMap((link) => (link.tags ? [link.tags] : []))
+        .sort((a, b) => a.name.localeCompare(b.name)),
       addedAt: new Date(row.created_at),
     };
   });
+}
+
+/** Every tag the signed-in person has made, A to Z, including ones on no entry right now. */
+export async function listTags(client: Client): Promise<EntryTag[]> {
+  const { data, error } = await client.from("tags").select("id, name").order("name");
+  if (error) throw error;
+  return data;
 }

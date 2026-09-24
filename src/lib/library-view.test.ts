@@ -135,7 +135,12 @@ describe("filterEntries", () => {
   const library = [
     entry({ title: "Pokémon White Version 2", platformId: 20, progress: "finished" }),
     entry({ title: "The Last of Us Part II", platformId: 167, progress: "playing" }),
-    entry({ title: "Borderlands 2", platformId: 12, ownership: "want_to_own", tags: ["Co-op"] }),
+    entry({
+      title: "Borderlands 2",
+      platformId: 12,
+      ownership: "want_to_own",
+      tags: [{ name: "Co-op" }],
+    }),
     entry({ title: "The Legend of Zelda: Breath of the Wild", platformId: 130 }),
   ];
 

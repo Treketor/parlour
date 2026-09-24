@@ -29,7 +29,7 @@ export type LibraryViewState = {
 export type FilterableEntry = SortableEntry & {
   ownership: Ownership;
   platformId: number;
-  tags: readonly string[];
+  tags: ReadonlyArray<{ name: string }>;
 };
 
 export const LIBRARY_SORTS = [
@@ -141,7 +141,7 @@ export function filterEntries<T extends FilterableEntry>(
     }
     if (filters.ownership && entry.ownership !== filters.ownership) return false;
     if (filters.platformId !== null && entry.platformId !== filters.platformId) return false;
-    if (filters.tag && !entry.tags.includes(filters.tag)) return false;
+    if (filters.tag && !entry.tags.some((tag) => tag.name === filters.tag)) return false;
     if (words.length > 0) {
       // Every word has to appear somewhere, in any order: "zelda breath" works.
       const title = folded(entry.title);
