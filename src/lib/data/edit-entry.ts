@@ -39,12 +39,6 @@ export function isIsoDate(value: unknown): value is string {
   return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
 }
 
-/** Today in the person's own time zone, as an ISO date. */
-export function todayIso(now: Date = new Date()): string {
-  const pad = (part: number) => String(part).padStart(2, "0");
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
-
 /** Checks an edit; any unknown field or bad value refuses the whole request. */
 export function parseEntryUpdate(input: unknown): { entryId: string; patch: EntryPatch } | null {
   if (typeof input !== "object" || input === null) return null;
@@ -99,25 +93,6 @@ export function datesInOrder(
   return !startedOn || !finishedOn || finishedOn >= startedOn;
 }
 
-/**
- * What else changes when progress does. Starting a game fills in the start
- * date, and finishing or completing it fills in the finish date, but only
- * when they are empty: a date someone typed is never overwritten.
- */
-export function progressChange(
-  entry: { startedOn: string | null; finishedOn: string | null },
-  progress: Progress,
-  today: string,
-): EntryPatch {
-  const patch: EntryPatch = { progress };
-  if (progress === "playing" && entry.startedOn === null) patch.startedOn = today;
-  if ((progress === "finished" || progress === "completed") && entry.finishedOn === null) {
-    // Leave the finish date empty rather than put it before a later start date.
-    if (datesInOrder(entry.startedOn, today)) patch.finishedOn = today;
-  }
-  return patch;
-}
-
 /** Tidies a tag name as typed; null when nothing usable is left. */
 export function normaliseTagName(name: unknown): string | null {
   if (typeof name !== "string") return null;
@@ -153,7 +128,10 @@ export function showsProgress(ownership: Ownership): boolean {
   return ownership !== "not_interested";
 }
 
-/** The dates that mean something for a progress: a start once begun, a finish once done. */
+/**
+ * The dates that can be recorded for a progress: a start once begun, a
+ * finish once done. They are offered, never asked for (DECISIONS.md 039).
+ */
 export function datesFor(progress: Progress): { started: boolean; finished: boolean } {
   const finished = progress === "finished" || progress === "completed";
   return { started: progress !== "want_to_play", finished };

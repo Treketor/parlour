@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useTransition, type KeyboardEvent } from "
 import { useLayoutTransition } from "@/components/Providers";
 import { Button, IconButton } from "@/components/ui/Button";
 import { GameCover } from "@/components/ui/GameCover";
-import { CloseIcon } from "@/components/ui/icons";
+import { CloseIcon, PlusIcon } from "@/components/ui/icons";
 import { ProgressGlyph } from "@/components/ui/ProgressGlyph";
 import { RatingInput } from "@/components/ui/RatingInput";
 import { Select } from "@/components/ui/Select";
@@ -20,10 +20,8 @@ import {
   isIsoDate,
   normaliseTagName,
   ownershipFits,
-  progressChange,
   sameTagName,
   showsProgress,
-  todayIso,
   tracksProgress,
   type EntryPatch,
 } from "@/lib/data/edit-entry";
@@ -136,6 +134,11 @@ export function EntryEditor({
   }));
   const tracked = tracksProgress(item.ownership);
   const dates = tracked ? datesFor(item.progress) : null;
+  // Dates are offered, not asked for: the fields appear once one is set or
+  // you ask for them, so a library can be filled in without them.
+  const [addingDates, setAddingDates] = useState(false);
+  const hasDates = item.startedOn !== null || item.finishedOn !== null;
+  const showDates = Boolean(dates?.started) && (hasDates || addingDates);
 
   // Fields below one that appears or disappears slide to their new places.
   const section = { layout: "position" as const, transition: { layout: move } };
@@ -183,7 +186,7 @@ export function EntryEditor({
               {...(!tracked && { hint: "Mark it as owned to track progress" })}
               onChange={(progress) => {
                 if (progress !== item.progress) {
-                  save("progress", progressChange(item, progress, todayIso()));
+                  save("progress", { progress });
                 }
               }}
             />
@@ -192,8 +195,27 @@ export function EntryEditor({
           )}
         </motion.div>
 
-        <AnimatePresence initial={false}>
-          {dates?.started && (
+        <AnimatePresence initial={false} mode="popLayout">
+          {dates?.started && !showDates && (
+            <motion.div
+              key="add-dates"
+              {...section}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: transition.enter }}
+              exit={{ opacity: 0, transition: transition.exit }}
+            >
+              <Button
+                size="sm"
+                variant="quiet"
+                icon={<PlusIcon width={12} height={12} />}
+                onClick={() => setAddingDates(true)}
+                className={styles.addDates}
+              >
+                {dates.finished ? "Add when you started and finished" : "Add when you started"}
+              </Button>
+            </motion.div>
+          )}
+          {dates && showDates && (
             <motion.div
               key="dates"
               {...section}

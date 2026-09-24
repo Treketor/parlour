@@ -6,12 +6,10 @@ import {
   isIsoDate,
   normaliseTagName,
   parseEntryUpdate,
-  progressChange,
   sameTagName,
   datesFor,
   ownershipFits,
   showsProgress,
-  todayIso,
   tracksProgress,
 } from "./edit-entry";
 
@@ -79,54 +77,12 @@ describe("isIsoDate", () => {
   });
 });
 
-describe("todayIso", () => {
-  it("uses the local calendar date", () => {
-    expect(todayIso(new Date(2026, 0, 5, 23, 59))).toBe("2026-01-05");
-  });
-});
-
 describe("datesInOrder", () => {
   it("allows missing dates and the same day", () => {
     expect(datesInOrder(null, "2026-01-01")).toBe(true);
     expect(datesInOrder("2026-01-01", undefined)).toBe(true);
     expect(datesInOrder("2026-01-01", "2026-01-01")).toBe(true);
     expect(datesInOrder("2026-01-02", "2026-01-01")).toBe(false);
-  });
-});
-
-describe("progressChange", () => {
-  const today = "2026-09-24";
-  const blank = { startedOn: null, finishedOn: null };
-
-  it("fills in the start date when you start playing", () => {
-    expect(progressChange(blank, "playing", today)).toEqual({
-      progress: "playing",
-      startedOn: today,
-    });
-  });
-
-  it("fills in the finish date when you finish or complete", () => {
-    expect(progressChange(blank, "finished", today)).toEqual({
-      progress: "finished",
-      finishedOn: today,
-    });
-    expect(progressChange(blank, "completed", today).finishedOn).toBe(today);
-  });
-
-  it("never overwrites a date you typed", () => {
-    const dated = { startedOn: "2025-01-01", finishedOn: "2025-02-01" };
-    expect(progressChange(dated, "playing", today)).toEqual({ progress: "playing" });
-    expect(progressChange(dated, "completed", today)).toEqual({ progress: "completed" });
-  });
-
-  it("leaves the finish date empty rather than before the start", () => {
-    expect(
-      progressChange({ startedOn: "2026-12-01", finishedOn: null }, "finished", today),
-    ).toEqual({ progress: "finished" });
-  });
-
-  it("changes nothing else for other states", () => {
-    expect(progressChange(blank, "paused", today)).toEqual({ progress: "paused" });
   });
 });
 
