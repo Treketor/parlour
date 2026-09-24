@@ -1,9 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState, type MouseEvent } from "react";
 import { useLayoutTransition, useShouldReduceMotion } from "@/components/Providers";
+import { PageHeader } from "@/components/shell/PageHeader";
 import { Button } from "@/components/ui/Button";
+import { Drawer } from "@/components/ui/Drawer";
 import { GameCard } from "@/components/ui/GameCard";
 import { CatalogueList, ListHeader, ListRow } from "@/components/ui/ListRow";
 import type { MenuOption } from "@/components/ui/MenuSelect";
@@ -14,7 +16,7 @@ import { Select } from "@/components/ui/Select";
 import { Tag } from "@/components/ui/Tag";
 import { TextField } from "@/components/ui/TextField";
 import { SearchIcon } from "@/components/ui/icons";
-import type { LibraryItem } from "@/lib/data/library";
+import type { EntryTag, LibraryItem } from "@/lib/data/library";
 import { formatCount } from "@/lib/format";
 import {
   LIBRARY_SORTS,
@@ -23,6 +25,7 @@ import {
   hasFilters,
   libraryViewParams,
   parseLibrarySort,
+  parseLibraryView,
   progressCounts,
   type LibraryFilters,
   type LibraryLayout,
@@ -32,6 +35,8 @@ import { LAYOUT_ANIMATION_ITEM_LIMIT, transition } from "@/lib/motion";
 import { OWNERSHIP_STATES, ownershipLabel } from "@/lib/ownership";
 import { progressLabel, type Progress } from "@/lib/progress";
 import { naturalDirection, nextSort, sortEntries } from "@/lib/sort";
+import { EntryEditor } from "./EntryEditor";
+import { LibraryEmpty } from "./LibraryEmpty";
 import styles from "./library.module.css";
 
 const LAYOUTS = [
@@ -51,11 +56,27 @@ const ownershipOptions: Array<MenuOption<string>> = [
 
 type LibraryBrowserProps = {
   items: LibraryItem[];
+  tags: EntryTag[];
   initialView: LibraryViewState;
+  /** An entry named in the address, opened in the panel on arrival. */
+  initialEntryId: string | null;
 };
 
-export function LibraryBrowser({ items, initialView }: LibraryBrowserProps) {
+/** Marks history entries this page pushed, so closing the panel can step back over them. */
+const ENTRY_STATE = "parlourEntry";
+
+export function LibraryBrowser({
+  items: initialItems,
+  tags: initialTags,
+  initialView,
+  initialEntryId,
+}: LibraryBrowserProps) {
+  const [items, setItems] = useState(initialItems);
+  const [allTags, setAllTags] = useState(initialTags);
   const [view, setView] = useState(initialView);
+  const [openId, setOpenId] = useState(initialEntryId);
+  const openItem = items.find((item) => item.id === openId);
+  const panelHeadingId = useId();
   const { layout, sort, filters } = view;
   const reduceMotion = useShouldReduceMotion();
   const move = useLayoutTransition("move");
@@ -69,15 +90,73 @@ export function LibraryBrowser({ items, initialView }: LibraryBrowserProps) {
   const tags = useMemo(() => tagOptions(items), [items]);
   const filtered = hasFilters(filters);
 
+  // Back and forward move between an open entry and the library behind it.
+  useEffect(() => {
+    function onPopState() {
+      const params = Object.fromEntries(new URLSearchParams(window.location.search));
+      setView(parseLibraryView(params));
+      setOpenId(params.entry ?? null);
+    }
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  /** The address for a view, with an open entry if there is one. */
+  function addressFor(next: LibraryViewState, entryId: string | null): string {
+    const params = libraryViewParams(next);
+    if (entryId) params.set("entry", entryId);
+    // Commas are legal in a query string; "progress=playing,paused" reads better than %2C.
+    const query = params.toString().replaceAll("%2C", ",");
+    return query ? `${window.location.pathname}?${query}` : window.location.pathname;
+  }
+
   function update(next: LibraryViewState) {
     setView(next);
     // Kept in the address so a reload or the back button shows the same view,
     // without a server round trip: the whole library is already here.
-    const url = new URL(window.location.href);
-    // Commas are legal in a query string; "progress=playing,paused" reads better than %2C.
-    url.search = libraryViewParams(next).toString().replaceAll("%2C", ",");
-    window.history.replaceState(null, "", url);
+    window.history.replaceState(window.history.state, "", addressFor(next, openId));
   }
+
+  function openEntry(event: MouseEvent<HTMLAnchorElement>, id: string) {
+    // A new tab or window gets the link as it is.
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    setOpenId(id);
+    // Pushed, not replaced, so the back button closes the panel as it would a page.
+    window.history.pushState({ [ENTRY_STATE]: true }, "", addressFor(view, id));
+  }
+
+  function closeEntry() {
+    const state: unknown = window.history.state;
+    if (typeof state === "object" && state !== null && ENTRY_STATE in state) {
+      window.history.back();
+      return;
+    }
+    // Arrived with the entry already open: there is nothing to step back to.
+    setOpenId(null);
+    window.history.replaceState(window.history.state, "", addressFor(view, null));
+  }
+
+  function updateItem(id: string, change: (item: LibraryItem) => LibraryItem) {
+    setItems((current) => current.map((item) => (item.id === id ? change(item) : item)));
+  }
+
+  function addKnownTag(tag: EntryTag) {
+    setAllTags((current) =>
+      current.some((known) => known.id === tag.id)
+        ? current
+        : [...current, tag].sort((a, b) => a.name.localeCompare(b.name)),
+    );
+  }
+
+  function removeItem(id: string) {
+    closeEntry();
+    setItems((current) => current.filter((item) => item.id !== id));
+  }
+
+  const entryHref = (id: string) => `?${new URLSearchParams({ entry: id }).toString()}`;
 
   function filter(patch: Partial<LibraryFilters>) {
     update({ ...view, filters: { ...filters, ...patch } });
@@ -110,190 +189,234 @@ export function LibraryBrowser({ items, initialView }: LibraryBrowserProps) {
     ? `Showing ${visible.length} of ${formatCount(items.length, "game")}`
     : "";
 
+  // The count and the empty state live here, not in the server page, so
+  // removing a game updates them without a reload.
+  const header = (
+    <PageHeader
+      title="Library"
+      meta={items.length === 0 ? "No games yet" : formatCount(items.length, "game")}
+    />
+  );
+  if (items.length === 0) {
+    return (
+      <>
+        {header}
+        <LibraryEmpty />
+      </>
+    );
+  }
+
   return (
-    <div className={styles.browser}>
-      <div className={styles.toolbar}>
-        <div className={styles.filters}>
-          <TextField
-            id={TEXT_FILTER_ID}
-            label="Filter by title"
-            hideLabel
-            placeholder="Filter by title"
-            type="search"
-            autoComplete="off"
-            leading={<SearchIcon width={16} height={16} />}
-            value={filters.text}
-            onChange={(event) => filter({ text: event.target.value })}
-            onClear={() => filter({ text: "" })}
-            className={styles.textFilter}
-          />
-          <Select
-            label="Ownership"
-            hideLabel
-            options={ownershipOptions}
-            value={filters.ownership ?? ANY}
-            onChange={(next) =>
-              filter({ ownership: OWNERSHIP_STATES.find((state) => state === next) ?? null })
-            }
-          />
-          <Select
-            label="Platform"
-            hideLabel
-            options={platforms}
-            value={filters.platformId === null ? ANY : String(filters.platformId)}
-            onChange={(next) => filter({ platformId: Number(next) || null })}
-          />
-          {/* The first option is "Any tag"; the filter appears once there is a real one. */}
-          {tags.length > 1 && (
-            <Select
-              label="Tag"
-              hideLabel
-              options={tags}
-              value={filters.tag ?? ANY}
-              onChange={(next) => filter({ tag: next === ANY ? null : next })}
+    <>
+      {header}
+      <div className={styles.browser}>
+        <Drawer open={openItem !== undefined} onClose={closeEntry} labelledBy={panelHeadingId}>
+          {openItem && (
+            <EntryEditor
+              key={openItem.id}
+              item={openItem}
+              headingId={panelHeadingId}
+              allTags={allTags}
+              onUpdate={updateItem}
+              onTagCreated={addKnownTag}
+              onRemoved={removeItem}
+              onClose={closeEntry}
             />
           )}
+        </Drawer>
+
+        <div className={styles.toolbar}>
+          <div className={styles.filters}>
+            <TextField
+              id={TEXT_FILTER_ID}
+              label="Filter by title"
+              hideLabel
+              placeholder="Filter by title"
+              type="search"
+              autoComplete="off"
+              leading={<SearchIcon width={16} height={16} />}
+              value={filters.text}
+              onChange={(event) => filter({ text: event.target.value })}
+              onClear={() => filter({ text: "" })}
+              className={styles.textFilter}
+            />
+            <Select
+              label="Ownership"
+              hideLabel
+              options={ownershipOptions}
+              value={filters.ownership ?? ANY}
+              onChange={(next) =>
+                filter({ ownership: OWNERSHIP_STATES.find((state) => state === next) ?? null })
+              }
+            />
+            <Select
+              label="Platform"
+              hideLabel
+              options={platforms}
+              value={filters.platformId === null ? ANY : String(filters.platformId)}
+              onChange={(next) => filter({ platformId: Number(next) || null })}
+            />
+            {/* The first option is "Any tag"; the filter appears once there is a real one. */}
+            {tags.length > 1 && (
+              <Select
+                label="Tag"
+                hideLabel
+                options={tags}
+                value={filters.tag ?? ANY}
+                onChange={(next) => filter({ tag: next === ANY ? null : next })}
+              />
+            )}
+          </div>
+
+          <div className={styles.arrange}>
+            <Select
+              label="Sort by"
+              hideLabel
+              options={LIBRARY_SORTS}
+              value={sort.key}
+              onChange={(next) => {
+                const key = parseLibrarySort(next);
+                update({ ...view, sort: { key, direction: naturalDirection(key) } });
+              }}
+              className={styles.sort}
+            />
+            <SegmentedControl
+              label="Layout"
+              options={LAYOUTS}
+              value={layout}
+              onChange={(next) => update({ ...view, layout: next })}
+            />
+          </div>
         </div>
 
-        <div className={styles.arrange}>
-          <Select
-            label="Sort by"
-            hideLabel
-            options={LIBRARY_SORTS}
-            value={sort.key}
-            onChange={(next) => {
-              const key = parseLibrarySort(next);
-              update({ ...view, sort: { key, direction: naturalDirection(key) } });
-            }}
-            className={styles.sort}
-          />
-          <SegmentedControl
-            label="Layout"
-            options={LAYOUTS}
-            value={layout}
-            onChange={(next) => update({ ...view, layout: next })}
-          />
-        </div>
-      </div>
+        {/* Always in the page, so screen readers hear the count change as filters apply. */}
+        <p className="visually-hidden" role="status">
+          {status}
+        </p>
 
-      {/* Always in the page, so screen readers hear the count change as filters apply. */}
-      <p className="visually-hidden" role="status">
-        {status}
-      </p>
+        {(progress.length > 1 || (filtered && visible.length > 0)) && (
+          <div className={styles.refine}>
+            {progress.length > 1 && (
+              <div className={styles.progressFilters} role="group" aria-label="Filter by progress">
+                {progress.map(({ progress: state, count }) => (
+                  <Tag
+                    key={state}
+                    selected={filters.progress.includes(state)}
+                    onToggle={() => toggleProgress(state)}
+                  >
+                    <ProgressGlyph progress={state} />
+                    {progressLabel[state]}
+                    <span className={styles.chipCount}>{count}</span>
+                  </Tag>
+                ))}
+              </div>
+            )}
+            {/* With nothing left, the notice below says so and offers the same way out. */}
+            {filtered && visible.length > 0 && (
+              <div className={styles.result}>
+                {/* The hidden status above already reads this out. */}
+                <span aria-hidden="true">{status}</span>
+                <Button size="sm" variant="quiet" onClick={clearFilters}>
+                  Clear filters
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
 
-      {(progress.length > 1 || (filtered && visible.length > 0)) && (
-        <div className={styles.refine}>
-          {progress.length > 1 && (
-            <div className={styles.progressFilters} role="group" aria-label="Filter by progress">
-              {progress.map(({ progress: state, count }) => (
-                <Tag
-                  key={state}
-                  selected={filters.progress.includes(state)}
-                  onToggle={() => toggleProgress(state)}
-                >
-                  <ProgressGlyph progress={state} />
-                  {progressLabel[state]}
-                  <span className={styles.chipCount}>{count}</span>
-                </Tag>
-              ))}
-            </div>
-          )}
-          {/* With nothing left, the notice below says so and offers the same way out. */}
-          {filtered && visible.length > 0 && (
-            <div className={styles.result}>
-              {/* The hidden status above already reads this out. */}
-              <span aria-hidden="true">{status}</span>
-              <Button size="sm" variant="quiet" onClick={clearFilters}>
+        {visible.length === 0 ? (
+          <Notice
+            title="Nothing matches these filters"
+            action={
+              <Button size="sm" onClick={clearFilters}>
                 Clear filters
               </Button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {visible.length === 0 ? (
-        <Notice
-          title="Nothing matches these filters"
-          action={
-            <Button size="sm" onClick={clearFilters}>
-              Clear filters
-            </Button>
-          }
-        >
-          {`None of your ${formatCount(items.length, "game")} match. Clear the filters to see them all again.`}
-        </Notice>
-      ) : (
-        // Switching layout crossfades: a row and a card share nothing to morph between.
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={layout}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: transition.enter }}
-            exit={{ opacity: 0, transition: transition.exit }}
+            }
           >
-            {layout === "list" ? (
-              <CatalogueList>
-                <ListHeader
-                  sort={sort}
-                  onSort={(key) => update({ ...view, sort: nextSort(sort, key) })}
-                />
-                <motion.ul
-                  key={animateLayout ? "rows" : viewKey}
-                  className={styles.rows}
-                  initial={animateLayout ? false : { opacity: 0 }}
-                  animate={{ opacity: 1, transition: transition.enter }}
-                >
-                  <AnimatePresence initial={false} mode="popLayout">
-                    {visible.map((item) => (
-                      <motion.li
-                        key={item.id}
-                        layout={animateLayout ? "position" : false}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, transition: transition.enter }}
-                        exit={{ opacity: 0, transition: transition.exit }}
-                        transition={{ layout: move }}
-                      >
-                        <ListRow game={{ ...item, coverUrl: item.thumbUrl }} />
-                      </motion.li>
-                    ))}
-                  </AnimatePresence>
-                </motion.ul>
-              </CatalogueList>
-            ) : (
-              /*
-               * A new order crossfades the grid: cards crossing a wide grid
-               * read as a blur, not a move (DECISIONS.md 033). Filtering only
-               * closes gaps, short moves that stay legible, so those travel.
-               */
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.ul
-                  key={animateLayout ? orderKey : viewKey}
-                  className={styles.grid}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1, transition: transition.enter }}
-                  exit={{ opacity: 0, transition: transition.exit }}
-                >
-                  <AnimatePresence initial={false} mode="popLayout">
-                    {visible.map((item) => (
-                      <motion.li
-                        key={item.id}
-                        layout={animateLayout ? "position" : false}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, transition: transition.enter }}
-                        exit={{ opacity: 0, transition: transition.exit }}
-                        transition={{ layout: move }}
-                      >
-                        <GameCard game={item} />
-                      </motion.li>
-                    ))}
-                  </AnimatePresence>
-                </motion.ul>
-              </AnimatePresence>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      )}
-    </div>
+            {`None of your ${formatCount(items.length, "game")} match. Clear the filters to see them all again.`}
+          </Notice>
+        ) : (
+          // Switching layout crossfades: a row and a card share nothing to morph between.
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={layout}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: transition.enter }}
+              exit={{ opacity: 0, transition: transition.exit }}
+            >
+              {layout === "list" ? (
+                <CatalogueList>
+                  <ListHeader
+                    sort={sort}
+                    onSort={(key) => update({ ...view, sort: nextSort(sort, key) })}
+                  />
+                  <motion.ul
+                    key={animateLayout ? "rows" : viewKey}
+                    className={styles.rows}
+                    initial={animateLayout ? false : { opacity: 0 }}
+                    animate={{ opacity: 1, transition: transition.enter }}
+                  >
+                    <AnimatePresence initial={false} mode="popLayout">
+                      {visible.map((item) => (
+                        <motion.li
+                          key={item.id}
+                          layout={animateLayout ? "position" : false}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1, transition: transition.enter }}
+                          exit={{ opacity: 0, transition: transition.exit }}
+                          transition={{ layout: move }}
+                        >
+                          <ListRow
+                            game={{ ...item, coverUrl: item.thumbUrl }}
+                            href={entryHref(item.id)}
+                            onClick={(event) => openEntry(event, item.id)}
+                            selected={item.id === openId}
+                          />
+                        </motion.li>
+                      ))}
+                    </AnimatePresence>
+                  </motion.ul>
+                </CatalogueList>
+              ) : (
+                /*
+                 * A new order crossfades the grid: cards crossing a wide grid
+                 * read as a blur, not a move (DECISIONS.md 033). Filtering only
+                 * closes gaps, short moves that stay legible, so those travel.
+                 */
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.ul
+                    key={animateLayout ? orderKey : viewKey}
+                    className={styles.grid}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, transition: transition.enter }}
+                    exit={{ opacity: 0, transition: transition.exit }}
+                  >
+                    <AnimatePresence initial={false} mode="popLayout">
+                      {visible.map((item) => (
+                        <motion.li
+                          key={item.id}
+                          layout={animateLayout ? "position" : false}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1, transition: transition.enter }}
+                          exit={{ opacity: 0, transition: transition.exit }}
+                          transition={{ layout: move }}
+                        >
+                          <GameCard
+                            game={item}
+                            href={entryHref(item.id)}
+                            onClick={(event) => openEntry(event, item.id)}
+                          />
+                        </motion.li>
+                      ))}
+                    </AnimatePresence>
+                  </motion.ul>
+                </AnimatePresence>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -308,6 +431,8 @@ function platformOptions(items: readonly LibraryItem[]): Array<MenuOption<string
 
 /** The tags in use, A to Z, for the tag filter. */
 function tagOptions(items: readonly LibraryItem[]): Array<MenuOption<string>> {
-  const tags = [...new Set(items.flatMap((item) => item.tags))].sort((a, b) => a.localeCompare(b));
+  const tags = [...new Set(items.flatMap((item) => item.tags.map((tag) => tag.name)))].sort(
+    (a, b) => a.localeCompare(b),
+  );
   return [{ value: ANY, label: "Any tag" }, ...tags.map((tag) => ({ value: tag, label: tag }))];
 }
