@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 import {
+  criticSearchLink,
   firstReleases,
   formatRelease,
   guideLinks,
@@ -113,5 +114,13 @@ describe("firstReleases", () => {
       { platform: "Nintendo Switch", date: "1 Mar 2017", regions: ["Japan"] },
       { platform: "Wii U", date: "3 Mar 2017", regions: ["Worldwide"] },
     ]);
+  });
+});
+
+describe("criticSearchLink", () => {
+  it("searches Metacritic for the name", () => {
+    expect(criticSearchLink("The Legend of Zelda: Ocarina of Time").href).toBe(
+      "https://www.metacritic.com/search/The%20Legend%20of%20Zelda%3A%20Ocarina%20of%20Time/",
+    );
   });
 });

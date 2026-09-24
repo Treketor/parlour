@@ -147,3 +147,16 @@ export function storeLinks(externalIds: GameDetail["externalIds"]): OutboundLink
     },
   ];
 }
+
+/**
+ * Where to read critic reviews when IGDB has too few. IGDB's critic data is
+ * thin for older games (Ocarina of Time has none), so the page says so and
+ * points to a search rather than showing nothing.
+ */
+export function criticSearchLink(name: string): OutboundLink {
+  return {
+    label: "Critic reviews on Metacritic",
+    description: "Search Metacritic",
+    href: `https://www.metacritic.com/search/${encodeURIComponent(name)}/`,
+  };
+}
