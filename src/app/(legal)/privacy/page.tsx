@@ -38,8 +38,9 @@ export default function PrivacyPage() {
           <h2>Cookies and tracking</h2>
           <p>
             Parlour runs no analytics, advertising or tracking scripts. Signing in sets cookies that
-            hold your session, and signing out removes them. Visitors who do not sign in get no
-            cookies at all.
+            hold your session, and signing out removes them. A few small cookies remember choices on
+            this device, whether or not you sign in: the library&rsquo;s layout and order, your last
+            search, and the region prices are shown for. They hold nothing that identifies you.
           </p>
         </section>
 
@@ -50,13 +51,15 @@ export default function PrivacyPage() {
             are sent through it. Pages are served by the hosting provider, which keeps short-lived
             request logs (such as IP addresses) to run and protect the service. Game images will
             load from IGDB, and trailers will play through YouTube&rsquo;s privacy-enhanced mode,
-            which avoids tracking cookies until you press play. Links to stores go directly to those
-            stores.
+            which avoids tracking cookies until you press play. Links to shops go through
+            IsThereAnyDeal, which may add its affiliate tags; the shop can see that you came from
+            there.
           </p>
           <p>
             When you search, Parlour sends the words you typed to IGDB from its own server. Nothing
             that identifies you goes with them, and searches are kept for a day so the same one is
-            not sent twice.
+            not sent twice. In the same way, a game&rsquo;s name and your chosen region go to RAWG,
+            Steam and IsThereAnyDeal for scores and prices, never anything about you.
           </p>
           <p>Your data is never sold or shared for marketing.</p>
         </section>

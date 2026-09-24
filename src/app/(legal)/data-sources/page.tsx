@@ -32,8 +32,10 @@ const sources = [
   {
     name: "IsThereAnyDeal",
     href: "https://isthereanydeal.com",
-    provides: "Current prices by store and price history for your region.",
-    terms: "Store links are passed through exactly as provided, including any affiliate tags.",
+    provides:
+      "Current prices by shop, the lowest recorded prices, and a year of price history, for the region you choose.",
+    terms:
+      "Used through the IsThereAnyDeal API. Shop links are passed through exactly as provided, including any affiliate tags.",
   },
   {
     name: "YouTube",
@@ -51,8 +53,7 @@ export default function DataSourcesPage() {
         <p>
           Parlour does not write its own game data. Everything about a game comes from the services
           below, through their official APIs, cached so they are not asked twice for the same thing.
-          IGDB, RAWG, Steam and YouTube are connected; IsThereAnyDeal is not yet, and this page is
-          updated when it is. Parlour is not affiliated with or endorsed by any of them.
+          Parlour is not affiliated with or endorsed by any of them.
         </p>
 
         <dl className={styles.sources}>
