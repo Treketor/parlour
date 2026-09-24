@@ -3,7 +3,8 @@
 import {
   DndContext,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -21,7 +22,14 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useId, useState, useTransition } from "react";
+import {
+  useId,
+  useState,
+  useTransition,
+  type KeyboardEventHandler,
+  type MouseEvent,
+  type TouchEvent,
+} from "react";
 import { useShouldReduceMotion } from "@/components/Providers";
 import { IconButton } from "@/components/ui/Button";
 import { GameCover } from "@/components/ui/GameCover";
@@ -53,8 +61,10 @@ export function QueueList({ initialItems }: { initialItems: QueueItem[] }) {
   const dndId = useId();
 
   const sensors = useSensors(
-    // A few pixels of travel before a drag starts, so a tap on the handle is still a tap.
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    // A mouse drags from anywhere on a row after a few pixels, so a click is still a click.
+    useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
+    // A finger has to rest a moment first, so swiping through a long queue still scrolls.
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -188,6 +198,15 @@ function QueueRow({ item, position, leaving, reduceMotion, onRemove }: QueueRowP
       : { duration: duration.base, easing: `cubic-bezier(${easing.out.join(", ")})` },
   });
 
+  // The row answers a mouse or a finger anywhere; the keyboard works through
+  // the handle, which stays the one focusable control for moving.
+  const { onKeyDown, ...pointer } = listeners ?? {};
+  // The title and the remove button keep their own clicks rather than starting a drag.
+  const own = {
+    onMouseDown: (event: MouseEvent) => event.stopPropagation(),
+    onTouchStart: (event: TouchEvent) => event.stopPropagation(),
+  };
+
   return (
     <li
       ref={setNodeRef}
@@ -195,6 +214,7 @@ function QueueRow({ item, position, leaving, reduceMotion, onRemove }: QueueRowP
       data-dragging={isDragging || undefined}
       data-leaving={leaving || undefined}
       style={{ transform: CSS.Translate.toString(transform), transition }}
+      {...pointer}
     >
       <span className={styles.position} aria-hidden="true">
         {position}
@@ -205,7 +225,8 @@ function QueueRow({ item, position, leaving, reduceMotion, onRemove }: QueueRowP
         className={styles.handle}
         aria-label={`Move ${item.title}, number ${position}`}
         {...attributes}
-        {...listeners}
+        // dnd-kit types its listeners loosely; this one is its keyboard sensor's handler.
+        onKeyDown={onKeyDown as KeyboardEventHandler<HTMLButtonElement> | undefined}
       >
         <GripIcon />
       </button>
@@ -213,7 +234,7 @@ function QueueRow({ item, position, leaving, reduceMotion, onRemove }: QueueRowP
         <GameCover title={item.title} src={item.thumbUrl} size="thumb" />
       </span>
       <span className={styles.text}>
-        <Link href={`/?entry=${item.entryId}`} className={styles.title}>
+        <Link href={`/?entry=${item.entryId}`} className={styles.title} {...own}>
           {item.title}
         </Link>
         <span className={styles.meta}>
@@ -233,6 +254,7 @@ function QueueRow({ item, position, leaving, reduceMotion, onRemove }: QueueRowP
         size="sm"
         onClick={onRemove}
         className={styles.remove}
+        {...own}
       >
         <CloseIcon width={14} height={14} />
       </IconButton>

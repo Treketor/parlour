@@ -26,7 +26,13 @@
   padding: var(--space-2) var(--space-2) var(--space-2) 0;
   border-bottom: var(--hairline);
   background: var(--color-canvas);
+  cursor: grab;
   transition: opacity var(--duration-fast) var(--ease-in);
+  user-select: none;
+}
+
+.row[data-dragging] {
+  cursor: grabbing;
 }
 
 /* Lifted while dragged: a lighter ground and the accent edge, no shadow. */
@@ -62,8 +68,7 @@
   border-radius: var(--radius-control);
   background: transparent;
   color: var(--color-text-faint);
-  cursor: grab;
-  touch-action: none;
+  cursor: inherit;
 }
 
 @media (hover: hover) {
@@ -95,6 +100,7 @@
 
 /* Two lines before it trims: "The Legend of Zelda:" alone says nothing on a phone. */
 .title {
+  cursor: pointer;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
