@@ -8,7 +8,13 @@ export type CatalogueGame = {
   firstReleaseDate: string | null;
   coverImageId: string | null;
   gameType: string | null;
-  platforms: Array<{ id: number; name: string; abbreviation: string | null }>;
+  platforms: Array<{
+    id: number;
+    name: string;
+    abbreviation: string | null;
+    /** Console generation, for ordering platforms; null for PC and similar. */
+    generation: number | null;
+  }>;
   /** IGDB user score, 0 to 100; always shown with its count. */
   igdbRating: number | null;
   igdbRatingCount: number;

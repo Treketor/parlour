@@ -100,3 +100,12 @@ export async function libraryStatusFor(
     ]),
   );
 }
+
+/** How many entries the signed-in person has on each platform, to guess the platform they would pick. */
+export async function platformHabits(client: Client): Promise<Record<number, number>> {
+  const { data, error } = await client.from("library_entries").select("platform_id");
+  if (error) throw error;
+  const counts: Record<number, number> = {};
+  for (const row of data) counts[row.platform_id] = (counts[row.platform_id] ?? 0) + 1;
+  return counts;
+}

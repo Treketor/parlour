@@ -2,7 +2,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Notice } from "@/components/ui/Notice";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { CatalogueGame } from "@/lib/catalogue";
-import { libraryStatusFor, type EntryStatus } from "@/lib/data/library";
+import { libraryStatusFor, platformHabits, type EntryStatus } from "@/lib/data/library";
 import type { SearchSort } from "@/lib/search-sort";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalogue } from "@/server/catalogue";
@@ -46,18 +46,22 @@ export async function SearchResults({ query, sort }: { query: string; sort: Sear
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getClaims();
   const signedIn = Boolean(auth?.claims);
-  const statuses: Map<string, EntryStatus> = signedIn
-    ? await libraryStatusFor(
-        supabase,
-        games.map((game) => game.id),
-      )
-    : new Map();
+  const [statuses, habits]: [Map<string, EntryStatus>, Record<number, number>] = signedIn
+    ? await Promise.all([
+        libraryStatusFor(
+          supabase,
+          games.map((game) => game.id),
+        ),
+        platformHabits(supabase),
+      ])
+    : [new Map(), {}];
 
   return (
     <ResultsGrid
       query={query}
       games={games}
       statuses={Object.fromEntries(statuses)}
+      habits={habits}
       signedIn={signedIn}
       initialSort={sort}
     />

@@ -5,7 +5,7 @@ import { adminClient } from "../supabase-admin";
 import { createCatalogue, type Catalogue, type CatalogueStore } from "./service";
 
 const GAME_COLUMNS =
-  "id, slug, name, summary, first_release_date, cover_image_id, game_type, igdb_rating, igdb_rating_count, critic_rating, critic_rating_count, game_platforms(platforms(id, name, abbreviation))";
+  "id, slug, name, summary, first_release_date, cover_image_id, game_type, igdb_rating, igdb_rating_count, critic_rating, critic_rating_count, game_platforms(platforms(id, name, abbreviation, generation))";
 
 const databaseStore: CatalogueStore = {
   async readSearch(query) {
