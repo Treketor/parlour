@@ -14,6 +14,11 @@ type ModalProps = {
   labelledBy: string;
   /** "wide" for pictures, which want the room more than a form does. */
   size?: "default" | "wide";
+  /**
+   * Finds the opener again when closing re-rendered it, e.g. a card whose list
+   * came back from a navigation. Without it, focus would fall to the page.
+   */
+  returnFocusTo?: (() => HTMLElement | null) | undefined;
   children: ReactNode;
 };
 
@@ -23,11 +28,23 @@ type ModalProps = {
  * removed only after its exit animation, and focus then returns to whatever
  * opened it.
  */
-export function Modal({ open, onClose, labelledBy, size = "default", children }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  labelledBy,
+  size = "default",
+  returnFocusTo,
+  children,
+}: ModalProps) {
   return (
     <AnimatePresence>
       {open && (
-        <ModalDialog onClose={onClose} labelledBy={labelledBy} size={size}>
+        <ModalDialog
+          onClose={onClose}
+          labelledBy={labelledBy}
+          size={size}
+          returnFocusTo={returnFocusTo}
+        >
           {children}
         </ModalDialog>
       )}
@@ -35,8 +52,19 @@ export function Modal({ open, onClose, labelledBy, size = "default", children }:
   );
 }
 
-function ModalDialog({ onClose, labelledBy, size, children }: Omit<ModalProps, "open">) {
+function ModalDialog({
+  onClose,
+  labelledBy,
+  size,
+  returnFocusTo,
+  children,
+}: Omit<ModalProps, "open">) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  // Read at close, not open, so it sees the page as it is by then.
+  const findOpener = useRef(returnFocusTo);
+  useLayoutEffect(() => {
+    findOpener.current = returnFocusTo;
+  });
   const reduceMotion = useShouldReduceMotion();
 
   useLayoutEffect(() => {
@@ -46,7 +74,16 @@ function ModalDialog({ onClose, labelledBy, size, children }: Omit<ModalProps, "
     dialog.showModal();
     return () => {
       if (dialog.open) dialog.close();
-      if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
+      // A frame later: the dialog is still being removed now, and focus given
+      // back mid-removal is dropped. By then a navigation that closed it has
+      // also rendered, so a replaced opener can be found again.
+      requestAnimationFrame(() => {
+        // The body means nothing opened it, e.g. the page loaded with it open.
+        const kept =
+          opener instanceof HTMLElement && opener.isConnected && opener !== document.body;
+        const target = kept ? opener : findOpener.current?.();
+        target?.focus();
+      });
     };
   }, []);
 

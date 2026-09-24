@@ -71,8 +71,10 @@
   grid-area: 1 / 1;
 }
 
+/* Transparent rather than hidden: visibility would take the label out of the
+   accessibility tree, and a busy button would be announced with no name. */
 .content[data-hidden] {
-  visibility: hidden;
+  opacity: 0;
 }
 
 .spinner {

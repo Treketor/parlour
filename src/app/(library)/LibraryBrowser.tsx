@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, type MotionStyle } from "motion/react";
-import { useEffect, useId, useMemo, useState, useTransition, type MouseEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, useTransition, type MouseEvent } from "react";
 import { useLayoutTransition, useShouldReduceMotion } from "@/components/Providers";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { Button } from "@/components/ui/Button";
@@ -101,6 +101,11 @@ export function LibraryBrowser({
   const [view, setView] = useState(initialView);
   const [openId, setOpenId] = useState(initialEntryId);
   const openItem = items.find((item) => item.id === openId);
+  // The entry last shown, so closing can hand focus back to its card.
+  const lastOpenId = useRef<string | null>(null);
+  useEffect(() => {
+    if (openId) lastOpenId.current = openId;
+  }, [openId]);
   const panelHeadingId = useId();
   const { layout, sort, filters } = view;
   const reduceMotion = useShouldReduceMotion();
@@ -370,7 +375,16 @@ export function LibraryBrowser({
     <>
       {header}
       <div className={styles.browser}>
-        <Modal open={openItem !== undefined} onClose={closeEntry} labelledBy={panelHeadingId}>
+        <Modal
+          open={openItem !== undefined}
+          onClose={closeEntry}
+          labelledBy={panelHeadingId}
+          returnFocusTo={() =>
+            lastOpenId.current
+              ? document.querySelector<HTMLElement>(`main [href*="entry=${lastOpenId.current}"]`)
+              : null
+          }
+        >
           {openItem && (
             <EntryEditor
               key={openItem.id}

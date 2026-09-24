@@ -105,6 +105,13 @@
   border: 0;
 }
 
+/* The field and its suggestions, spaced as the tag list above them is. */
+.tagAdder {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
 /* Same voice as a field label, so a group reads as one more field. */
 .legend {
   margin-bottom: var(--space-1-5);

@@ -4,6 +4,7 @@ import { AnimatePresence, motion, type Transition } from "motion/react";
 import Link from "next/link";
 import {
   useEffect,
+  useId,
   useRef,
   useState,
   useTransition,
@@ -535,6 +536,7 @@ function TagField({
   const [draft, setDraft] = useState("");
   // Your other tags are offered while you are adding one, not all the time.
   const [adding, setAdding] = useState(false);
+  const fieldId = useId();
   const [, startTagging] = useTransition();
 
   const onEntry = (name: string) => item.tags.some((tag) => sameTagName(tag.name, name));
@@ -621,35 +623,54 @@ function TagField({
               ))}
             </ul>
           )}
-          <TextField
-            label="Add a tag"
-            hideLabel
-            placeholder="Add a tag, then press Enter"
-            maxLength={TAG_MAX_LENGTH}
-            autoComplete="off"
-            enterKeyHint="done"
-            value={draft}
-            error={error}
-            onChange={(event) => setDraft(event.target.value)}
-            onKeyDown={onKeyDown}
+          {/*
+            Focus anywhere in the field or its suggestions counts as adding, so
+            Tab can reach a suggestion without the list vanishing under it.
+          */}
+          <div
+            className={styles.tagAdder}
             onFocus={() => setAdding(true)}
-            onBlur={() => setAdding(false)}
-          />
-          {(adding || search) && suggestions.length > 0 && (
-            <div
-              className={styles.tagList}
-              role="group"
-              aria-label="Your other tags"
-              // Keeps focus in the field, so a press on a suggestion is not lost to its blur.
-              onPointerDown={(event) => event.preventDefault()}
-            >
-              {suggestions.map((tag) => (
-                <Tag key={tag.id} tone="suggestion" onToggle={() => add(tag.name)}>
-                  {tag.name}
-                </Tag>
-              ))}
-            </div>
-          )}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) setAdding(false);
+            }}
+          >
+            <TextField
+              id={fieldId}
+              label="Add a tag"
+              hideLabel
+              placeholder="Add a tag, then press Enter"
+              maxLength={TAG_MAX_LENGTH}
+              autoComplete="off"
+              enterKeyHint="done"
+              value={draft}
+              error={error}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={onKeyDown}
+            />
+            {(adding || search) && suggestions.length > 0 && (
+              <div
+                className={styles.tagList}
+                role="group"
+                aria-label="Your other tags"
+                // Keeps focus in the field, so a press on a suggestion is not lost to its blur.
+                onPointerDown={(event) => event.preventDefault()}
+              >
+                {suggestions.map((tag) => (
+                  <Tag
+                    key={tag.id}
+                    tone="suggestion"
+                    onToggle={() => {
+                      add(tag.name);
+                      // The suggestion leaves the list once applied; focus goes back to the field.
+                      document.getElementById(fieldId)?.focus();
+                    }}
+                  >
+                    {tag.name}
+                  </Tag>
+                ))}
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>
