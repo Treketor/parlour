@@ -208,6 +208,67 @@ export type Database = {
           },
         ];
       };
+      game_score_checks: {
+        Row: {
+          checked_at: string;
+          game_id: number;
+        };
+        Insert: {
+          checked_at?: string;
+          game_id: number;
+        };
+        Update: {
+          checked_at?: string;
+          game_id?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_score_checks_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: true;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_scores: {
+        Row: {
+          count: number | null;
+          game_id: number;
+          label: string | null;
+          out_of: number;
+          score: number;
+          source: string;
+          url: string | null;
+        };
+        Insert: {
+          count?: number | null;
+          game_id: number;
+          label?: string | null;
+          out_of: number;
+          score: number;
+          source: string;
+          url?: string | null;
+        };
+        Update: {
+          count?: number | null;
+          game_id?: number;
+          label?: string | null;
+          out_of?: number;
+          score?: number;
+          source?: string;
+          url?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_scores_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       game_videos: {
         Row: {
           game_id: number;
@@ -593,6 +654,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      store_game_scores: {
+        Args: { scores: Json; target_game_id: number };
+        Returns: undefined;
+      };
       store_igdb_games: { Args: { batch: Json }; Returns: undefined };
     };
     Enums: {
