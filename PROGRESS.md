@@ -39,6 +39,8 @@
 
 - Stage 7: an entry panel over the library, opened from any row or card and kept in the address; progress, ownership, rating, start and finish dates, tags and notes, each saved as it changes and rolled back with a reason if refused; start and finish dates filled in from progress when empty; removing an entry with an in-place confirmation.
 
+- Stage 8 review: dates can be cleared or removed; "Add to library" drawn as a button; pictures fit the screen in the viewer; trailers open large; boxed genres; missing critic scores explained with a Metacritic search; your entry's rating, dates, tags and notes on the game page.
+
 - Stage 8: a public game page at /games/[slug]: cover, genres, separate player and critic scores with counts, summary, releases per platform (all regional dates on request), an image grid with a wide stepping viewer, trailers that load YouTube only when played, guide searches and a Steam link, and your entries plus the add controls. Reached from search titles and covers and the entry editor.
 
 ## Next
@@ -48,6 +50,7 @@
 ## Later
 
 - Search filters: released games only, a release-year range, platform. Suggested at stage 5 review; the library filters in stage 6 come first.
+- A second critic score source for older games IGDB covers thinly (e.g. OpenCritic, which needs its own API key and terms). Found at stage 8 review.
 - Written reviews: a few lines alongside the 1 to 10 rating, to explain it. Suggested at stage 7 review.
 
 ## Known issues

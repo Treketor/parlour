@@ -315,3 +315,13 @@ The card and the row share one hook and one set of controls, so adding works ide
 - **Trailers load nothing from YouTube until played.** Each shows one of the game's IGDB images as a poster. Pressing play swaps in the youtube-nocookie player, as the privacy page promises. Two are shown, with the rest a press away.
 - **Guides are searches, not guessed pages:** YouTube walkthroughs, GameFAQs and HowLongToBeat, all searched by name. A search always lands somewhere useful; a guessed address often doesn't. Steam gets a store link because its id makes a real address. GOG and Epic ids don't, so they wait for prices in stage 9.
 - **Getting there:** search cards and rows link their title and cover (one keyboard stop per game), and the entry editor has a "Game page" link.
+
+## 041. Stage 8 review
+
+- **Dates can be removed:** each field has a clear control, and "Remove dates" clears both and folds the fields away. "Add dates" sits directly under progress, as a small outlined button, rather than in a section of its own.
+- **"Add to library" is a button that opens a menu.** In action mode the trigger is filled, centred, with a plus sign and no chevron. It still opens the ownership choices, because adding needs that one answer, but it reads as the command it is.
+- **Pictures fit the screen.** The viewer's frame is capped at 70% of the screen height, and each picture is drawn whole inside it, never cropped or spilling out, with the page visible around the box to click away. The frame's grid track is now definite: without that, the height limit silently did nothing, which is what made pictures look zoomed in.
+- **Trailers open in the same large box** as pictures, sized to 16:9 within the screen, and YouTube still loads only on play.
+- **Genres are boxed labels,** so they never read as part of the release date.
+- **Missing critic scores say why.** IGDB's critic data is thin for older games: Ocarina of Time has none, A Link to the Past has one review. Parlour does not invent or borrow a number. It says "No reviews on IGDB" or "Only 1 review on IGDB" and links a Metacritic search. A second score source could fill this properly later; it would need its own licence and API key.
+- **Your library on the game page shows what you recorded:** rating, progress and ownership, dates, tags and the first few lines of your notes, with "Edit in your library".
