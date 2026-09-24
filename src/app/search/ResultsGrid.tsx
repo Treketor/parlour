@@ -31,6 +31,8 @@ type ResultsGridProps = {
   signedIn: boolean;
   initialSort: SearchSort;
   initialLayout: SearchLayout;
+  /** Metacritic scores already known, by game id. */
+  metascores: Record<number, number>;
 };
 
 export function ResultsGrid({
@@ -41,6 +43,7 @@ export function ResultsGrid({
   signedIn,
   initialSort,
   initialLayout,
+  metascores,
 }: ResultsGridProps) {
   const [sort, setSort] = useState<SearchSort>(initialSort);
   const [layout, setLayout] = useState<SearchLayout>(initialLayout);
@@ -102,7 +105,14 @@ export function ResultsGrid({
           exit={{ opacity: 0, transition: transition.exit }}
         >
           {sorted.map((game) => {
-            const props = { game, session, habits, signedIn, returnTo };
+            const props = {
+              game,
+              session,
+              habits,
+              signedIn,
+              returnTo,
+              metascore: metascores[game.id] ?? null,
+            };
             return (
               <li key={game.id}>
                 {layout === "grid" ? <SearchCard {...props} /> : <SearchRow {...props} />}

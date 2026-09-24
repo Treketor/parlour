@@ -307,3 +307,11 @@
     text-underline-offset: 0.2em;
   }
 }
+
+/* Names the source when it is Metacritic's, so a metascore never passes for IGDB's figure. */
+.scoreSource {
+  color: var(--color-text-faint);
+  font-size: var(--text-2xs);
+  font-weight: var(--ui-strong-weight);
+  letter-spacing: 0.02em;
+}

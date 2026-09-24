@@ -40,6 +40,8 @@ export type SearchResultProps = {
   habits: Readonly<Record<number, number>>;
   signedIn: boolean;
   returnTo: string;
+  /** Metacritic's score when known, which leads over IGDB's (DECISIONS.md 046). */
+  metascore?: number | null;
 };
 
 /** One game in the results grid: cover, title and facts, then the controls. */
@@ -61,7 +63,7 @@ export function SearchCard(props: SearchResultProps) {
             {game.name}
           </Link>
         </h3>
-        <GameFacts game={game} />
+        <GameFacts game={game} metascore={props.metascore ?? null} />
       </div>
       <SearchControls {...props} state={state} />
     </article>
@@ -87,7 +89,7 @@ export function SearchRow(props: SearchResultProps) {
             {game.name}
           </Link>
         </h3>
-        <GameFacts game={game} />
+        <GameFacts game={game} metascore={props.metascore ?? null} />
       </div>
       <SearchControls {...props} state={state} className={styles.rowControls} />
     </article>
@@ -120,7 +122,7 @@ function CoverLink({
 }
 
 /** Release date and the combined score, with how many ratings it rests on. */
-function GameFacts({ game }: { game: CatalogueGame }) {
+function GameFacts({ game, metascore }: { game: CatalogueGame; metascore: number | null }) {
   const score = combinedScore(
     { rating: game.igdbRating, count: game.igdbRatingCount },
     { rating: game.criticRating, count: game.criticRatingCount },
@@ -132,20 +134,33 @@ function GameFacts({ game }: { game: CatalogueGame }) {
   return (
     <p className={styles.cardMeta}>
       <span className={styles.release}>{releaseLabel}</span>
-      {score && (
+      {metascore !== null ? (
         <span
           className={styles.score}
-          data-tier={scoreTier(score.value)}
-          title={`Player and critic score from ${score.count.toLocaleString("en-GB")} ratings on IGDB`}
+          data-tier={scoreTier(metascore)}
+          title="Metacritic metascore"
         >
           <span aria-hidden="true">
-            <strong>{score.value}</strong>{" "}
-            <span className={styles.scoreCount}>({compactCount(score.count)})</span>
+            <span className={styles.scoreSource}>MC</span> <strong>{metascore}</strong>
           </span>
-          <span className="visually-hidden">
-            Scored {score.value} from {score.count} ratings
-          </span>
+          <span className="visually-hidden">Metacritic score {metascore}</span>
         </span>
+      ) : (
+        score && (
+          <span
+            className={styles.score}
+            data-tier={scoreTier(score.value)}
+            title={`Player and critic score from ${score.count.toLocaleString("en-GB")} ratings on IGDB`}
+          >
+            <span aria-hidden="true">
+              <strong>{score.value}</strong>{" "}
+              <span className={styles.scoreCount}>({compactCount(score.count)})</span>
+            </span>
+            <span className="visually-hidden">
+              Scored {score.value} from {score.count} ratings
+            </span>
+          </span>
+        )
       )}
     </p>
   );

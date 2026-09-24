@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCatalogue } from "@/server/catalogue";
 import { MIN_QUERY_LENGTH } from "@/server/catalogue/service";
 import { IgdbError } from "@/server/igdb/errors";
+import { after } from "next/server";
+import { metascoresFor } from "@/server/scores";
 import { ResultsGrid } from "./ResultsGrid";
 import styles from "./search.module.css";
 
@@ -45,6 +47,15 @@ export async function SearchResults({ query, sort, layout }: SearchResultsProps)
     );
   }
 
+  // Known metascores lead each card's score; the rest are looked up once the page has gone.
+  const { metascores, fill } = await metascoresFor(games.map((game) => game.id)).catch(
+    (error: unknown) => {
+      console.error("Search scores could not be read", error);
+      return { metascores: {}, fill: async () => {} };
+    },
+  );
+  after(fill);
+
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getClaims();
   const signedIn = Boolean(auth?.claims);
@@ -67,6 +78,7 @@ export async function SearchResults({ query, sort, layout }: SearchResultsProps)
       signedIn={signedIn}
       initialSort={sort}
       initialLayout={layout}
+      metascores={metascores}
     />
   );
 }
