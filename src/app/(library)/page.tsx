@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { SignInPrompt } from "@/components/shell/SignInPrompt";
-import { countLibraryEntries } from "@/lib/data/library";
+import { listLibrary } from "@/lib/data/library";
 import { formatCount } from "@/lib/format";
+import { parseLibraryView } from "@/lib/library-view";
 import { createClient } from "@/lib/supabase/server";
+import { LibraryBrowser } from "./LibraryBrowser";
 import { LibraryEmpty } from "./LibraryEmpty";
 
 export const metadata: Metadata = {
@@ -11,7 +13,7 @@ export const metadata: Metadata = {
   title: { absolute: "Library | Parlour" },
 };
 
-export default async function LibraryPage() {
+export default async function LibraryPage({ searchParams }: PageProps<"/">) {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
 
@@ -24,16 +26,19 @@ export default async function LibraryPage() {
     );
   }
 
-  const count = await countLibraryEntries(supabase);
+  const [items, params] = await Promise.all([listLibrary(supabase), searchParams]);
 
-  // Browsing entries arrives in stage 6; until then a library with games shows its count.
   return (
     <>
       <PageHeader
         title="Library"
-        meta={count === 0 ? "No games yet" : formatCount(count, "game")}
+        meta={items.length === 0 ? "No games yet" : formatCount(items.length, "game")}
       />
-      {count === 0 && <LibraryEmpty />}
+      {items.length === 0 ? (
+        <LibraryEmpty />
+      ) : (
+        <LibraryBrowser items={items} initialView={parseLibraryView(params)} />
+      )}
     </>
   );
 }

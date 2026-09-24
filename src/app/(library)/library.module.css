@@ -74,3 +74,135 @@
   font-size: var(--text-xs);
   line-height: var(--leading-reading);
 }
+
+/*
+ * Browsing. The toolbar narrows the library (left) and arranges it (right);
+ * the row beneath holds the progress filters and what they left.
+ */
+.browser {
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.toolbar {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.textFilter {
+  grid-column: 1 / -1;
+}
+
+.arrange {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2);
+}
+
+/*
+ * Wider: filters and arrangement share a line while they fit. When they do
+ * not, the arrangement wraps under, still flush right, instead of stretching.
+ */
+@media (min-width: 48rem) {
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: start;
+    column-gap: var(--space-6);
+  }
+
+  .filters {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+  }
+
+  .textFilter {
+    flex: 1 1 12rem;
+    max-width: 18rem;
+  }
+
+  .filters > :not(.textFilter) {
+    flex: 0 1 10.5rem;
+  }
+
+  .arrange {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .sort {
+    width: 10.5rem;
+  }
+}
+
+.refine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  min-height: var(--control-height-sm);
+}
+
+.progressFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chipCount {
+  color: var(--color-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+  color: var(--color-text-faint);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.rows {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Same grid as search results, so a cover is the same size wherever it appears. */
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8) var(--space-4);
+  margin: 0;
+  padding: var(--space-4) 0 0;
+  border-top: var(--hairline);
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    column-gap: var(--space-5);
+  }
+}
+
+.controlSkeleton {
+  height: var(--control-height-md);
+}
+
+/* The List and Grid segments at their rendered width. */
+.layoutSkeleton {
+  width: 6.65rem;
+}

@@ -1,20 +1,45 @@
 import { PageHeader } from "@/components/shell/PageHeader";
 import { CatalogueList, ListRowSkeleton } from "@/components/ui/ListRow";
 import { Skeleton } from "@/components/ui/Skeleton";
+import styles from "./library.module.css";
 
 /*
  * The title is real and only the count is pending, so the heading never moves.
- * Rows stand in for the list, the shape most visits will resolve to.
+ * The toolbar keeps the real one's boxes, and rows stand in for the list, the
+ * layout most visits resolve to.
  */
 export default function LibraryLoading() {
   return (
     <div aria-busy="true" aria-label="Loading your library">
       <PageHeader title="Library" meta={<Skeleton variant="text" width="5rem" />} />
-      <CatalogueList>
-        {Array.from({ length: 6 }, (_, index) => (
-          <ListRowSkeleton key={index} />
-        ))}
-      </CatalogueList>
+      <div className={styles.browser}>
+        <div className={styles.toolbar} aria-hidden="true">
+          <div className={styles.filters}>
+            <div className={`${styles.textFilter} ${styles.controlSkeleton}`}>
+              <Skeleton />
+            </div>
+            <div className={styles.controlSkeleton}>
+              <Skeleton />
+            </div>
+            <div className={styles.controlSkeleton}>
+              <Skeleton />
+            </div>
+          </div>
+          <div className={styles.arrange}>
+            <div className={`${styles.sort} ${styles.controlSkeleton}`}>
+              <Skeleton />
+            </div>
+            <div className={`${styles.layoutSkeleton} ${styles.controlSkeleton}`}>
+              <Skeleton />
+            </div>
+          </div>
+        </div>
+        <CatalogueList>
+          {Array.from({ length: 6 }, (_, index) => (
+            <ListRowSkeleton key={index} />
+          ))}
+        </CatalogueList>
+      </div>
     </div>
   );
 }
